@@ -5,7 +5,9 @@ import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { ThemeProvider } from "@/components/theme-provider";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
+import { getMetadataBase } from "@/lib/metadata";
 import { routing } from "@/i18n/routing";
 import "./../globals.css";
 
@@ -13,6 +15,8 @@ type LocaleLayoutProps = Readonly<{
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 }>;
+
+export const dynamic = "force-static";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -25,11 +29,23 @@ export async function generateMetadata({
   if (!hasLocale(routing.locales, locale)) {
     notFound();
   }
-  const t = await getTranslations({ locale, namespace: "landing" });
+  const t = await getTranslations({ locale, namespace: "metadata" });
 
   return {
-    title: t("metaTitle"),
-    description: t("metaDescription"),
+    metadataBase: getMetadataBase(),
+    title: {
+      default: t("siteTitle"),
+      template: `%s | ${t("brand")}`,
+    },
+    description: t("siteDescription"),
+    alternates: {
+      canonical: `/${locale}`,
+      languages: {
+        en: "/en",
+        fa: "/fa",
+        "x-default": "/en",
+      },
+    },
   };
 }
 
@@ -55,8 +71,10 @@ export default async function LocaleLayout({
       <body className="min-h-svh bg-background text-foreground antialiased">
         <NextIntlClientProvider messages={messages}>
           <ThemeProvider>
-            {children}
-            <Toaster />
+            <TooltipProvider>
+              {children}
+              <Toaster />
+            </TooltipProvider>
           </ThemeProvider>
         </NextIntlClientProvider>
       </body>

@@ -2,17 +2,17 @@
 
 import { Moon, Sun } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { Link, usePathname } from "@/i18n/navigation";
 import type { AppLocale } from "@/lib/format";
+import { useTheme } from "@/components/theme-provider";
 
 export function SiteControls() {
   const t = useTranslations("common");
   const locale = useLocale() as AppLocale;
   const pathname = usePathname();
-  const { resolvedTheme, setTheme } = useTheme();
-  const isDark = resolvedTheme !== "light";
+  const { theme, setTheme } = useTheme();
+  const isDark = theme === "dark";
   const nextLocale = locale === "en" ? "fa" : "en";
 
   return (

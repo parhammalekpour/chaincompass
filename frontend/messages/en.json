@@ -1,6 +1,9 @@
 {
   "common": {
     "appName": "ChainCompass",
+    "backHome": "Back to home",
+    "close": "Close",
+    "languageLabel": "Language: English",
     "themeToLight": "Switch to light theme",
     "themeToDark": "Switch to dark theme",
     "switchToPersian": "فارسی",
@@ -16,6 +19,42 @@
     "alerts": "Alerts",
     "settings": "Settings"
   },
+  "marketing": {
+    "navLabel": "Main navigation",
+    "methodology": "Methodology",
+    "learn": "Learn",
+    "soon": "Soon",
+    "login": "Log in",
+    "getStarted": "Get started",
+    "openMenu": "Open navigation menu",
+    "menuTitle": "Navigation",
+    "footerDisclaimer": "On-chain analysis for long-term context, not investment advice or a trading signal.",
+    "productLinks": "Product",
+    "legal": "Legal"
+  },
+  "appNav": {
+    "label": "Application navigation",
+    "workspace": "Workspace",
+    "dashboard": "Dashboard",
+    "chains": "Chains",
+    "chat": "Chat",
+    "watchlist": "Watchlist",
+    "alerts": "Alerts",
+    "settings": "Settings",
+    "expandSidebar": "Expand sidebar",
+    "collapseSidebar": "Collapse sidebar",
+    "version": "ChainCompass preview",
+    "versionShort": "CC"
+  },
+  "appShell": {
+    "openNavigation": "Open application navigation",
+    "navigationTitle": "Application navigation",
+    "search": "Search",
+    "searchShortcut": "Ctrl K",
+    "userMenu": "User menu",
+    "guest": "Guest",
+    "accountSoon": "Account options will be available soon"
+  },
   "landing": {
     "metaTitle": "ChainCompass — on-chain clarity for long-term investors",
     "metaDescription": "Understand blockchain health with transparent, evidence-based analysis.",
@@ -27,6 +66,48 @@
     "sampleHeading": "A clearer view of network activity",
     "sampleNote": "Illustrative values show formatting only; they are not live market data."
   },
+  "landingV1": {
+    "eyebrow": "On-chain insight, grounded in evidence",
+    "headline": "Understand the networks you follow.",
+    "subheadline": "A calm, clear view of blockchain health for long-term investors. Explore the evidence, understand uncertainty, and make your own decisions.",
+    "getStarted": "Get started",
+    "seeMethodology": "See methodology",
+    "supportedChains": "Starting with Bitcoin, Ethereum, Solana, and BNB Chain.",
+    "previewTitle": "Network overview",
+    "previewScore": "Health score",
+    "previewStatus": "Steady",
+    "previewActivity": "Network activity",
+    "previewRisk": "Risk context",
+    "previewNetwork": "Illustrative preview · not live data",
+    "previewRangeStart": "24h",
+    "previewRangeEnd": "Now",
+    "featuresTitle": "A clearer way to read on-chain data",
+    "featuresDescription": "Useful context and transparent evidence, without turning analysis into a trading instruction.",
+    "healthTitle": "Network health score",
+    "healthDescription": "See key network indicators in one explainable score, with the underlying metrics close at hand.",
+    "alertsTitle": "Risk alerts",
+    "alertsDescription": "Notice meaningful changes with plain-language context, not alarmist prompts or trade calls.",
+    "analystTitle": "AI analyst",
+    "analystDescription": "Ask questions and explore cited data. The agent only reports numbers returned by its analysis tools.",
+    "howTitle": "How it works",
+    "howDescription": "From source data to understandable context in three transparent steps.",
+    "step1Title": "Gather public data",
+    "step1Description": "Collect on-chain and market context from documented, replaceable data providers.",
+    "step2Title": "Explain the evidence",
+    "step2Description": "Use transparent rules and clear metric definitions to summarize network conditions.",
+    "step3Title": "Explore with context",
+    "step3Description": "Review changes, uncertainty, and freshness before drawing your own conclusions.",
+    "promiseTitle": "Our promise",
+    "promiseDescription": "Useful analysis should be clear about what it can and cannot tell you.",
+    "promise1": "Analysis and context, never financial advice.",
+    "promise2": "Historical scenarios communicate ranges, not price predictions.",
+    "promise3": "Methods, evidence, uncertainty, and data freshness stay visible.",
+    "disclaimerTitle": "An important note",
+    "disclaimer": "ChainCompass is for informational purposes only. It is not financial, investment, or trading advice and does not recommend buying or selling any asset.",
+    "finalTitle": "Start with better context.",
+    "finalDescription": "Explore on-chain evidence at your own pace. No trading calls, no promised outcomes.",
+    "reducedMotionLabel": "Decorative network activity preview"
+  },
   "auth": {
     "signIn": "Sign in",
     "register": "Create account",
@@ -34,9 +115,129 @@
     "password": "Password",
     "forgotPassword": "Forgot password?"
   },
+  "login": {
+    "title": "Welcome back",
+    "description": "Sign-in will be available when account access is implemented."
+  },
+  "register": {
+    "title": "Create your account",
+    "description": "Registration will be available when account access is implemented."
+  },
+  "methodology": {
+    "title": "Methodology",
+    "description": "Learn how network indicators are sourced, scored, and presented with uncertainty."
+  },
+  "learn": {
+    "title": "Learn",
+    "description": "Plain-language guides to on-chain data and network health are coming soon."
+  },
+  "legal": {
+    "title": "Legal and disclaimer",
+    "description": "ChainCompass provides information only. It is not financial advice and does not make trading recommendations."
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "description": "A clear overview of network conditions, recent changes, and data freshness."
+  },
+  "chains": {
+    "title": "Chains",
+    "description": "Browse network health indicators for the chains covered by ChainCompass."
+  },
+  "chainDetail": {
+    "title": "{chain} network",
+    "description": "Explore network indicators, historical context, and source freshness for {chain}."
+  },
+  "chat": {
+    "title": "Chat analyst",
+    "description": "Ask questions about sourced on-chain data. Numeric answers will come only from analysis tools."
+  },
+  "watchlist": {
+    "title": "Watchlist",
+    "description": "Keep the networks you follow close at hand."
+  },
+  "alerts": {
+    "title": "Alerts",
+    "description": "Review notable network changes with evidence and context, never trading instructions."
+  },
+  "settings": {
+    "title": "Settings",
+    "description": "Manage language, appearance, and account preferences."
+  },
+  "states": {
+    "loading": "Loading content",
+    "emptyTitle": "Nothing to show yet",
+    "emptyDescription": "When information is available, it will appear here.",
+    "errorTitle": "This page could not be loaded",
+    "errorDescription": "Please try again. If the problem continues, come back later.",
+    "retry": "Try again",
+    "notFoundTitle": "Page not found",
+    "notFoundDescription": "The page may have moved or may no longer be available.",
+    "backHome": "Back to home"
+  },
   "errors": {
     "generic": "Something went wrong. Please try again.",
     "notFound": "This page could not be found.",
     "validation": "Check the highlighted fields and try again."
+  },
+  "metadata": {
+    "brand": "ChainCompass",
+    "siteTitle": "On-chain intelligence for long-term investors",
+    "siteDescription": "Evidence-based blockchain health analysis, clear uncertainty, and context for long-term investors.",
+    "landing": {
+      "title": "On-chain clarity for long-term investors",
+      "description": "Understand blockchain health with transparent, evidence-based analysis."
+    },
+    "login": {
+      "title": "Sign in",
+      "description": "Sign in to your ChainCompass account."
+    },
+    "register": {
+      "title": "Create an account",
+      "description": "Create a ChainCompass account."
+    },
+    "methodology": {
+      "title": "Our methodology",
+      "description": "Learn how ChainCompass sources and explains on-chain indicators."
+    },
+    "learn": {
+      "title": "Learn about on-chain data",
+      "description": "Educational resources about blockchain networks and on-chain data."
+    },
+    "legal": {
+      "title": "Legal information",
+      "description": "ChainCompass terms and informational-use disclaimer."
+    },
+    "dashboard": {
+      "title": "Network dashboard",
+      "description": "A summary of network conditions and recent on-chain changes."
+    },
+    "chains": {
+      "title": "Explore blockchain networks",
+      "description": "Browse health indicators for supported blockchain networks."
+    },
+    "chainDetail": {
+      "title": "{chainName} network analysis",
+      "description": "On-chain indicators and historical context for {chainName}."
+    },
+    "chat": {
+      "title": "On-chain data analyst",
+      "description": "Explore sourced on-chain information with the ChainCompass analyst."
+    },
+    "watchlist": {
+      "title": "Your network watchlist",
+      "description": "Keep track of blockchain networks you follow."
+    },
+    "alerts": {
+      "title": "Network alerts",
+      "description": "Review notable blockchain network changes."
+    },
+    "settings": {
+      "title": "Account settings",
+      "description": "Manage your ChainCompass preferences."
+    },
+    "notFound": {
+      "title": "Page not found",
+      "description": "The requested ChainCompass page could not be found."
+    }
   }
 }
