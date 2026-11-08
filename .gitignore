@@ -31,3 +31,21 @@ venv/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Test and build output
+build/
+coverage/
+playwright-report/
+test-results/
+*.log
+*.pyc
+
+# Docker bind-mount and local data folders
+docker/volumes/
+docker/data/
+**/docker/volumes/
+**/docker/data/
+
+# Allow checked-in VS Code recommendations while ignoring local settings
+!.vscode/
+!.vscode/extensions.json

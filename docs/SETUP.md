@@ -29,3 +29,50 @@
    docker --version
    ollama --version
    ```
+
+## Manual installation (if winget is unavailable)
+
+Install these tools from their official download sources:
+
+- **Node.js LTS >= 20.9** (Node.js 22 recommended): download the Windows `.msi` from [nodejs.org](https://nodejs.org/).
+- **Python 3.12:** download from [python.org](https://www.python.org/downloads/).
+- **Git:** download from [git-scm.com](https://git-scm.com/download/win).
+- **Docker Desktop** with the WSL 2 backend: download from [docker.com](https://www.docker.com/products/docker-desktop/).
+- **Ollama** (optional until the AI agent step): download from [ollama.com](https://ollama.com/download).
+
+After installing Node.js, close and reopen all PowerShell windows and VS Code so
+they load the updated PATH.
+
+### Verify
+
+Run these commands in a new PowerShell window:
+
+```powershell
+node -v
+npm -v
+python --version
+git --version
+docker info --format "{{.ServerVersion}}"
+```
+
+Docker Desktop must be running for the Docker command to return a server version.
+If Docker reports a WSL issue, run `wsl --update` from Administrator PowerShell
+and restart Windows.
+
+### Optional WSL resource limits
+
+Create `%USERPROFILE%\.wslconfig` with:
+
+```ini
+[wsl2]
+memory=6GB
+processors=4
+```
+
+Then apply the configuration with:
+
+```powershell
+wsl --shutdown
+```
+
+The `scripts/setup-windows.ps1` script is optional and requires `winget`.
