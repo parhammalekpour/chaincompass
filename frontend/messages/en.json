@@ -1,0 +1,42 @@
+{
+  "common": {
+    "appName": "ChainCompass",
+    "themeToLight": "Switch to light theme",
+    "themeToDark": "Switch to dark theme",
+    "switchToPersian": "فارسی",
+    "switchToEnglish": "English",
+    "sampleNumber": "Network activity",
+    "sampleCurrency": "Estimated value",
+    "samplePercent": "Weekly change"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "chains": "Chains",
+    "watchlist": "Watchlist",
+    "alerts": "Alerts",
+    "settings": "Settings"
+  },
+  "landing": {
+    "metaTitle": "ChainCompass — on-chain clarity for long-term investors",
+    "metaDescription": "Understand blockchain health with transparent, evidence-based analysis.",
+    "eyebrow": "On-chain intelligence, without the noise",
+    "title": "See the network behind the numbers.",
+    "description": "Clear, evidence-based on-chain analysis for long-term investors. Understand what is happening across major networks, with context and uncertainty in view.",
+    "scope": "Starting with Bitcoin, Ethereum, Solana, and BNB Chain.",
+    "disclaimer": "For information only. Not financial advice and never a buy or sell signal.",
+    "sampleHeading": "A clearer view of network activity",
+    "sampleNote": "Illustrative values show formatting only; they are not live market data."
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "register": "Create account",
+    "email": "Email address",
+    "password": "Password",
+    "forgotPassword": "Forgot password?"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "notFound": "This page could not be found.",
+    "validation": "Check the highlighted fields and try again."
+  }
+}
