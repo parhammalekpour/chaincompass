@@ -76,3 +76,56 @@ wsl --shutdown
 ```
 
 The `scripts/setup-windows.ps1` script is optional and requires `winget`.
+
+## Getting Started
+
+Run the following commands in PowerShell from the repository root. Docker
+Desktop must be running. If Docker Hub is slow or unreachable, connect to a
+trusted VPN and retry the image pull.
+
+Create the ignored local environment file once, then replace the database and
+JWT placeholders with local-only values. Keep the URL credentials matched to
+the PostgreSQL variables:
+
+```powershell
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
+notepad .env
+```
+
+Start PostgreSQL 16 (the only Compose service):
+
+```powershell
+docker compose --env-file .env -f infra/docker-compose.yml up -d
+```
+
+Create the backend virtual environment and install its pinned runtime and
+development dependencies:
+
+```powershell
+Set-Location backend
+py -3.12 -m venv .venv
+& .\.venv\Scripts\python.exe -m pip install --upgrade pip
+& .\.venv\Scripts\python.exe -m pip install -e ".[dev]"
+```
+
+Run the baseline migration, then start the API. Keep this PowerShell window open:
+
+```powershell
+& .\.venv\Scripts\python.exe -m alembic upgrade head
+& .\.venv\Scripts\python.exe -m uvicorn app.main:app --reload --port 8000
+```
+
+Verify the API in another PowerShell window:
+
+```powershell
+Invoke-RestMethod http://localhost:8000/api/v1/health
+```
+
+In a separate PowerShell window, start the frontend from the `frontend`
+directory (the repository root does not define npm scripts):
+
+```powershell
+Set-Location frontend
+npm ci
+npm run dev
+```
