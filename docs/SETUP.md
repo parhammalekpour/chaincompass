@@ -13,12 +13,12 @@
 2. Reboot Windows if the script says a reboot is needed. A reboot is needed after
    WSL installation.
 
-3. Start Docker Desktop from the Start menu and wait until it reports that Docker
-   is running. Docker Desktop is used for PostgreSQL and Mailpit; develop the app
-   natively on Windows.
+3. If you choose the optional Docker PostgreSQL setup, start Docker Desktop from
+   the Start menu and wait until it reports that Docker is running. PostgreSQL
+   can instead run natively on Windows; develop the app natively either way.
 
-4. If Docker Hub downloads are slow or unavailable, connect to a trusted VPN
-   before starting or using Docker Desktop. Depending on your network, you may
+4. If you use Docker and Docker Hub downloads are slow or unavailable, connect
+   to a trusted VPN before pulling images. Depending on your network, you may
    need to restart Docker Desktop after connecting.
 
 5. Open a new PowerShell window and verify the tools:
@@ -55,9 +55,9 @@ git --version
 docker info --format "{{.ServerVersion}}"
 ```
 
-Docker Desktop must be running for the Docker command to return a server version.
-If Docker reports a WSL issue, run `wsl --update` from Administrator PowerShell
-and restart Windows.
+Docker Desktop is only required for the optional container setup. If Docker
+reports a WSL issue, run `wsl --update` from Administrator PowerShell and
+restart Windows.
 
 ### Optional WSL resource limits
 
@@ -77,11 +77,85 @@ wsl --shutdown
 
 The `scripts/setup-windows.ps1` script is optional and requires `winget`.
 
+## Native PostgreSQL on Windows
+
+Docker is optional. For a native installation, install PostgreSQL 16 for
+Windows from [postgresql.org](https://www.postgresql.org/download/windows/).
+Install the **Microsoft Visual C++ Redistributable 2015–2022 (x64)** required by
+the PostgreSQL binaries. Keep PostgreSQL's `bin` directory available by using
+full paths in PowerShell if it is not in `PATH`:
+
+```powershell
+$pgBin = 'C:\Program Files\PostgreSQL\16\bin'
+Get-Service postgresql*
+& "$pgBin\postgres.exe" --version
+& "$pgBin\psql.exe" --version
+& "$pgBin\pg_isready.exe" -h localhost -p 5432
+```
+
+If the service is stopped, open Administrator PowerShell and start the service
+reported by `Get-Service` (commonly `postgresql-x64-16`):
+
+```powershell
+Start-Service postgresql-x64-16
+```
+
+Create the project role and database. These commands prompt for the existing
+`postgres` superuser password without putting it into command history. At the
+`psql` prompt, set a project password using letters and digits only:
+
+```powershell
+$pgBin = 'C:\Program Files\PostgreSQL\16\bin'
+& "$pgBin\psql.exe" -W -U postgres -h localhost -d postgres
+```
+
+In the interactive `psql` session:
+
+```sql
+CREATE ROLE chaincompass LOGIN;
+\password chaincompass
+CREATE DATABASE chaincompass OWNER chaincompass;
+\connect chaincompass
+GRANT USAGE, CREATE ON SCHEMA public TO chaincompass;
+\quit
+```
+
+If the role or database already exists, omit its `CREATE` statement; use
+`\password chaincompass` to set the project's local password. Verify the project
+login interactively:
+
+```powershell
+& "$pgBin\psql.exe" -W -U chaincompass -h localhost -d chaincompass -c "select 1"
+```
+
+Set the root `.env` (never commit it) with matching values. Replace the example
+password with the same project password entered above:
+
+```dotenv
+POSTGRES_USER=chaincompass
+POSTGRES_PASSWORD=YOUR_LETTERS_AND_DIGITS_PASSWORD
+POSTGRES_DB=chaincompass
+DATABASE_URL=postgresql+asyncpg://chaincompass:YOUR_LETTERS_AND_DIGITS_PASSWORD@localhost:5432/chaincompass
+```
+
+Exit code `-1073741515` from `postgres.exe` indicates a missing Visual C++
+runtime. Install the x64 Visual C++ Redistributable; do not copy DLLs into the
+PostgreSQL installation directory.
+
+## Optional Docker PostgreSQL
+
+Docker Desktop is optional. To use its PostgreSQL 16 container, create the root
+`.env` from `.env.example` and set local database credentials first. If Docker
+Hub is slow or unreachable, connect to a trusted VPN before pulling the image.
+
+```powershell
+docker compose --env-file .env -f infra/docker-compose.yml up -d
+```
+
 ## Getting Started
 
-Run the following commands in PowerShell from the repository root. Docker
-Desktop must be running. If Docker Hub is slow or unreachable, connect to a
-trusted VPN and retry the image pull.
+Run the following commands in PowerShell from the repository root. Choose either
+native PostgreSQL above or the optional Docker service.
 
 Create the ignored local environment file once, then replace the database and
 JWT placeholders with local-only values. Keep the URL credentials matched to
@@ -90,12 +164,6 @@ the PostgreSQL variables:
 ```powershell
 if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 notepad .env
-```
-
-Start PostgreSQL 16 (the only Compose service):
-
-```powershell
-docker compose --env-file .env -f infra/docker-compose.yml up -d
 ```
 
 Create the backend virtual environment and install its pinned runtime and

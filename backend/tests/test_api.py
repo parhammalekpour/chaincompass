@@ -4,6 +4,7 @@ import pytest
 from fastapi import FastAPI, Query
 from httpx import ASGITransport, AsyncClient
 
+from app.db.session import engine
 from app.main import create_app
 
 
@@ -29,6 +30,7 @@ async def client(application: FastAPI) -> AsyncIterator[AsyncClient]:
         base_url="http://test",
     ) as test_client:
         yield test_client
+    await engine.dispose()
 
 
 @pytest.mark.asyncio
@@ -48,6 +50,21 @@ async def test_health_returns_expected_shape_when_database_is_up_or_down(
     assert payload["status"] == ("ok" if payload["db"] == "ok" else "degraded")
     assert isinstance(payload["version"], str)
     assert payload["version"]
+
+
+@pytest.mark.asyncio
+async def test_health_reports_database_ok_when_reachable(
+    client: AsyncClient,
+) -> None:
+    response = await client.get("/api/v1/health")
+    assert response.status_code == 200
+    payload = response.json()
+
+    if payload["db"] != "ok":
+        pytest.skip("PostgreSQL is not reachable")
+
+    assert payload["status"] == "ok"
+    assert payload["db"] == "ok"
 
 
 @pytest.mark.asyncio
