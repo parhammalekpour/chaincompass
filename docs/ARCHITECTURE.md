@@ -43,6 +43,22 @@ swappable external providers before storing it. The API calls language models
 through a provider interface, and notification adapters deliver email or
 Telegram messages.
 
+## Auth
+
+Passwords are hashed with Argon2id. Login returns a short-lived signed JWT
+access token in the response; clients should keep it in memory rather than
+persistent browser storage. A cryptographically random opaque refresh token is
+stored only as a SHA-256 hash in PostgreSQL and delivered in an httpOnly,
+SameSite=Lax cookie scoped to `/api/v1/auth`. Cookie `Secure` and optional
+domain attributes are configurable for deployment.
+
+Login and refresh also issue a readable CSRF cookie. Refresh and logout require
+the matching `X-CSRF-Token` header and reject a mismatched `Origin` when one is
+provided. Each refresh rotates the token and revokes its predecessor; reuse of
+a revoked token revokes every active token in that family. Logout revokes the
+current refresh token and clears both cookies. User lockout fields are present,
+but lockout enforcement and rate limiting are deferred to auth step 5B.
+
 ## Key decisions
 
 - **Monorepo:** frontend, API, worker, infrastructure, and shared product

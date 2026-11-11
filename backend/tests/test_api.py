@@ -72,7 +72,7 @@ async def test_unknown_route_returns_consistent_error(client: AsyncClient) -> No
     response = await client.get("/api/v1/does-not-exist")
 
     assert response.status_code == 404
-    assert response.json() == {"code": "not_found", "message": "Not Found"}
+    assert response.json() == {"error": {"code": "not_found", "message": "Not Found"}}
 
 
 @pytest.mark.asyncio
@@ -81,14 +81,17 @@ async def test_validation_error_returns_consistent_error(client: AsyncClient) ->
 
     assert response.status_code == 422
     assert response.json() == {
-        "code": "validation_error",
-        "message": "Request validation failed",
+        "error": {
+            "code": "validation_error",
+            "message": "Request validation failed",
+        }
     }
 
 
 @pytest.mark.asyncio
 async def test_unexpected_error_is_generic_and_keeps_request_id(
     client: AsyncClient,
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
     response = await client.get(
         "/_error-probe",
@@ -97,7 +100,10 @@ async def test_unexpected_error_is_generic_and_keeps_request_id(
 
     assert response.status_code == 500
     assert response.json() == {
-        "code": "internal_error",
-        "message": "An unexpected error occurred",
+        "error": {
+            "code": "internal_error",
+            "message": "An unexpected error occurred",
+        }
     }
     assert response.headers["X-Request-ID"] == "error-test-request"
+    assert "internal detail" not in caplog.text

@@ -8,6 +8,14 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 logger = logging.getLogger(__name__)
 
 
+class APIError(Exception):
+    def __init__(self, status_code: int, code: str, message: str) -> None:
+        self.status_code = status_code
+        self.code = code
+        self.message = message
+        super().__init__(message)
+
+
 def register_exception_handlers(application: FastAPI) -> None:
     def request_headers(request: Request) -> dict[str, str]:
         request_id = getattr(request.state, "request_id", None)
@@ -21,8 +29,16 @@ def register_exception_handlers(application: FastAPI) -> None:
         message = exc.detail if isinstance(exc.detail, str) else "HTTP request failed"
         return JSONResponse(
             status_code=exc.status_code,
-            content={"code": code, "message": message},
+            content={"error": {"code": code, "message": message}},
             headers={**(exc.headers or {}), **request_headers(request)},
+        )
+
+    @application.exception_handler(APIError)
+    async def api_exception_handler(request: Request, exc: APIError) -> JSONResponse:
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={"error": {"code": exc.code, "message": exc.message}},
+            headers=request_headers(request),
         )
 
     @application.exception_handler(RequestValidationError)
@@ -32,8 +48,10 @@ def register_exception_handlers(application: FastAPI) -> None:
         return JSONResponse(
             status_code=422,
             content={
-                "code": "validation_error",
-                "message": "Request validation failed",
+                "error": {
+                    "code": "validation_error",
+                    "message": "Request validation failed",
+                }
             },
             headers=request_headers(request),
         )
@@ -42,15 +60,14 @@ def register_exception_handlers(application: FastAPI) -> None:
     async def unexpected_exception_handler(
         request: Request, exc: Exception
     ) -> JSONResponse:
-        logger.error(
-            "Unhandled request exception",
-            exc_info=(type(exc), exc, exc.__traceback__),
-        )
+        logger.error("Unhandled request exception: %s", type(exc).__name__)
         return JSONResponse(
             status_code=500,
             content={
-                "code": "internal_error",
-                "message": "An unexpected error occurred",
+                "error": {
+                    "code": "internal_error",
+                    "message": "An unexpected error occurred",
+                }
             },
             headers=request_headers(request),
         )
