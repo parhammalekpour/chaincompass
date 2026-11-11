@@ -10,13 +10,35 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
 
-from app.api.v1.auth.dependencies import require_role
+from app.api.v1.auth import router as auth_router
+from app.api.v1.auth.dependencies import require_role, require_verified_user
 from app.api.v1.auth.router import get_session
 from app.core.config import settings
 from app.db import models  # noqa: F401
 from app.db.base import Base
 from app.db.models.auth import User
 from app.main import create_app
+from app.services.email import OutgoingEmail
+from app.services.rate_limit import reset_rate_limiter
+
+
+class CapturingEmailSender:
+    def __init__(self) -> None:
+        self.messages: list[OutgoingEmail] = []
+        self.fail = False
+
+    async def send(self, message: OutgoingEmail) -> None:
+        if self.fail:
+            raise RuntimeError("test email transport failure")
+        self.messages.append(message)
+
+
+@pytest.fixture
+def captured_email_sender(monkeypatch: pytest.MonkeyPatch) -> CapturingEmailSender:
+    sender = CapturingEmailSender()
+    monkeypatch.setattr(auth_router, "email_sender", sender)
+    reset_rate_limiter()
+    return sender
 
 
 @pytest_asyncio.fixture(scope="session", loop_scope="session")
@@ -52,6 +74,7 @@ async def auth_session_factory() -> AsyncIterator[async_sessionmaker[AsyncSessio
 @pytest_asyncio.fixture(loop_scope="session")
 async def auth_client(
     auth_session_factory: async_sessionmaker[AsyncSession],
+    captured_email_sender: CapturingEmailSender,
 ) -> AsyncIterator[AsyncClient]:
     application = create_app()
 
@@ -60,6 +83,12 @@ async def auth_client(
         user: User = Depends(require_role("admin")),
     ) -> dict[str, str]:
         return {"role": user.role}
+
+    @application.get("/_verified-check")
+    async def verified_check(
+        user: User = Depends(require_verified_user),
+    ) -> dict[str, str]:
+        return {"email": user.email}
 
     async def override_session() -> AsyncIterator[AsyncSession]:
         async with auth_session_factory() as session:
@@ -79,6 +108,8 @@ async def clean_auth_tables(
     auth_session_factory: async_sessionmaker[AsyncSession],
 ) -> AsyncIterator[None]:
     async with auth_session_factory() as session:
+        await session.execute(text("DELETE FROM email_tokens"))
+        await session.execute(text("DELETE FROM oauth_accounts"))
         await session.execute(text("DELETE FROM refresh_tokens"))
         await session.execute(text("DELETE FROM users"))
         await session.commit()

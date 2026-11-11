@@ -56,8 +56,30 @@ Login and refresh also issue a readable CSRF cookie. Refresh and logout require
 the matching `X-CSRF-Token` header and reject a mismatched `Origin` when one is
 provided. Each refresh rotates the token and revokes its predecessor; reuse of
 a revoked token revokes every active token in that family. Logout revokes the
-current refresh token and clears both cookies. User lockout fields are present,
-but lockout enforcement and rate limiting are deferred to auth step 5B.
+current refresh token and clears both cookies.
+
+Verification and password-reset links use single-use SHA-256-hashed email
+tokens; verification links expire after 24 hours and password-reset links after
+one hour. A new reset request invalidates earlier unused reset tokens. Email is
+queued with FastAPI background tasks. Development uses a console/file sender
+that writes under `backend/.dev-mail`; non-development environments require
+SMTP configuration. Delivery failures are logged by exception type only, never
+with recipient addresses or tokens.
+
+Five consecutive failed logins lock an account for 15 minutes. A locked login
+returns the same generic invalid-credentials response and does not verify the
+password. In-process sliding-window limits are 10 login attempts per minute per
+IP and 5 per minute per email; registration is 5 per hour per IP; password
+recovery and verification resend are 10 per hour per IP and 5 per hour per
+email. `X-Forwarded-For` is ignored unless `TRUST_PROXY=true`. The limiter is
+per-process; a multi-worker deployment will need a shared store such as Redis.
+
+Google sign-in uses OpenID Connect with state and nonce in a short-lived signed
+httpOnly cookie and PKCE. The callback validates the ID-token signature,
+issuer, audience, expiry, and nonce against Google's JWKS. Only a Google
+identity with `email_verified=true` may be linked by email or create a verified
+passwordless account. Automated tests mock token exchange; real Google login
+has not been verified. Real SMTP delivery has also not been verified.
 
 ## Key decisions
 

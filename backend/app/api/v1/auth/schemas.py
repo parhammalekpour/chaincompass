@@ -15,6 +15,23 @@ class LoginRequest(BaseModel):
     password: str = Field(min_length=1, max_length=128)
 
 
+class EmailTokenRequest(BaseModel):
+    token: str = Field(min_length=20, max_length=512)
+
+
+class EmailRequest(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordRequest(EmailTokenRequest):
+    new_password: str = Field(min_length=10, max_length=128)
+
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str = Field(min_length=1, max_length=128)
+    new_password: str = Field(min_length=10, max_length=128)
+
+
 class UserResponse(BaseModel):
     id: UUID
     email: EmailStr

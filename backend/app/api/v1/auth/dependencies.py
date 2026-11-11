@@ -40,6 +40,16 @@ CurrentUserDependency = Annotated[User, Depends(get_current_user)]
 UserDependency = Callable[..., Awaitable[User]]
 
 
+async def require_verified_user(user: CurrentUserDependency) -> User:
+    if user.email_verified_at is None:
+        raise APIError(
+            403,
+            "email_not_verified",
+            "Email verification is required",
+        )
+    return user
+
+
 def require_role(required_role: str) -> UserDependency:
     async def dependency(user: CurrentUserDependency) -> User:
         if user.role != required_role:

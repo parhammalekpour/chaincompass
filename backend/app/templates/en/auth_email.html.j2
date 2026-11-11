@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+  <body>
+    {% if kind == "verify_email" %}
+    <p>Verify your email address to continue.</p><p><a href="{{ link }}">Verify email</a></p>
+    {% elif kind == "reset_password" %}
+    <p>Use this link within one hour to set a new password.</p><p><a href="{{ link }}">Reset password</a></p>
+    {% elif kind == "account_exists" %}
+    <p>An account already exists for this email address. If you did not request this notice, you can ignore it.</p>
+    {% elif kind == "password_changed" %}
+    <p>Your password was changed. If you did not make this change, reset your password and contact support.</p>
+    {% elif kind == "temporarily_locked" %}
+    <p>Your account was temporarily locked after several unsuccessful sign-in attempts. Try again after 15 minutes. If this was not you, reset your password.</p>
+    {% endif %}
+  </body>
+</html>

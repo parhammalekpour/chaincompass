@@ -6,6 +6,7 @@
 *.key
 *.p12
 *.pfx
+backend/.dev-mail/
 
 # Node.js / Next.js
 node_modules/

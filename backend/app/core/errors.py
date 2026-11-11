@@ -9,10 +9,17 @@ logger = logging.getLogger(__name__)
 
 
 class APIError(Exception):
-    def __init__(self, status_code: int, code: str, message: str) -> None:
+    def __init__(
+        self,
+        status_code: int,
+        code: str,
+        message: str,
+        headers: dict[str, str] | None = None,
+    ) -> None:
         self.status_code = status_code
         self.code = code
         self.message = message
+        self.headers = headers or {}
         super().__init__(message)
 
 
@@ -38,7 +45,7 @@ def register_exception_handlers(application: FastAPI) -> None:
         return JSONResponse(
             status_code=exc.status_code,
             content={"error": {"code": exc.code, "message": exc.message}},
-            headers=request_headers(request),
+            headers={**exc.headers, **request_headers(request)},
         )
 
     @application.exception_handler(RequestValidationError)

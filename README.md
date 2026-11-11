@@ -2,7 +2,7 @@
 
 Bilingual foundation for an on-chain intelligence app for long-term crypto investors.
 
-## Status: early development (auth core implemented; 5B pending)
+## Status: early development (auth foundation implemented)
 
 **Disclaimer:** ChainCompass is for informational purposes only, is not financial advice, and does not provide buy or sell recommendations.
 
@@ -18,17 +18,21 @@ See [Windows setup](docs/SETUP.md) to prepare the development environment.
 - GitHub Actions CI workflow for frontend, backend, and secret scanning.
 - Auth core: registration, login, short-lived JWT access tokens, rotating
   refresh-token cookies, CSRF checks, logout, and authenticated `/me`.
+- Email verification and password recovery flows, login lockout, and
+  per-process rate limiting.
+- Google OpenID Connect flow with PKCE and verified-email linking rules.
 
 ## Planned
 
-- Auth step 5B: lockout enforcement, rate limiting, email verification, and
-  account recovery.
 - On-chain data ingestion and analysis for BTC, ETH, SOL, and BNB.
 - Network Health Score and capital-flow analysis.
 - Historical-distribution scenarios.
 - Risk alerts and watchlists.
 - Tool-grounded AI analyst.
 - Administrative tools.
+
+**Not verified:** Real SMTP delivery and a live Google OAuth login have not
+been exercised; Google callback/token exchange is covered with mocked tests.
 
 ## Architecture
 
