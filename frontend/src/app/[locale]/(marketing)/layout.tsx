@@ -13,7 +13,7 @@ export default async function MarketingLayout({
     <div className="min-h-svh">
       <MarketingHeader />
       {children}
-      <MarketingFooter />
+      <MarketingFooter locale={locale} />
     </div>
   );
 }

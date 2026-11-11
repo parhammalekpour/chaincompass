@@ -10,6 +10,11 @@ export async function generateMetadata({
   return createPageMetadata("landing", "/", locale);
 }
 
-export default function Page() {
-  return <LandingPage />;
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  return <LandingPage locale={locale} />;
 }

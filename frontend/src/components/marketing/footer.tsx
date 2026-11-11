@@ -3,9 +3,9 @@ import { getTranslations } from "next-intl/server";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { Link } from "@/i18n/navigation";
 
-export async function MarketingFooter() {
-  const t = await getTranslations("marketing");
-  const common = await getTranslations("common");
+export async function MarketingFooter({ locale }: { locale: string }) {
+  const t = await getTranslations({ locale, namespace: "marketing" });
+  const common = await getTranslations({ locale, namespace: "common" });
 
   return (
     <footer className="border-t border-border bg-surface/50">

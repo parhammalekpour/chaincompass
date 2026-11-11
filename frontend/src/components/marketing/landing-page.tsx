@@ -13,8 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
-export async function LandingPage() {
-  const t = await getTranslations("landingV1");
+export async function LandingPage({ locale }: { locale: string }) {
+  const t = await getTranslations({ locale, namespace: "landingV1" });
 
   return (
     <main>

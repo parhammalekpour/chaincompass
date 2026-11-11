@@ -58,7 +58,7 @@ export default async function LocaleLayout({
     notFound();
   }
   setRequestLocale(locale);
-  const messages = await getMessages();
+  const messages = await getMessages({ locale });
   const direction = locale === "fa" ? "rtl" : "ltr";
 
   return (
@@ -69,7 +69,7 @@ export default async function LocaleLayout({
       suppressHydrationWarning
     >
       <body className="min-h-svh bg-background text-foreground antialiased">
-        <NextIntlClientProvider messages={messages}>
+        <NextIntlClientProvider locale={locale} messages={messages}>
           <ThemeProvider>
             <TooltipProvider>
               {children}
