@@ -1,18 +1,31 @@
 # ChainCompass
 
-On-chain intelligence for long-term crypto investors, with transparent data and scenario-based outlooks.
+Bilingual foundation for an on-chain intelligence app for long-term crypto investors.
 
-**Status:** Frontend scaffold and backend foundation are under active development.
+## Status: early development (foundation phase)
 
 **Disclaimer:** ChainCompass is for informational purposes only, is not financial advice, and does not provide buy or sell recommendations.
 
 See [Windows setup](docs/SETUP.md) to prepare the development environment.
 
-## Features
+## Implemented
 
-- Evidence-based on-chain health and capital-flow analysis for BTC, ETH, SOL, and BNB.
-- Bilingual English and Persian experience with full right-to-left support.
-- Risk alerts and historical-distribution scenarios, with data freshness and uncertainty.
+- Bilingual English/Persian routing with right-to-left layout for Persian.
+- Dark and light themes.
+- Public landing page.
+- FastAPI health endpoint.
+- PostgreSQL connection and health checks.
+- GitHub Actions CI workflow for frontend, backend, and secret scanning.
+
+## Planned
+
+- Authentication and account management.
+- On-chain data ingestion and analysis for BTC, ETH, SOL, and BNB.
+- Network Health Score and capital-flow analysis.
+- Historical-distribution scenarios.
+- Risk alerts and watchlists.
+- Tool-grounded AI analyst.
+- Administrative tools.
 
 ## Architecture
 
@@ -95,8 +108,11 @@ See the [Windows setup guide](docs/SETUP.md) for the full sequence and verificat
 
 ## Roadmap
 
-- **Phase 1:** Foundation, core chain analysis, watchlists, alerts, and the chat agent.
-- **Phase 2:** Level-2 protocol coverage, capital flows, risk center, comparison, plans/waitlist, and learning resources.
+| Phase | Scope | Status |
+|---|---|---|
+| Foundation | Repository, bilingual frontend foundation, landing page, backend health scaffold, database connectivity, and CI configuration | Done |
+| Phase 1 | Authentication and core chain analysis, watchlists, alerts, and chat agent | In progress; core product features are planned |
+| Phase 2 | Level-2 protocol coverage, dedicated capital flows and risk center, comparison, plans/waitlist, and learning resources | Planned |
 
 ## Documentation
 
