@@ -14,6 +14,7 @@ from app.api.v1.auth import router as auth_routes
 from app.api.v1.auth.router import GOOGLE_STATE_COOKIE, REFRESH_COOKIE
 from app.core.config import settings
 from app.db.models.auth import EmailToken, OAuthAccount, RefreshToken, User
+from app.services import rate_limit as rate_limit_service
 from app.services.email import build_auth_email
 from app.services.rate_limit import reset_rate_limiter
 
@@ -165,6 +166,28 @@ async def test_expired_password_reset_token_is_rejected(
     )
     assert response.status_code == 400
     assert response.json()["error"]["code"] == "invalid_reset_token"
+
+
+async def test_reset_token_is_single_use(
+    auth_client: AsyncClient,
+    captured_email_sender: Any,
+) -> None:
+    email = "single-use-reset@example.com"
+    await register(auth_client, email)
+    requested = await auth_client.post(
+        "/api/v1/auth/forgot-password",
+        json={"email": email},
+    )
+    assert requested.status_code == 202
+    token = email_token(captured_email_sender.messages[-1].text)
+    payload = {"token": token, "new_password": "Single-Use-Reset-Password-59!"}
+
+    first_use = await auth_client.post("/api/v1/auth/reset-password", json=payload)
+    second_use = await auth_client.post("/api/v1/auth/reset-password", json=payload)
+
+    assert first_use.status_code == 200
+    assert second_use.status_code == 400
+    assert second_use.json()["error"]["code"] == "invalid_reset_token"
 
 
 async def test_resend_forgot_generic_responses_and_newest_reset_token(
@@ -355,6 +378,7 @@ async def test_lockout_generic_response_and_clock_controlled_unlock(
         for response in responses
     )
     assert len(captured_email_sender.messages) == 1
+    reset_rate_limiter()
     locked_response = await auth_client.post(
         "/api/v1/auth/login",
         json={"email": "locked@example.com", "password": PASSWORD},
@@ -379,6 +403,154 @@ async def test_lockout_generic_response_and_clock_controlled_unlock(
             select(User).where(User.email == "locked@example.com")
         )
         assert user and user.failed_login_count == 0 and user.locked_until is None
+
+
+async def test_login_rate_limit_is_equal_for_known_and_unknown_email(
+    auth_client: AsyncClient,
+) -> None:
+    known_email = "rate-limit-known@example.com"
+    unknown_email = "rate-limit-unknown@example.com"
+    await register(auth_client, known_email)
+
+    async def failed_login_sequence(email: str) -> list[tuple[int, dict[str, Any]]]:
+        reset_rate_limiter()
+        results = []
+        for _ in range(6):
+            response = await auth_client.post(
+                "/api/v1/auth/login",
+                json={"email": email, "password": "Wrong-Rate-Limit-Password-59!"},
+            )
+            results.append((response.status_code, response.json()))
+        return results
+
+    unknown_results = await failed_login_sequence(unknown_email)
+    known_results = await failed_login_sequence(known_email)
+    unknown_statuses = [status for status, _ in unknown_results]
+    known_statuses = [status for status, _ in known_results]
+    print(f"unknown_email_status_codes={unknown_statuses}")
+    print(f"known_email_status_codes={known_statuses}")
+
+    assert unknown_statuses == known_statuses == [401, 401, 401, 401, 401, 429]
+    assert unknown_results == known_results
+    assert unknown_results[-1][1] == known_results[-1][1]
+    assert unknown_results[-1][1]["error"]["code"] == "rate_limited"
+
+
+async def test_lockout_reachable_beyond_rate_limit_window(
+    auth_client: AsyncClient,
+    captured_email_sender: Any,
+    auth_session_factory: async_sessionmaker[AsyncSession],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    email = "reachable-lockout@example.com"
+    now = datetime(2026, 11, 14, tzinfo=UTC)
+    monkeypatch.setattr(auth_routes, "auth_clock", lambda: now)
+    monkeypatch.setattr(rate_limit_service, "rate_limit_clock", lambda: now)
+    await register(auth_client, email)
+    captured_email_sender.messages.clear()
+
+    statuses = []
+    for _ in range(5):
+        response = await auth_client.post(
+            "/api/v1/auth/login",
+            json={"email": email, "password": "Wrong-Lockout-Password-59!"},
+        )
+        statuses.append(response.status_code)
+        now += timedelta(minutes=1, seconds=1)
+    assert statuses == [401, 401, 401, 401, 401]
+
+    async with auth_session_factory() as session:
+        user = await session.scalar(select(User).where(User.email == email))
+        assert user and user.failed_login_count == 5
+        assert user.locked_until == now - timedelta(minutes=1, seconds=1) + timedelta(
+            minutes=15
+        )
+    assert len(captured_email_sender.messages) == 1
+
+    wrong_while_locked = await auth_client.post(
+        "/api/v1/auth/login",
+        json={"email": email, "password": "Wrong-Lockout-Password-59!"},
+    )
+    correct_while_locked = await auth_client.post(
+        "/api/v1/auth/login",
+        json={"email": email, "password": PASSWORD},
+    )
+    assert wrong_while_locked.status_code == correct_while_locked.status_code == 401
+    assert wrong_while_locked.json()["error"]["code"] == "invalid_credentials"
+    assert wrong_while_locked.json() == correct_while_locked.json()
+
+
+async def test_successful_login_does_not_increment_failed_login_count(
+    auth_client: AsyncClient,
+    auth_session_factory: async_sessionmaker[AsyncSession],
+) -> None:
+    email = "successful-login-counter@example.com"
+    await register(auth_client, email)
+    response = await auth_client.post(
+        "/api/v1/auth/login",
+        json={"email": email, "password": PASSWORD},
+    )
+    assert response.status_code == 200
+
+    async with auth_session_factory() as session:
+        user = await session.scalar(select(User).where(User.email == email))
+        assert user and user.failed_login_count == 0
+
+
+async def test_auth_flows_never_log_email_password_or_raw_tokens(
+    auth_client: AsyncClient,
+    captured_email_sender: Any,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    email = "private-auth-log-check@example.com"
+    original_password = "Private-Original-Password-60!"
+    replacement_password = "Private-Replacement-Password-60!"
+    wrong_password = "Private-Wrong-Password-60!"
+
+    registration = await auth_client.post(
+        "/api/v1/auth/register",
+        json={"email": email, "password": original_password, "locale": "en"},
+    )
+    assert registration.status_code == 202
+    verification_token = email_token(captured_email_sender.messages[-1].text)
+    successful_login = await auth_client.post(
+        "/api/v1/auth/login",
+        json={"email": email, "password": original_password},
+    )
+    assert successful_login.status_code == 200
+    failed_login = await auth_client.post(
+        "/api/v1/auth/login",
+        json={"email": email, "password": wrong_password},
+    )
+    assert failed_login.status_code == 401
+    forgot = await auth_client.post(
+        "/api/v1/auth/forgot-password",
+        json={"email": email},
+    )
+    assert forgot.status_code == 202
+    reset_token = email_token(captured_email_sender.messages[-1].text)
+    reset = await auth_client.post(
+        "/api/v1/auth/reset-password",
+        json={"token": reset_token, "new_password": replacement_password},
+    )
+    assert reset.status_code == 200
+    verified = await auth_client.post(
+        "/api/v1/auth/verify-email",
+        json={"token": verification_token},
+    )
+    assert verified.status_code == 200
+
+    logged_text = "\n".join(record.getMessage() for record in caplog.records)
+    for sensitive_value in (
+        email,
+        PASSWORD,
+        original_password,
+        replacement_password,
+        wrong_password,
+        verification_token,
+        reset_token,
+    ):
+        assert sensitive_value not in logged_text
 
 
 async def test_rate_limit_has_retry_after(

@@ -71,8 +71,16 @@ returns the same generic invalid-credentials response and does not verify the
 password. In-process sliding-window limits are 10 login attempts per minute per
 IP and 5 per minute per email; registration is 5 per hour per IP; password
 recovery and verification resend are 10 per hour per IP and 5 per hour per
-email. `X-Forwarded-For` is ignored unless `TRUST_PROXY=true`. The limiter is
-per-process; a multi-worker deployment will need a shared store such as Redis.
+email. The per-email login limit counts attempts, while account lockout counts
+failed passwords: a successful login does not increase the failed-password
+counter, but it does consume a rate-limit attempt. Rate limiting is checked
+before the locked-account response so known and unknown emails receive the same
+429 threshold. After the rate-limit window expires, a locked account still
+receives the generic invalid-credentials response. Five failed attempts can
+temporarily lock a victim account; the per-IP limit constrains attempts from
+any one source but does not eliminate this denial-of-login risk. `X-Forwarded-For`
+is ignored unless `TRUST_PROXY=true`. The limiter is per-process; a multi-worker
+deployment will need a shared store such as Redis.
 
 Google sign-in uses OpenID Connect with state and nonce in a short-lived signed
 httpOnly cookie and PKCE. The callback validates the ID-token signature,
