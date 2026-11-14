@@ -1,3 +1,4 @@
+import os
 from collections.abc import AsyncIterator
 from uuid import uuid4
 
@@ -48,8 +49,11 @@ async def auth_session_factory() -> AsyncIterator[async_sessionmaker[AsyncSessio
     try:
         async with admin_engine.connect() as connection:
             await connection.execute(text("SELECT 1"))
-    except (SQLAlchemyError, OSError, TimeoutError):
+    except (SQLAlchemyError, OSError, TimeoutError) as exc:
         await admin_engine.dispose()
+        if os.environ.get("CI", "").lower() == "true":
+            # CI must exercise these tests; an unavailable DB is a failure.
+            pytest.fail(f"PostgreSQL is not reachable in CI: {type(exc).__name__}")
         pytest.skip("PostgreSQL is not reachable")
 
     async with admin_engine.begin() as connection:

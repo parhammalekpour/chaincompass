@@ -210,3 +210,14 @@ Set-Location frontend
 npm ci
 npm run dev
 ```
+
+## CI
+
+GitHub Actions runs three jobs: frontend lint, typecheck, tests, and build;
+backend migrations and schema-drift check plus Ruff, formatting, mypy, and
+pytest against a temporary PostgreSQL 16 service; and Gitleaks secret scanning.
+Ruff lint targets the application and tests; formatting checks the full backend,
+including Alembic migrations.
+Database-dependent backend tests skip locally when PostgreSQL is unavailable,
+but fail in CI so a missing database cannot produce a green run without
+exercising them.
