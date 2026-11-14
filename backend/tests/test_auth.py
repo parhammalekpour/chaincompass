@@ -171,6 +171,8 @@ async def test_login_errors_me_expired_and_tampered_tokens(
     assert "samesite=lax" in refresh_set_cookie.lower()
     assert "path=/api/v1/auth" in refresh_set_cookie.lower()
     assert "httponly" not in csrf_set_cookie.lower()
+    assert "path=/" in csrf_set_cookie.lower()
+    assert "path=/api/v1/auth" not in csrf_set_cookie.lower()
 
     valid = await auth_client.get(
         "/api/v1/auth/me",
@@ -272,6 +274,11 @@ async def test_logout_and_csrf_protection(
     )
     assert response.status_code == 204
     assert REFRESH_COOKIE in response.headers["set-cookie"]
+    clear_headers = response.headers.get_list("set-cookie")
+    csrf_clear_cookie = next(
+        cookie for cookie in clear_headers if cookie.startswith(f"{CSRF_COOKIE}=")
+    )
+    assert "path=/" in csrf_clear_cookie.lower()
     async with auth_session_factory() as session:
         stored_token = await session.scalar(
             select(RefreshToken).where(

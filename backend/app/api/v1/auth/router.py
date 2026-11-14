@@ -99,7 +99,7 @@ def _set_auth_cookies(response: Response, refresh_token: str) -> None:
         httponly=False,
         secure=settings.cookie_secure,
         samesite="lax",
-        path=REFRESH_PATH,
+        path="/",
         domain=settings.cookie_domain,
     )
 
@@ -118,7 +118,7 @@ def _clear_auth_cookies(response: Response) -> None:
         httponly=False,
         secure=settings.cookie_secure,
         samesite="lax",
-        path=REFRESH_PATH,
+        path="/",
         domain=settings.cookie_domain,
     )
 
