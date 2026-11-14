@@ -180,26 +180,17 @@ Run the baseline migration, then start the API. Keep this PowerShell window open
 
 ```powershell
 & .\.venv\Scripts\python.exe -m alembic upgrade head
-& .\.venv\Scripts\python.exe -m uvicorn app.main:app --reload --port 8000
+& .\.venv\Scripts\python.exe -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8010
 ```
 
-If port 8000 is already in use, run Uvicorn with `--port 8010` and use port
-8010 when calling the API. Keep the port consistent with the backend target in
-the Next.js rewrite (`frontend/next.config.ts`). The current Next.js config does
-not define an API rewrite yet; if one is added, set its target to the same port.
-There is not currently a single shared port setting, so update the Uvicorn
-command and rewrite target together when changing ports.
+`BACKEND_URL=http://127.0.0.1:8010` in the root `.env.example` and local `.env`
+is the canonical backend URL; use it as the target when the Next.js `/api`
+rewrite is added. The current Next.js config does not define that rewrite yet.
 
 Verify the API in another PowerShell window:
 
 ```powershell
-Invoke-RestMethod http://localhost:8000/api/v1/health
-```
-
-For an API started on port 8010, use:
-
-```powershell
-Invoke-RestMethod http://localhost:8010/api/v1/health
+Invoke-RestMethod http://127.0.0.1:8010/api/v1/health
 ```
 
 In a separate PowerShell window, start the frontend from the `frontend`

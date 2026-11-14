@@ -52,8 +52,11 @@ py -3.12 -m venv .venv
 & .\.venv\Scripts\python.exe -m pip install --upgrade pip
 & .\.venv\Scripts\python.exe -m pip install -e ".[dev]"
 & .\.venv\Scripts\python.exe -m alembic upgrade head
-& .\.venv\Scripts\python.exe -m uvicorn app.main:app --reload --port 8000
+& .\.venv\Scripts\python.exe -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8010
 ```
+
+The backend dev server uses `127.0.0.1:8010`. `BACKEND_URL` in the root
+`.env` is the canonical backend URL for the future Next.js `/api` rewrite.
 
 Docker is optional. To use the PostgreSQL container instead, run from the
 repository root (connect to a trusted VPN first if Docker Hub is unreachable):
