@@ -326,12 +326,12 @@ async def login(
         select(User).where(User.email == email).with_for_update()
     )
     now = auth_clock()
+    await check_rate_limit("login:email", email, 5, timedelta(minutes=1))
     locked = (
         user is not None and user.locked_until is not None and user.locked_until > now
     )
     if locked:
         return _invalid_login_response(background_tasks)
-    await check_rate_limit("login:email", email, 5, timedelta(minutes=1))
 
     stored_hash = (
         user.password_hash if user and user.password_hash else DUMMY_PASSWORD_HASH
