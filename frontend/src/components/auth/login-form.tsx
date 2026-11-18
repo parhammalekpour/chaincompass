@@ -29,6 +29,7 @@ export function LoginForm({ locale }: { locale: "en" | "fa" }) {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [retrySeconds, setRetrySeconds] = useState(0);
+  const [queryNotice, setQueryNotice] = useState<"oauthFailed" | "passwordReset" | null>(null);
   const {
     register,
     handleSubmit,
@@ -39,6 +40,17 @@ export function LoginForm({ locale }: { locale: "en" | "fa" }) {
     resolver: zodResolver(loginSchema),
     defaultValues: { email: "", password: "" },
   });
+
+  useEffect(() => {
+    const query = new URLSearchParams(window.location.search);
+    const notice =
+      query.get("error") === "oauth_failed"
+        ? "oauthFailed"
+        : query.get("notice") === "password_reset"
+          ? "passwordReset"
+          : null;
+    if (notice) queueMicrotask(() => setQueryNotice(notice));
+  }, []);
 
   useEffect(() => {
     if (status !== "authenticated") return;
@@ -86,10 +98,17 @@ export function LoginForm({ locale }: { locale: "en" | "fa" }) {
         aria-atomic="true"
         className="min-h-0"
       >
+        {queryNotice && (
+          <p role="status" className="mb-3 rounded-lg border border-border p-3 text-sm">
+            {queryNotice === "oauthFailed"
+              ? t("oauthFailedNotice")
+              : t("passwordResetNotice")}
+          </p>
+        )}
         {rootMessage && (
           <p role="alert" className="rounded-lg border border-destructive/40 p-3 text-sm text-destructive">
             {rootMessage === "authErrors.rateLimited"
-              ? errors("rateLimited", { seconds: retrySeconds })
+              ? errors("rateLimited", { seconds: String(retrySeconds) })
               : errors(rootMessage.replace("authErrors.", ""))}
           </p>
         )}
@@ -149,6 +168,12 @@ export function LoginForm({ locale }: { locale: "en" | "fa" }) {
             </p>
           )}
         </div>
+
+        <p className="text-end text-sm">
+          <Link href="/forgot-password" className="text-primary underline-offset-4 hover:underline">
+            {t("forgotPasswordLink")}
+          </Link>
+        </p>
 
         <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? t("submitting") : t("submit")}

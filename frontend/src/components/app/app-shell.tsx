@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { SiteControls } from "@/components/site-controls";
 import { useAuth } from "@/components/auth/auth-provider";
+import { ResendVerificationButton } from "@/components/auth/resend-verification-button";
 import { Sidebar } from "@/components/app/sidebar";
 import { Button } from "@/components/ui/button";
 import {
@@ -117,9 +118,7 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
             className="mx-4 mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-surface p-3 text-sm sm:mx-6"
           >
             <span>{t("verifyEmailNotice")}</span>
-            <Button variant="outline" size="sm" disabled>
-              {t("resendComingSoon")}
-            </Button>
+            <ResendVerificationButton email={user.email} />
           </div>
         )}
       </div>

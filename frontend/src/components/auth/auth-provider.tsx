@@ -11,6 +11,7 @@ import {
 } from "react";
 import {
   apiRequest,
+  ApiError,
   type AuthResponse,
   clearAccessToken,
   fetchAuthResponse,
@@ -33,6 +34,8 @@ type AuthContextValue = {
     locale: "en" | "fa",
   ) => Promise<void>;
   logout: () => Promise<void>;
+  refreshCurrentUser: () => Promise<AuthUser>;
+  restoreSession: () => Promise<AuthUser>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -54,6 +57,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setStatus("anonymous");
   }, []);
 
+  const refreshCurrentUser = useCallback(async () => {
+    const currentUser = await apiRequest<AuthUser>("/api/v1/auth/me");
+    setUser(currentUser);
+    setStatus("authenticated");
+    return currentUser;
+  }, []);
+
+  const restoreSession = useCallback(async () => {
+    try {
+      const auth = await refreshSession();
+      if (!auth) throw new ApiError("invalid_refresh_token", 401);
+      const currentUser = await loadUser(auth);
+      setUser(currentUser);
+      setStatus("authenticated");
+      return currentUser;
+    } catch (error) {
+      becomeAnonymous();
+      throw error;
+    }
+  }, [becomeAnonymous, loadUser]);
+
   useEffect(() => {
     let active = true;
     const unsubscribe = subscribeToSessionInvalidation(() => {
@@ -63,25 +87,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
 
-    void refreshSession()
-      .then(async (auth) => {
-        if (!active) return;
-        if (auth) {
-          const currentUser = await loadUser(auth);
+    const isOAuthCallback = /\/(?:en|fa)\/auth\/callback\/?$/.test(
+      window.location.pathname,
+    );
+    if (!isOAuthCallback) {
+      void refreshSession()
+        .then(async (auth) => {
           if (!active) return;
-          setUser(currentUser);
-          setStatus("authenticated");
-        } else {
-          setUser(null);
-          setStatus("anonymous");
-        }
-      })
-      .catch(() => {
-        if (active) {
-          setUser(null);
-          setStatus("anonymous");
-        }
-      });
+          if (auth) {
+            const currentUser = await loadUser(auth);
+            if (!active) return;
+            setUser(currentUser);
+            setStatus("authenticated");
+          } else {
+            setUser(null);
+            setStatus("anonymous");
+          }
+        })
+        .catch(() => {
+          if (active) {
+            setUser(null);
+            setStatus("anonymous");
+          }
+        });
+    }
 
     const onLogout = () => becomeAnonymous();
     let channel: BroadcastChannel | null = null;
@@ -156,8 +185,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [becomeAnonymous]);
 
   const value = useMemo(
-    () => ({ status, user, login, register, logout }),
-    [status, user, login, register, logout],
+    () => ({
+      status,
+      user,
+      login,
+      register,
+      logout,
+      refreshCurrentUser,
+      restoreSession,
+    }),
+    [status, user, login, register, logout, refreshCurrentUser, restoreSession],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

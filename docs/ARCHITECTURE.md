@@ -94,11 +94,21 @@ The frontend forwards same-origin `/api/:path*` requests to `BACKEND_URL`
 (default `http://127.0.0.1:8010`). Open the app at `http://localhost:3000` so
 the browser Origin matches `FRONTEND_ORIGIN`. Access tokens exist only in
 frontend memory; the readable CSRF cookie is used to bootstrap/rotate the
-refresh session. Login and registration forms are bilingual. A client-side app
-layout guard provides loading and redirect UX, but it is not an authorization
-boundary: the API must enforce authentication and roles on every protected
-endpoint. Forgot-password, reset-password, and email-verification frontend
-pages are deferred to step 6B.
+refresh session. Login, registration, forgot/reset password, email
+verification, Google callback, and security settings are bilingual. Token
+pages immediately remove query tokens from the address bar and use
+`Referrer-Policy: no-referrer` and `Cache-Control: no-store`. The callback
+restores the session through the refresh endpoint; login notices accept only
+explicitly whitelisted query values.
+
+The security settings page displays the account email and verification status
+and supports password changes. The backend revokes other refresh-token
+families while preserving the current family, so the current session remains
+valid without refreshing its access token. A client-side app layout guard
+provides loading and redirect UX, but it is not an authorization boundary: the
+API must enforce authentication and roles on every protected endpoint.
+
+Real SMTP delivery and a live Google OAuth login have not been verified.
 
 ## Key decisions
 

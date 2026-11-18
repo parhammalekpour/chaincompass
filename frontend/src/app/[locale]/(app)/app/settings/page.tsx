@@ -1,5 +1,5 @@
-import { PlaceholderPage } from "@/components/placeholder-page";
 import { createPageMetadata } from "@/lib/metadata";
+import { SecuritySettings } from "@/components/app/security-settings";
 
 export async function generateMetadata({
   params,
@@ -11,5 +11,5 @@ export async function generateMetadata({
 }
 
 export default function Page() {
-  return <PlaceholderPage namespace="settings" />;
+  return <SecuritySettings />;
 }

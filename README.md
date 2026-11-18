@@ -2,7 +2,7 @@
 
 Bilingual foundation for an on-chain intelligence app for long-term crypto investors.
 
-## Status: early development (frontend auth core implemented; 6B pending)
+## Status: early development (frontend authentication flows implemented)
 
 **Disclaimer:** ChainCompass is for informational purposes only, is not financial advice, and does not provide buy or sell recommendations.
 
@@ -22,7 +22,9 @@ See [Windows setup](docs/SETUP.md) to prepare the development environment.
   per-process rate limiting.
 - Google OpenID Connect flow with PKCE and verified-email linking rules.
 - Frontend auth client, in-memory access-token session, login/register forms,
-  and client-side app route guard.
+  forgot/reset password, email verification, Google callback, and client-side
+  app route guard.
+- Security settings with email verification status and password changes.
 
 ## Planned
 
@@ -32,10 +34,11 @@ See [Windows setup](docs/SETUP.md) to prepare the development environment.
 - Risk alerts and watchlists.
 - Tool-grounded AI analyst.
 - Administrative tools.
-- Forgot/reset password and email verification pages (frontend step 6B).
 
 **Not verified:** Real SMTP delivery and a live Google OAuth login have not
-been exercised; Google callback/token exchange is covered with mocked tests.
+been exercised. The OAuth callback and password/email flows have automated
+tests, but Google provider behavior and real email delivery still need live
+verification.
 
 ## Architecture
 

@@ -13,9 +13,12 @@ describe("sanitizeNextPath", () => {
   });
 
   it.each([
-    "//attacker.example",
+    "//evil.com",
     "https://attacker.example/path",
-    "/\\attacker.example",
+    "/\\evil.com",
+    "https://evil.com",
+    "%2F%2Fevil.com",
+    "/%5Cevil.com",
     "/%2f%2fattacker.example",
     "/%252f%252fattacker.example",
     "/%5c%5cattacker.example",
