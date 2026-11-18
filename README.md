@@ -2,7 +2,7 @@
 
 Bilingual foundation for an on-chain intelligence app for long-term crypto investors.
 
-## Status: early development (auth foundation implemented)
+## Status: early development (frontend auth core implemented; 6B pending)
 
 **Disclaimer:** ChainCompass is for informational purposes only, is not financial advice, and does not provide buy or sell recommendations.
 
@@ -21,6 +21,8 @@ See [Windows setup](docs/SETUP.md) to prepare the development environment.
 - Email verification and password recovery flows, login lockout, and
   per-process rate limiting.
 - Google OpenID Connect flow with PKCE and verified-email linking rules.
+- Frontend auth client, in-memory access-token session, login/register forms,
+  and client-side app route guard.
 
 ## Planned
 
@@ -30,6 +32,7 @@ See [Windows setup](docs/SETUP.md) to prepare the development environment.
 - Risk alerts and watchlists.
 - Tool-grounded AI analyst.
 - Administrative tools.
+- Forgot/reset password and email verification pages (frontend step 6B).
 
 **Not verified:** Real SMTP delivery and a live Google OAuth login have not
 been exercised; Google callback/token exchange is covered with mocked tests.
@@ -55,8 +58,10 @@ py -3.12 -m venv .venv
 & .\.venv\Scripts\python.exe -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8010
 ```
 
-The backend dev server uses `127.0.0.1:8010`. `BACKEND_URL` in the root
-`.env` is the canonical backend URL for the future Next.js `/api` rewrite.
+The backend dev server uses `127.0.0.1:8010`; the Next.js rewrite reads
+`BACKEND_URL` from the root `.env` (default: `http://127.0.0.1:8010`). Open the
+frontend at **http://localhost:3000**, not `127.0.0.1:3000`, so the browser's
+Origin matches `FRONTEND_ORIGIN`.
 
 Docker is optional. To use the PostgreSQL container instead, run from the
 repository root (connect to a trusted VPN first if Docker Hub is unreachable):

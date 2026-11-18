@@ -53,7 +53,11 @@
     "searchShortcut": "Ctrl K",
     "userMenu": "User menu",
     "guest": "Guest",
-    "accountSoon": "Account options will be available soon"
+    "accountSoon": "Account options will be available soon",
+    "logout": "Log out",
+    "logoutFailed": "Could not complete sign out with the server. Your local session was cleared.",
+    "verifyEmailNotice": "Please verify your email address to access all account features.",
+    "resendComingSoon": "Resend verification coming soon"
   },
   "landing": {
     "metaTitle": "ChainCompass — on-chain clarity for long-term investors",
@@ -117,11 +121,54 @@
   },
   "login": {
     "title": "Welcome back",
-    "description": "Sign-in will be available when account access is implemented."
+    "description": "Sign in to continue to ChainCompass.",
+    "email": "Email address",
+    "password": "Password",
+    "submit": "Sign in",
+    "submitting": "Signing in…",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "noAccount": "New to ChainCompass?",
+    "registerLink": "Create an account"
   },
   "register": {
     "title": "Create your account",
-    "description": "Registration will be available when account access is implemented."
+    "description": "Create an account to continue to ChainCompass.",
+    "email": "Email address",
+    "password": "Password",
+    "submit": "Create account",
+    "submitting": "Creating account…",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "passwordLengthHint": "Use 10–128 characters. Avoid using your email address as your password.",
+    "language": "Account language",
+    "english": "English",
+    "persian": "Persian",
+    "haveAccount": "Already have an account?",
+    "loginLink": "Sign in",
+    "successTitle": "Check your email",
+    "successMessage": "If this address can be registered, check your email for next steps."
+  },
+  "authErrors": {
+    "csrfFailed": "Your security check expired. Reload the page and try again.",
+    "emailNotVerified": "Verify your email address to continue.",
+    "forbidden": "You do not have permission to do that.",
+    "generic": "Something went wrong. Please try again.",
+    "sessionExpired": "Your session has expired. Sign in again.",
+    "invalidCredentials": "The email or password is incorrect.",
+    "invalidEmailToken": "This verification link is invalid or has expired.",
+    "invalidResetToken": "This password reset link is invalid or has expired.",
+    "googleComingSoon": "Google sign-in is coming soon.",
+    "rateLimited": "Too many attempts. Try again in {seconds} seconds.",
+    "validation": "Check the highlighted fields and try again.",
+    "weakPassword": "Choose a password with 10–128 characters that is not your email address.",
+    "network": "Could not connect. Check your connection and try again.",
+    "emailInvalid": "Enter a valid email address.",
+    "passwordRequired": "Enter your password.",
+    "passwordTooShort": "Use at least 10 characters.",
+    "passwordTooLong": "Use no more than 128 characters.",
+    "passwordMatchesEmail": "Your password cannot be the same as your email address.",
+    "googleButton": "Continue with Google"
   },
   "methodology": {
     "title": "Methodology",

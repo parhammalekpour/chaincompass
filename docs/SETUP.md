@@ -183,9 +183,10 @@ Run the baseline migration, then start the API. Keep this PowerShell window open
 & .\.venv\Scripts\python.exe -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8010
 ```
 
-`BACKEND_URL=http://127.0.0.1:8010` in the root `.env.example` and local `.env`
-is the canonical backend URL; use it as the target when the Next.js `/api`
-rewrite is added. The current Next.js config does not define that rewrite yet.
+The Next.js `/api/:path*` rewrite targets `BACKEND_URL` from the root `.env`;
+it defaults to `http://127.0.0.1:8010`. Always open the frontend at
+**http://localhost:3000**, not `http://127.0.0.1:3000`, because the backend
+checks the browser `Origin` against `FRONTEND_ORIGIN=http://localhost:3000`.
 
 Verify the API in another PowerShell window:
 
@@ -201,6 +202,9 @@ Set-Location frontend
 npm ci
 npm run dev
 ```
+
+Open the app at `http://localhost:3000` so auth requests use the configured
+frontend Origin.
 
 ## CI
 

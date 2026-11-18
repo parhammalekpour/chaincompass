@@ -1,4 +1,4 @@
-import { PlaceholderPage } from "@/components/placeholder-page";
+import { RegisterForm } from "@/components/auth/register-form";
 import { createPageMetadata } from "@/lib/metadata";
 
 export async function generateMetadata({
@@ -10,6 +10,11 @@ export async function generateMetadata({
   return createPageMetadata("register", "/register", locale);
 }
 
-export default function Page() {
-  return <PlaceholderPage namespace="register" compact />;
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  return <RegisterForm locale={locale === "fa" ? "fa" : "en"} />;
 }

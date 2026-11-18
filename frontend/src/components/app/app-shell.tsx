@@ -5,6 +5,7 @@ import { Menu, Search, UserRound } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { SiteControls } from "@/components/site-controls";
+import { useAuth } from "@/components/auth/auth-provider";
 import { Sidebar } from "@/components/app/sidebar";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,7 +30,9 @@ import {
 
 export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) {
   const t = useTranslations("appShell");
+  const { user, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [logoutFailed, setLogoutFailed] = useState(false);
   const collapsed = useSyncExternalStore(
     subscribeSidebarPreference,
     getSidebarCollapsed,
@@ -88,14 +91,37 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>{t("guest")}</DropdownMenuLabel>
+                <DropdownMenuLabel>{user?.email ?? t("guest")}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem disabled>{t("accountSoon")}</DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={() => {
+                    setLogoutFailed(false);
+                    void logout().catch(() => setLogoutFailed(true));
+                  }}
+                >
+                  {t("logout")}
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </header>
+        {logoutFailed && (
+          <p role="alert" className="px-4 pt-3 text-sm text-destructive sm:px-6">
+            {t("logoutFailed")}
+          </p>
+        )}
         <main className="flex-1 p-4 sm:p-6">{children}</main>
+        {user?.email_verified === false && (
+          <div
+            role="status"
+            className="mx-4 mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-surface p-3 text-sm sm:mx-6"
+          >
+            <span>{t("verifyEmailNotice")}</span>
+            <Button variant="outline" size="sm" disabled>
+              {t("resendComingSoon")}
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

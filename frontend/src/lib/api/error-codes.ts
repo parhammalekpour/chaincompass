@@ -1,0 +1,43 @@
+export const backendErrorCodes = [
+  "csrf_failed",
+  "email_not_verified",
+  "forbidden",
+  "http_error",
+  "internal_error",
+  "invalid_access_token",
+  "invalid_credentials",
+  "invalid_email_token",
+  "invalid_refresh_token",
+  "invalid_reset_token",
+  "not_found",
+  "oauth_not_configured",
+  "origin_not_allowed",
+  "rate_limited",
+  "refresh_token_reuse",
+  "registration_failed",
+  "validation_error",
+  "weak_password",
+] as const;
+
+export type BackendErrorCode = (typeof backendErrorCodes)[number];
+
+export const backendErrorMessageKeys: Record<BackendErrorCode, string> = {
+  csrf_failed: "authErrors.csrfFailed",
+  email_not_verified: "authErrors.emailNotVerified",
+  forbidden: "authErrors.forbidden",
+  http_error: "authErrors.generic",
+  internal_error: "authErrors.generic",
+  invalid_access_token: "authErrors.sessionExpired",
+  invalid_credentials: "authErrors.invalidCredentials",
+  invalid_email_token: "authErrors.invalidEmailToken",
+  invalid_refresh_token: "authErrors.sessionExpired",
+  invalid_reset_token: "authErrors.invalidResetToken",
+  not_found: "authErrors.generic",
+  oauth_not_configured: "authErrors.googleComingSoon",
+  origin_not_allowed: "authErrors.generic",
+  rate_limited: "authErrors.rateLimited",
+  refresh_token_reuse: "authErrors.sessionExpired",
+  registration_failed: "authErrors.generic",
+  validation_error: "authErrors.validation",
+  weak_password: "authErrors.weakPassword",
+};

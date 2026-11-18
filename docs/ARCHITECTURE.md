@@ -52,11 +52,12 @@ stored only as a SHA-256 hash in PostgreSQL and delivered in an httpOnly,
 SameSite=Lax cookie scoped to `/api/v1/auth`. Cookie `Secure` and optional
 domain attributes are configurable for deployment.
 
-Login and refresh also issue a readable CSRF cookie. Refresh and logout require
-the matching `X-CSRF-Token` header and reject a mismatched `Origin` when one is
-provided. Each refresh rotates the token and revokes its predecessor; reuse of
-a revoked token revokes every active token in that family. Logout revokes the
-current refresh token and clears both cookies.
+Login and refresh also issue a readable CSRF cookie at path `/`; the refresh
+cookie remains scoped to `/api/v1/auth`. Refresh and logout require the matching
+`X-CSRF-Token` header and reject a mismatched `Origin` when one is provided.
+Each refresh rotates the token and revokes its predecessor; reuse of a revoked
+token revokes every active token in that family. Logout revokes the current
+refresh token and clears both cookies.
 
 Verification and password-reset links use single-use SHA-256-hashed email
 tokens; verification links expire after 24 hours and password-reset links after
@@ -88,6 +89,16 @@ issuer, audience, expiry, and nonce against Google's JWKS. Only a Google
 identity with `email_verified=true` may be linked by email or create a verified
 passwordless account. Automated tests mock token exchange; real Google login
 has not been verified. Real SMTP delivery has also not been verified.
+
+The frontend forwards same-origin `/api/:path*` requests to `BACKEND_URL`
+(default `http://127.0.0.1:8010`). Open the app at `http://localhost:3000` so
+the browser Origin matches `FRONTEND_ORIGIN`. Access tokens exist only in
+frontend memory; the readable CSRF cookie is used to bootstrap/rotate the
+refresh session. Login and registration forms are bilingual. A client-side app
+layout guard provides loading and redirect UX, but it is not an authorization
+boundary: the API must enforce authentication and roles on every protected
+endpoint. Forgot-password, reset-password, and email-verification frontend
+pages are deferred to step 6B.
 
 ## Key decisions
 
