@@ -8,10 +8,12 @@ from typing import Any
 
 import httpx
 import pytest
+from sqlalchemy import select
 
 from app.db.models.ingestion import (
     Chain,
     DataSource,
+    IngestionRun,
     MetricDefinition,
     Observation,
     SeriesCoverage,
@@ -21,7 +23,9 @@ from app.ingest import (
     format_status,
     gap_ranges,
     http_error_is_unavailable,
+    legacy_bnb_coinmetrics_reason,
     parse_args,
+    purge_observations,
     run_updates_all,
 )
 from app.ingestion.btcnet import BtcNetworkProvider, btc_fees_to_usd
@@ -508,11 +512,48 @@ def test_check_finds_planted_gap_and_jump() -> None:
             strict=True,
         )
     ]
-    gaps, zeros, jumps = analyze_series(series, Decimal("0.4"))
+    gaps, zeros, jumps, prelaunch_zeros = analyze_series(series, Decimal("0.4"))
     assert gaps == [(date(2026, 1, 3), date(2026, 1, 3))]
     assert zeros == []
+    assert prelaunch_zeros is None
     assert len(jumps) == 1
     assert jumps[0][2] == Decimal(1)
+
+
+def test_check_uses_trailing_median_for_volume_and_prelaunch_zeros() -> None:
+    volume_series = [
+        Observation(
+            chain_code="btc",
+            metric_code="volume_usd",
+            source_code="binance",
+            obs_date=date(2026, 1, 1) + timedelta(days=offset),
+            value=value,
+            fetched_at=datetime.now(UTC),
+        )
+        for offset, value in enumerate([Decimal("100")] * 30 + [Decimal("110")])
+    ]
+    _, _, volume_jumps, _ = analyze_series(volume_series, Decimal("0.4"))
+    assert volume_jumps == []
+
+    activity_series = [
+        Observation(
+            chain_code="btc",
+            metric_code="active_addresses",
+            source_code="coin_metrics",
+            obs_date=date(2026, 1, 1) + timedelta(days=offset),
+            value=value,
+            fetched_at=datetime.now(UTC),
+        )
+        for offset, value in enumerate(
+            map(Decimal, ("0", "0", "100", "0")),
+        )
+    ]
+    _, suspicious_zeros, _, prelaunch_zeros = analyze_series(
+        activity_series,
+        Decimal("0.4"),
+    )
+    assert len(suspicious_zeros) == 1
+    assert prelaunch_zeros == (date(2026, 1, 1), date(2026, 1, 2))
 
 
 def test_status_renders_unavailable_reason() -> None:
@@ -528,6 +569,192 @@ def test_status_renders_unavailable_reason() -> None:
     rendered = format_status([row])
     assert "unavailable" in rendered
     assert "HTTP 403: asset is not in community tier" in rendered
+
+
+def test_status_labels_btc_fees_as_derived() -> None:
+    row = SeriesCoverage(
+        chain_code="btc",
+        metric_code="fees_usd",
+        source_code="blockchain_info",
+        points=1,
+        missing_days=0,
+        status="ok",
+    )
+    assert "derived" in format_status([row])
+
+
+def test_legacy_bnb_coinmetrics_series_are_not_refetched() -> None:
+    assert (
+        legacy_bnb_coinmetrics_reason("bnb", "active_addresses")
+        == "legacy BNB asset series ended 2019-04-22; not BNB Chain"
+    )
+    assert legacy_bnb_coinmetrics_reason("bnb", "price_close_usd") is None
+    assert legacy_bnb_coinmetrics_reason("btc", "active_addresses") is None
+
+
+def test_purge_command_requires_confirmation() -> None:
+    args = parse_args(
+        ["purge", "--provider", "coinmetrics", "--chains", "bnb"],
+    )
+    assert args.yes is False
+    confirmed = parse_args(
+        ["purge", "--provider", "coinmetrics", "--chains", "bnb", "--yes"],
+    )
+    assert confirmed.yes is True
+
+
+@pytest.mark.asyncio
+async def test_purge_deletes_only_confirmed_coinmetrics_bnb_rows(
+    auth_session_factory,
+    clean_ingestion_tables,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    async with auth_session_factory() as session:
+        for chain_code in ("bnb", "btc"):
+            await ensure_reference(
+                session,
+                Chain(
+                    code=chain_code,
+                    name=chain_code.upper(),
+                    native_symbol=chain_code.upper(),
+                    consensus="pos",
+                ),
+                DataSource(
+                    code="coin_metrics",
+                    name="Coin Metrics",
+                    url="https://community-api.coinmetrics.io/",
+                    license_note="Community API terms apply.",
+                    attribution_required=True,
+                ),
+                MetricDefinition(
+                    code="tx_count",
+                    unit="transactions",
+                    frequency="1d",
+                    description="Daily transactions",
+                ),
+            )
+        for metric_code, unit in (
+            ("market_cap_usd", "USD"),
+            ("active_addresses", "addresses"),
+        ):
+            if await session.get(MetricDefinition, metric_code) is None:
+                session.add(
+                    MetricDefinition(
+                        code=metric_code,
+                        unit=unit,
+                        frequency="1d",
+                        description=metric_code,
+                    )
+                )
+        await session.commit()
+        session.add_all(
+            [
+                Observation(
+                    chain_code="bnb",
+                    metric_code="tx_count",
+                    source_code="coin_metrics",
+                    obs_date=date(2019, 4, 22),
+                    value=Decimal("10"),
+                    fetched_at=datetime.now(UTC),
+                ),
+                Observation(
+                    chain_code="btc",
+                    metric_code="tx_count",
+                    source_code="coin_metrics",
+                    obs_date=date(2026, 1, 1),
+                    value=Decimal("20"),
+                    fetched_at=datetime.now(UTC),
+                ),
+            ]
+        )
+        await session.commit()
+
+        assert (
+            await purge_observations(
+                session,
+                provider_name="coinmetrics",
+                chains=["bnb"],
+                confirmed=False,
+            )
+            == 2
+        )
+        assert len((await session.scalars(select(Observation))).all()) == 2
+        assert (
+            await purge_observations(
+                session,
+                provider_name="coinmetrics",
+                chains=["bnb"],
+                confirmed=True,
+            )
+            == 0
+        )
+        remaining = list((await session.scalars(select(Observation))).all())
+        assert len(remaining) == 1
+        assert remaining[0].chain_code == "btc"
+        coverage = await session.get(
+            SeriesCoverage,
+            ("bnb", "tx_count", "coin_metrics"),
+        )
+        assert coverage is not None
+        assert coverage.status == "discontinued"
+        assert "not BNB Chain" in (coverage.last_error or "")
+        run = await session.scalar(
+            select(IngestionRun).where(IngestionRun.job == "purge")
+        )
+        assert run is not None
+        assert "purged_observations=1" in (run.error or "")
+        assert "Purge plan: 1 observations" in capsys.readouterr().out
+
+
+@pytest.mark.asyncio
+async def test_old_series_is_marked_discontinued(
+    auth_session_factory,
+    clean_ingestion_tables,
+) -> None:
+    async with auth_session_factory() as session:
+        await ensure_reference(
+            session,
+            Chain(
+                code="btc",
+                name="Bitcoin",
+                native_symbol="BTC",
+                consensus="pow",
+            ),
+            DataSource(
+                code="binance",
+                name="Binance",
+                url="https://data-api.binance.vision/",
+                license_note="Public market data.",
+                attribution_required=False,
+            ),
+            MetricDefinition(
+                code="price_close_usd",
+                unit="USD",
+                frequency="1d",
+                description="Daily close",
+            ),
+        )
+        old_date = date(2010, 1, 1)
+        service = IngestionService(
+            session,
+            provider=object(),  # type: ignore[arg-type]
+            provider_code="binance",
+            source_code="binance",
+        )
+        await service.upsert_points(
+            ChainContext("btc", "BTC"),
+            "price_close_usd",
+            [Point(old_date, Decimal("100"))],
+            today=datetime.now(UTC).date(),
+        )
+        await service.recompute_coverage("btc", "price_close_usd")
+        coverage = await session.get(
+            SeriesCoverage,
+            ("btc", "price_close_usd", "binance"),
+        )
+        assert coverage is not None
+        assert coverage.status == "discontinued"
+        assert old_date.isoformat() in (coverage.last_error or "")
 
 
 def test_check_threshold_rejects_non_finite_values() -> None:

@@ -134,10 +134,13 @@ uses a seven-day overlap for revised on-chain observations.
 
 Coverage is recomputed after each run. Prices and volumes become stale after
 two UTC days; on-chain, fees, TVL, stablecoin, and network metrics use a
-three-day threshold. Missing days remain gaps; providers never forward-fill or
-interpolate. `series_coverage` distinguishes `ok`, `stale`, `error`,
-`never_run`, and `unavailable` (verified HTTP 403/404 or documented absence).
-Runs record success/rejection counts and truncated errors.
+three-day threshold. Any successfully fetched series whose last point is older
+than the configurable `INGESTION_DISCONTINUED_DAYS` threshold (default 30 days)
+is `discontinued`, not `stale`. Missing days remain gaps; providers never
+forward-fill or interpolate. `series_coverage` distinguishes `ok`, `stale`,
+`error`, `never_run`, `unavailable` (verified HTTP 403/404 or documented
+absence), and `discontinued`. Runs record success/rejection counts and
+truncated errors.
 
 The providers currently ingest Binance daily klines, Coin Metrics Community
 daily market-cap/on-chain metrics, DefiLlama TVL/stablecoin histories, and
@@ -146,8 +149,18 @@ close and quote-volume metrics, not an independent fiat-USD measurement.
 Blockchain.info reports hashrate in TH/s, converted to H/s by multiplying by
 10^12. Its transaction-fees chart is BTC-denominated; daily fees are converted
 to USD with the matching Binance BTC close and remain stored under the
-Blockchain.info fee source. Chart response spans are limited, so the provider
-fetches sequential bounded windows.
+Blockchain.info fee source as a derived series. The 228 historical fee-chart
+rows without a same-day Binance close are intentionally omitted. Chart
+response spans are limited, so the provider fetches sequential bounded windows.
+The legacy Coin Metrics `bnb` asset ended on 2019-04-22 and is not BNB Chain;
+those observations are excluded from updates and can be removed only through
+the explicit, confirmed `python -m app.ingest purge --provider coinmetrics
+--chains bnb --yes` command. The purge is recorded in `ingestion_runs`.
+
+The `check` command flags day-over-day moves only for price, market cap, TVL,
+and stablecoin supply (40% by default, configurable with `--jump-threshold`).
+Volume, transactions, and active addresses are compared with their trailing
+30-day median; leading zero runs are reported as informational pre-launch zeros.
 
 Coin Metrics Community requires attribution and is non-commercial. Preserve
 attribution for DefiLlama, Blockchain.info, and mempool.space, and review each

@@ -10,7 +10,7 @@ from decimal import Decimal, InvalidOperation
 from uuid import uuid4
 
 import httpx
-from sqlalchemy import select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models.ingestion import (
@@ -54,6 +54,17 @@ PROVIDER_CHAINS: dict[str, tuple[str, ...]] = {
     "btcnet": ("btc",),
 }
 DEFAULT_BACKFILL_DATE = date(2017, 1, 1)
+LEGACY_BNB_COINMETRICS_METRICS = {
+    "market_cap_usd",
+    "active_addresses",
+    "tx_count",
+}
+
+
+def legacy_bnb_coinmetrics_reason(chain_code: str, metric_code: str) -> str | None:
+    if chain_code == "bnb" and metric_code in LEGACY_BNB_COINMETRICS_METRICS:
+        return "legacy BNB asset series ended 2019-04-22; not BNB Chain"
+    return None
 
 
 async def seed() -> int:
@@ -127,6 +138,18 @@ async def run_provider(
                     await ensure_coverage(
                         session, chain.code, metric, provider.source_code
                     )
+                    discontinued_reason = (
+                        legacy_bnb_coinmetrics_reason(chain.code, metric)
+                        if provider_name == "coinmetrics"
+                        else None
+                    )
+                    if discontinued_reason is not None:
+                        await service.record_discontinued(
+                            chain.code,
+                            metric,
+                            discontinued_reason,
+                        )
+                        continue
                     if provider_name == "defillama" and chain.code == "btc":
                         await service.record_unavailable(
                             chain.code,
@@ -238,14 +261,113 @@ async def run_provider(
     return 0 if not failures else 1
 
 
+async def purge_observations(
+    session: AsyncSession,
+    *,
+    provider_name: str,
+    chains: list[str],
+    confirmed: bool,
+) -> int:
+    if provider_name != "coinmetrics" or chains != ["bnb"]:
+        print("Purge is restricted to --provider coinmetrics --chains bnb")
+        return 2
+
+    source_code = CoinMetricsProvider.source_code
+    result = await session.scalar(
+        select(func.count())
+        .select_from(Observation)
+        .where(
+            Observation.chain_code == "bnb",
+            Observation.source_code == source_code,
+        )
+    )
+    count = int(result or 0)
+    print(
+        f"Purge plan: {count} observations for chain=bnb "
+        f"source={source_code}; coverage will be marked discontinued."
+    )
+    if not confirmed:
+        print("No rows deleted. Re-run with --yes to confirm.")
+        return 2
+
+    started_at = datetime.now(UTC)
+    run = IngestionRun(
+        id=uuid4(),
+        job="purge",
+        provider=provider_name,
+        started_at=started_at,
+        status="running",
+    )
+    session.add(run)
+    await session.flush()
+    delete_result = await session.execute(
+        delete(Observation)
+        .where(
+            Observation.chain_code == "bnb",
+            Observation.source_code == source_code,
+        )
+        .returning(Observation.obs_date)
+    )
+    deleted = len(delete_result.all())
+    reason = "legacy BNB asset series ended 2019-04-22; not BNB Chain"
+    for metric in sorted(LEGACY_BNB_COINMETRICS_METRICS):
+        coverage = await session.get(
+            SeriesCoverage,
+            ("bnb", metric, source_code),
+        )
+        if coverage is None:
+            coverage = SeriesCoverage(
+                chain_code="bnb",
+                metric_code=metric,
+                source_code=source_code,
+            )
+            session.add(coverage)
+        coverage.first_date = None
+        coverage.last_date = None
+        coverage.points = 0
+        coverage.missing_days = 0
+        coverage.status = "discontinued"
+        coverage.last_error = reason
+
+    run.status = "ok"
+    run.finished_at = datetime.now(UTC)
+    run.error = (f"purged_observations={deleted}; chain=bnb; source={source_code}")[
+        :300
+    ]
+    await session.commit()
+    print(f"Deleted {deleted} observations.")
+    return 0
+
+
+async def run_purge(
+    *,
+    provider_name: str,
+    chains: list[str],
+    confirmed: bool,
+) -> int:
+    async with SessionFactory() as session:
+        return await purge_observations(
+            session,
+            provider_name=provider_name,
+            chains=chains,
+            confirmed=confirmed,
+        )
+
+
 def format_status(rows: list[SeriesCoverage]) -> str:
     lines = [
-        "chain | metric | source | first | last | points | missing | status | reason",
+        "chain | metric | source | kind | first | last | points | missing | "
+        "status | reason",
         "-" * 120,
     ]
     for row in rows:
+        kind = (
+            "derived"
+            if row.metric_code == "fees_usd" and row.source_code == "blockchain_info"
+            else "observed"
+        )
         lines.append(
-            f"{row.chain_code} | {row.metric_code} | {row.source_code} | "
+            f"{row.chain_code} | {row.metric_code} | {row.source_code} | {kind} | "
             f"{row.first_date or '-'} | {row.last_date or '-'} | "
             f"{row.points} | {row.missing_days} | {row.status} | "
             f"{row.last_error or '-'}"
@@ -305,33 +427,78 @@ def analyze_series(
     list[tuple[date, date]],
     list[Observation],
     list[tuple[Observation, Observation, Decimal]],
+    tuple[date, date] | None,
 ]:
     gaps = gap_ranges([row.obs_date for row in series])
+    zero_metrics = {
+        "price_close_usd",
+        "volume_usd",
+        "market_cap_usd",
+        "active_addresses",
+        "tx_count",
+        "tvl_usd",
+        "stablecoin_supply_usd",
+        "hashrate",
+        "validators",
+    }
+    leading_zero_rows: list[Observation] = []
+    for row in series:
+        if row.value != 0:
+            break
+        leading_zero_rows.append(row)
     zero_rows = [
         row
         for row in series
-        if row.metric_code
-        in {
-            "price_close_usd",
-            "volume_usd",
-            "market_cap_usd",
-            "active_addresses",
-            "tx_count",
-            "tvl_usd",
-            "stablecoin_supply_usd",
-            "hashrate",
-            "validators",
-        }
+        if row.metric_code in zero_metrics
         and row.value == 0
+        and row not in leading_zero_rows
     ]
+    relative_jump_metrics = {
+        "price_close_usd",
+        "market_cap_usd",
+        "tvl_usd",
+        "stablecoin_supply_usd",
+    }
+    median_metrics = {"volume_usd", "tx_count", "active_addresses"}
     jumps: list[tuple[Observation, Observation, Decimal]] = []
-    for previous, current in zip(series, series[1:], strict=False):
-        if (current.obs_date - previous.obs_date).days != 1 or previous.value == 0:
-            continue
-        change = current.value / previous.value - Decimal(1)
-        if abs(change) > jump_threshold:
-            jumps.append((previous, current, change))
-    return gaps, zero_rows, jumps
+    for index, current in enumerate(series):
+        if current.metric_code in relative_jump_metrics:
+            if index == 0:
+                continue
+            previous = series[index - 1]
+            if (current.obs_date - previous.obs_date).days != 1:
+                continue
+            if previous.value <= 0:
+                continue
+            change = current.value / previous.value - Decimal(1)
+            if abs(change) > jump_threshold:
+                jumps.append((previous, current, change))
+        elif current.metric_code in median_metrics:
+            trailing = [
+                row
+                for row in series[:index]
+                if 0 < (current.obs_date - row.obs_date).days <= 30
+            ]
+            if not trailing:
+                continue
+            values = sorted(row.value for row in trailing)
+            middle = len(values) // 2
+            median = (
+                values[middle]
+                if len(values) % 2
+                else (values[middle - 1] + values[middle]) / Decimal(2)
+            )
+            if median <= 0:
+                continue
+            if current.value > median * 10 or current.value < median / 10:
+                change = current.value / median - Decimal(1)
+                jumps.append((trailing[-1], current, change))
+    prelaunch_zeros = (
+        (leading_zero_rows[0].obs_date, leading_zero_rows[-1].obs_date)
+        if leading_zero_rows
+        else None
+    )
+    return gaps, zero_rows, jumps, prelaunch_zeros
 
 
 async def check_data(jump_threshold: Decimal) -> int:
@@ -353,23 +520,41 @@ async def check_data(jump_threshold: Decimal) -> int:
 
     gap_count = 0
     zero_count = 0
-    jump_count = 0
+    daily_move_count = 0
+    median_outlier_count = 0
     jump_series_count = 0
     for (chain, metric, source), series in sorted(grouped.items()):
-        gaps, zero_rows, jumps = analyze_series(series, jump_threshold)
+        gaps, zero_rows, jumps, prelaunch_zeros = analyze_series(series, jump_threshold)
         for start, end in gaps:
             gap_count += 1
             length = (end - start).days + 1
             print(f"gap {chain}/{metric}/{source}: {start}..{end} ({length} days)")
         zero_count += len(zero_rows)
+        if prelaunch_zeros is not None:
+            start, end = prelaunch_zeros
+            print(
+                f"pre-launch zeros {chain}/{metric}/{source}: "
+                f"{start}..{end} (informational)"
+            )
         if zero_rows:
             spans = ", ".join(
                 f"{start}..{end}"
                 for start, end in contiguous_ranges([row.obs_date for row in zero_rows])
             )
-            print(f"zero {chain}/{metric}/{source}: {len(zero_rows)} dates={spans}")
+            print(
+                f"suspicious zeros {chain}/{metric}/{source}: "
+                f"{len(zero_rows)} dates={spans}"
+            )
         if jumps:
-            jump_count += len(jumps)
+            if metric in {
+                "price_close_usd",
+                "market_cap_usd",
+                "tvl_usd",
+                "stablecoin_supply_usd",
+            }:
+                daily_move_count += len(jumps)
+            else:
+                median_outlier_count += len(jumps)
             jump_series_count += 1
             largest_jumps = sorted(
                 jumps,
@@ -380,15 +565,27 @@ async def check_data(jump_threshold: Decimal) -> int:
                 f"{previous.obs_date}->{current.obs_date} ({change * 100:.2f}%)"
                 for previous, current, change in largest_jumps
             )
+            alert_rule = (
+                f"daily moves over {jump_threshold}"
+                if metric
+                in {
+                    "price_close_usd",
+                    "market_cap_usd",
+                    "tvl_usd",
+                    "stablecoin_supply_usd",
+                }
+                else "trailing median outliers (>10x or <0.1x)"
+            )
             print(
-                f"jumps {chain}/{metric}/{source}: {len(jumps)} "
-                f"over {jump_threshold}; largest={examples}"
+                f"alerts {chain}/{metric}/{source}: {len(jumps)} "
+                f"{alert_rule}; largest={examples}"
             )
     print(
         f"check summary: series={len(grouped)} gap_ranges={gap_count} "
         f"suspicious_zero_rows={zero_count} "
-        f"jumps_over_{jump_threshold}={jump_count} "
-        f"series_with_jumps={jump_series_count}"
+        f"daily_moves_over_{jump_threshold}={daily_move_count} "
+        f"trailing_median_outliers={median_outlier_count} "
+        f"series_with_alerts={jump_series_count}"
     )
     return 0
 
@@ -449,6 +646,10 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     update_selection = update.add_mutually_exclusive_group(required=True)
     update_selection.add_argument("--provider", choices=PROVIDER_TYPES)
     update_selection.add_argument("--all", action="store_true")
+    purge = sub.add_parser("purge")
+    purge.add_argument("--provider", choices=("coinmetrics",), required=True)
+    purge.add_argument("--chains", required=True)
+    purge.add_argument("--yes", action="store_true")
     sub.add_parser("status")
     check = sub.add_parser("check")
     check.add_argument(
@@ -471,6 +672,15 @@ def main() -> None:
             code = 2
         else:
             code = asyncio.run(check_data(args.jump_threshold))
+    elif args.command == "purge":
+        purge_chains = [item.strip() for item in args.chains.split(",") if item.strip()]
+        code = asyncio.run(
+            run_purge(
+                provider_name=args.provider,
+                chains=purge_chains,
+                confirmed=args.yes,
+            )
+        )
     elif args.command == "backfill":
         selected_chains = (
             [item.strip() for item in args.chains.split(",") if item.strip()]

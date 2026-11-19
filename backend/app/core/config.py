@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     google_client_id: str = ""
     google_client_secret: str = ""
     trust_proxy: bool = False
+    ingestion_discontinued_days: int = Field(default=30, gt=0)
 
     model_config = SettingsConfigDict(
         env_file=ROOT_ENV_FILE,

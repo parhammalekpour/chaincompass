@@ -57,7 +57,9 @@ Coin Metrics daily catalog reports `max_time=2019-04-22` for all three metrics,
 so these are discontinued legacy `bnb` asset series, not current BNB Chain
 coverage. The matrix and candidate-component table below now reflect that
 evidence. Historical rows were still present in storage at this audit stage;
-they are handled separately by the ingestion correction.
+the 1,961 stored legacy BNB Coin Metrics observations have since been purged
+explicitly. A subsequent `update --all` left zero BNB Coin Metrics observations
+and preserved the discontinued coverage status.
 
 The historical TVL ranges measured in the live run start in 2017-09-27 for
 ETH, 2021-03-17 for SOL, and 2020-10-30 for BNB. The global stablecoin chart
@@ -150,7 +152,9 @@ Missing components remain unavailable and must not be imputed.
 UTC day available at the run (`2026-11-18`). Where the first stored date equals
 the requested `--since 2017-01-01`, it is reported as `>=2017-01-01`, not as a
 proven source start. Point counts are stored observation counts; missing days
-are not filled.
+are not filled. After the confirmed BNB purge and `update --all`, the database
+contains 68,120 observations; update rewrote overlap rows without increasing
+the total.
 
 | Chain | Metric | Source | First stored date | Last stored date | Points | Missing days | Status |
 |---|---|---|---|---|---:|---:|---|
@@ -158,7 +162,7 @@ are not filled.
 | BTC | Active addresses | Coin Metrics Community | >=2017-01-01 | 2026-11-18 | 3609 | 0 | ok |
 | BTC | Transactions | Coin Metrics Community | >=2017-01-01 | 2026-11-18 | 3609 | 0 | ok |
 | BTC | Hashrate (H/s) | Blockchain.info | >=2017-01-01 | 2026-11-18 | 3606 | 3 | ok |
-| BTC | Fees (USD) | Blockchain.info + Binance close conversion | 2017-08-17 | 2026-11-18 | 3378 | 3 | ok |
+| BTC | Fees (USD, derived) | Blockchain.info + Binance close conversion | 2017-08-17 | 2026-11-18 | 3378 | 3 | ok; 228 fee rows without a matching close omitted |
 | ETH | Market cap | Coin Metrics Community | >=2017-01-01 | 2026-11-18 | 3609 | 0 | ok |
 | ETH | Active addresses | Coin Metrics Community | >=2017-01-01 | 2026-11-18 | 3609 | 0 | ok |
 | ETH | Transactions | Coin Metrics Community | >=2017-01-01 | 2026-11-18 | 3609 | 0 | ok |
@@ -167,8 +171,9 @@ are not filled.
 | SOL | Market cap, active addresses, transactions | Coin Metrics Community | — | — | 0 | 0 | unavailable (HTTP 403) |
 | SOL | TVL | DefiLlama | 2021-03-17 | 2026-11-18 | 2073 | 0 | ok |
 | SOL | Stablecoin supply | DefiLlama | 2021-09-10 | 2026-11-18 | 1653 | 243 | ok; gap preserved |
-| BNB | Market cap | Coin Metrics Community | 2017-07-15 | 2019-04-22 | 647 | 0 | stale |
-| BNB | Active addresses, transactions | Coin Metrics Community | 2017-07-05 | 2019-04-22 | 657 each | 0 | stale |
+| BNB | Market cap | Coin Metrics Community | — | — | 0 | 0 | discontinued; legacy asset ended 2019-04-22, purged |
+| BNB | Active addresses | Coin Metrics Community | — | — | 0 | 0 | discontinued; legacy asset ended 2019-04-22, purged |
+| BNB | Transactions | Coin Metrics Community | — | — | 0 | 0 | discontinued; legacy asset ended 2019-04-22, purged |
 | BNB | TVL | DefiLlama | 2020-10-30 | 2026-11-18 | 2211 | 0 | ok |
 | BNB | Stablecoin supply | DefiLlama | 2020-08-29 | 2026-11-18 | 2222 | 51 | ok; gap preserved |
 
@@ -178,8 +183,8 @@ DefiLlama stablecoin supply has two known multi-day gaps: SOL
 their stored ranges; these remain gaps. BTC hashrate on 2026-11-18 was
 approximately `1.0522e21 H/s`; ETH TVL on 2021-11-09 was `$107.424B`.
 
-The ingested Coin Metrics BNB series shown above stops at 2019-04-22 and is
-discontinued despite historical points; the rows are scheduled for explicit
-purge in the follow-up ingestion correction. SOL's requested Coin Metrics
-metrics returned HTTP 403 and are stored as unavailable. Coin Metrics
-Community data is non-commercial and requires attribution.
+The Coin Metrics BNB history stopped at 2019-04-22; all 1,961 legacy rows were
+purged, and the three corresponding coverage rows remain `discontinued` after
+the live update. SOL's requested Coin Metrics metrics returned HTTP 403 and
+are stored as unavailable. Coin Metrics Community data is non-commercial and
+requires attribution.

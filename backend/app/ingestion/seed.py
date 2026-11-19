@@ -56,7 +56,9 @@ DATA_SOURCES = (
         "blockchain_info",
         "Blockchain.info",
         "https://www.blockchain.com/explorer/api",
-        "API/chart terms apply; attribution requirements require review.",
+        "API/chart terms apply; attribution requirements require review. "
+        "BTC transaction fees are derived in USD using same-day Binance closes; "
+        "228 historical BTC fee-chart rows without a close are intentionally omitted.",
         True,
     ),
     (
@@ -74,7 +76,14 @@ METRICS = (
     ("market_cap_usd", "USD", "1d", "Daily market capitalization estimate."),
     ("active_addresses", "addresses", "1d", "Daily active-address count."),
     ("tx_count", "transactions", "1d", "Daily transaction count."),
-    ("fees_usd", "USD", "1d", "Daily network fees in USD."),
+    (
+        "fees_usd",
+        "USD",
+        "1d",
+        "BTC Blockchain.info fees converted from BTC to USD with same-day "
+        "Binance closes; derived series. 228 historical rows without a "
+        "matching close are intentionally omitted.",
+    ),
     ("tvl_usd", "USD", "1d", "Daily total value locked."),
     ("stablecoin_supply_usd", "USD", "1d", "Daily stablecoin supply."),
     ("hashrate", "H/s", "1d", "Daily network hash rate."),
@@ -127,4 +136,8 @@ async def seed_reference_data(session: AsyncSession) -> None:
                     description=description,
                 )
             )
+        else:
+            existing.unit = unit
+            existing.frequency = frequency
+            existing.description = description
     await session.commit()

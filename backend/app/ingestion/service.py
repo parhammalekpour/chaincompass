@@ -10,6 +10,7 @@ from sqlalchemy import and_, func, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.db.models.ingestion import (
     Observation,
     SeriesCoverage,
@@ -186,9 +187,18 @@ class IngestionService:
         if first is not None and last is not None:
             missing = max(0, (last - first).days + 1 - int(count))
         today = datetime.now(UTC).date()
-        status: Literal["ok", "stale", "error", "never_run", "unavailable"] = "ok"
+        status: Literal[
+            "ok", "stale", "error", "never_run", "unavailable", "discontinued"
+        ] = "ok"
+        last_error: str | None = None
         if last is None:
             status = "never_run"
+        elif (today - last).days > settings.ingestion_discontinued_days:
+            status = "discontinued"
+            last_error = (
+                f"last data {last.isoformat()} is older than "
+                f"{settings.ingestion_discontinued_days} days"
+            )
         elif (today - last).days > self.staleness_days.get(metric_code, 3):
             status = "stale"
         coverage = await self.session.get(
@@ -207,8 +217,50 @@ class IngestionService:
         coverage.points = int(count)
         coverage.missing_days = missing
         coverage.last_success_at = datetime.now(UTC)
-        coverage.last_error = None
+        coverage.last_error = last_error
         coverage.status = status
+        await self.session.commit()
+
+    async def record_discontinued(
+        self,
+        chain_code: str,
+        metric_code: str,
+        reason: str,
+    ) -> None:
+        result = await self.session.execute(
+            select(
+                func.min(Observation.obs_date),
+                func.max(Observation.obs_date),
+                func.count(Observation.obs_date),
+            ).where(
+                and_(
+                    Observation.chain_code == chain_code,
+                    Observation.metric_code == metric_code,
+                    Observation.source_code == self.source_code,
+                )
+            )
+        )
+        first, last, count = result.one()
+        missing = 0
+        if first is not None and last is not None:
+            missing = max(0, (last - first).days + 1 - int(count))
+        coverage = await self.session.get(
+            SeriesCoverage,
+            (chain_code, metric_code, self.source_code),
+        )
+        if coverage is None:
+            coverage = SeriesCoverage(
+                chain_code=chain_code,
+                metric_code=metric_code,
+                source_code=self.source_code,
+            )
+            self.session.add(coverage)
+        coverage.first_date = first
+        coverage.last_date = last
+        coverage.points = int(count)
+        coverage.missing_days = missing
+        coverage.status = "discontinued"
+        coverage.last_error = reason[:300]
         await self.session.commit()
 
     async def record_error(

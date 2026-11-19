@@ -29,8 +29,12 @@ See [Windows setup](docs/SETUP.md) to prepare the development environment.
   [docs/DATA_AUDIT.md](docs/DATA_AUDIT.md).
 - Data model and ingestion framework with Binance, Coin Metrics Community,
   DefiLlama, and Blockchain.info BTC daily-series ingestion.
-- Per-source coverage and unavailable states, incremental revision overlap,
-  and data-quality checks for gaps, zeros, and large daily changes.
+- Per-source coverage including unavailable and discontinued states,
+  incremental revision overlap, and metric-specific checks for gaps,
+  pre-launch zeros, price/market-cap/TVL changes, and activity outliers.
+- Explicitly confirmed purge for the discontinued legacy Coin Metrics BNB
+  series; BTC USD fees are derived from Blockchain.info fee amounts and Binance
+  BTC closes.
 
 ## Planned
 
