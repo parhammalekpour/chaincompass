@@ -9,6 +9,8 @@ import pytest
 from scripts.data_audit.run import (
     ProbeResult,
     ProbeSpec,
+    _analytics_semantics,
+    _catalog_metric_ranges,
     _time_series_summary,
     apply_catalog_freshness,
     markdown_report,
@@ -110,6 +112,60 @@ async def test_offline_fixture_report_has_no_raw_payload() -> None:
     for result in report["results"]:
         assert len(json.dumps(result).encode("utf-8")) < 100_000
         assert "raw_payload" not in result
+
+
+@pytest.mark.asyncio
+async def test_audit_can_select_an_exact_endpoint_subset() -> None:
+    report = await run_audit(
+        sources={"Coin Metrics targeted"},
+        endpoint_contains={"catalog/assets?assets=bnb_bsc"},
+        transport=httpx.MockTransport(
+            lambda request: httpx.Response(
+                200,
+                json={
+                    "data": [
+                        {
+                            "asset": "bnb_bsc",
+                            "metrics": [
+                                {
+                                    "metric": "PriceUSD",
+                                    "frequencies": [
+                                        {
+                                            "frequency": "1d",
+                                            "min_time": "2020-08-29T00:00:00Z",
+                                            "max_time": "2026-11-18T00:00:00Z",
+                                        },
+                                        {
+                                            "frequency": "1h",
+                                            "min_time": "2020-08-29T00:00:00Z",
+                                            "max_time": "2026-11-19T00:00:00Z",
+                                        },
+                                    ],
+                                }
+                            ],
+                        }
+                    ]
+                },
+                request=request,
+            )
+        ),
+    )
+    assert len(report["results"]) == 1
+    catalog_ranges = report["results"][0]["catalog_metric_ranges"]
+    assert catalog_ranges["bnb_bsc"]["PriceUSD"]["1h"]["max_time"] == "2026-11-19"
+
+
+@pytest.mark.asyncio
+async def test_new_targeted_probes_support_offline_fixtures() -> None:
+    report = await run_audit(
+        sources={"Coin Metrics targeted", "DefiLlama chain analytics"},
+        offline_fixtures=True,
+    )
+    assert len(report["results"]) == 18
+    assert {row["source"] for row in report["results"]} == {
+        "Coin Metrics targeted",
+        "DefiLlama chain analytics",
+    }
 
 
 def test_markdown_generator() -> None:
@@ -271,6 +327,205 @@ async def test_coinmetrics_fresh_200_is_available() -> None:
     assert stopped is False
     assert result.daily_points == 1
     assert result.availability == "AVAILABLE"
+
+
+def test_target_coinmetrics_catalog_ranges_include_all_requested_metrics() -> None:
+    payload = {
+        "data": [
+            {
+                "asset": "bnb_bsc",
+                "metrics": [
+                    {
+                        "metric": metric,
+                        "frequencies": [
+                            {
+                                "frequency": "1d",
+                                "min_time": "2020-09-01T00:00:00Z",
+                                "max_time": "2026-11-18T00:00:00Z",
+                            }
+                        ],
+                    }
+                    for metric in (
+                        "AdrActCnt",
+                        "TxCnt",
+                        "CapMrktCurUSD",
+                        "FeeTotUSD",
+                    )
+                ],
+            },
+            {"asset": "sol", "metrics": []},
+        ]
+    }
+    summary = _catalog_metric_ranges(payload)
+    assert set(summary["bnb_bsc"]) == {
+        "AdrActCnt",
+        "TxCnt",
+        "CapMrktCurUSD",
+        "FeeTotUSD",
+    }
+    assert summary["bnb_bsc"]["AdrActCnt"]["1d"] == {
+        "min_time": "2020-09-01",
+        "max_time": "2026-11-18",
+    }
+    assert summary["sol"] == {}
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("status_code", "payload", "expected_availability"),
+    [
+        (200, {"totalDataChart": []}, "UNVERIFIED (empty response)"),
+        (
+            200,
+            {"totalDataChart": [[1545523200, 123]]},
+            "DISCONTINUED (last data 2018-12-23)",
+        ),
+        (403, {"error": "forbidden"}, None),
+        (404, {"error": "not found"}, None),
+    ],
+)
+async def test_defillama_analytics_probe_status_and_freshness(
+    status_code: int,
+    payload: dict[str, object],
+    expected_availability: str | None,
+) -> None:
+    spec = ProbeSpec(
+        "DefiLlama chain analytics",
+        "https://fixture.test/overview/fees/ethereum?dataType=dailyFees",
+        ("ETH",),
+        ("protocol fees",),
+        "daily; fees; dailyFees",
+        "json",
+        "fixture.json",
+    )
+
+    async def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(status_code, json=payload, request=request)
+
+    async with httpx.AsyncClient(
+        transport=httpx.MockTransport(handler),
+    ) as client:
+        result, stopped = await probe(client, spec)
+    assert stopped is (status_code == 429)
+    assert result.http_status == status_code
+    assert result.availability == expected_availability
+    if status_code in {403, 404}:
+        assert result.error_body in {
+            '{"error":"forbidden"}',
+            '{"error":"not found"}',
+        }
+
+
+def test_defillama_analytics_unit_and_fee_semantics_are_explicit() -> None:
+    spec = ProbeSpec(
+        "DefiLlama chain analytics",
+        "https://api.llama.fi/overview/fees/ethereum?dataType=dailyFees",
+        ("ETH",),
+        ("protocol fees",),
+        "daily; fees; dailyFees",
+        "json",
+        "fixture.json",
+    )
+    unit, semantics = _analytics_semantics(spec, {"totalDataChart": []})
+    assert unit == "UNVERIFIED (unit not declared in response)"
+    assert "not network/base transaction fees" in semantics
+
+
+def test_defillama_analytics_chart_points_have_daily_depth_and_gaps() -> None:
+    spec = ProbeSpec(
+        "DefiLlama chain analytics",
+        "https://api.llama.fi/overview/dexs/ethereum",
+        ("ETH",),
+        ("DEX volume",),
+        "daily; dexs; dailyVolume",
+        "json",
+        "fixture.json",
+    )
+    first, last, points, gaps, _, samples = _time_series_summary(
+        {
+            "totalDataChart": [
+                [1763510400, 10.25],
+                [1763683200, 11.5],
+            ]
+        },
+        spec,
+    )
+    assert first == "2025-11-19"
+    assert last == "2025-11-21"
+    assert points == 2
+    assert gaps == 1
+    assert samples[0] == {"date": "2025-11-19", "value": 10.25}
+
+
+def test_markdown_includes_targeted_catalog_and_chain_analytics_evidence() -> None:
+    report = {
+        "run_date": "2026-11-19",
+        "duration_seconds": 1.0,
+        "daily_freshness_days": 30,
+        "results": [
+            {
+                "source": "Coin Metrics targeted",
+                "endpoint": "https://community-api.coinmetrics.io/v4/catalog/assets",
+                "chains": ["BNB"],
+                "metrics": ["asset catalog"],
+                "granularity": "catalog",
+                "reachable": True,
+                "error_class": "none",
+                "error_detail": None,
+                "latency_ms": 1,
+                "http_status": 200,
+                "catalog_metric_ranges": {
+                    "bnb_bsc": {
+                        "PriceUSD": {
+                            "1d": {
+                                "min_time": "2020-08-29",
+                                "max_time": "2026-11-18",
+                            }
+                        }
+                    }
+                },
+            },
+            {
+                "source": "Coin Metrics targeted",
+                "endpoint": "https://community-api.coinmetrics.io/v4/timeseries",
+                "chains": ["BNB"],
+                "metrics": ["AdrActCnt"],
+                "granularity": "daily; bounded 30d",
+                "reachable": False,
+                "error_class": "HTTP status",
+                "error_detail": "HTTP 403",
+                "latency_ms": 1,
+                "http_status": 403,
+                "daily_points": None,
+                "last_date": None,
+            },
+            {
+                "source": "DefiLlama chain analytics",
+                "endpoint": "https://api.llama.fi/overview/fees/ethereum",
+                "chains": ["ETH"],
+                "metrics": ["protocol fees"],
+                "granularity": "daily; fees; dailyFees",
+                "reachable": True,
+                "error_class": "none",
+                "error_detail": None,
+                "latency_ms": 1,
+                "http_status": 200,
+                "availability": "AVAILABLE",
+                "first_date": "2018-03-26",
+                "last_date": "2026-11-18",
+                "daily_points": 3154,
+                "missing_days": 6,
+                "value_unit": "UNVERIFIED (unit not declared in response)",
+                "series_semantics": "Protocol fees, not network transaction fees",
+            },
+        ],
+    }
+    text = markdown_report(report)
+    assert "Targeted BNB Chain and DefiLlama probes" in text
+    assert "bnb_bsc" in text
+    assert "PriceUSD (1d: 2020-08-29 to 2026-11-18)" in text
+    assert "UNVERIFIED (HTTP 403)" in text
+    assert "Protocol fees, not network transaction fees" in text
 
 
 def test_markdown_rejects_stale_2xx_as_available() -> None:

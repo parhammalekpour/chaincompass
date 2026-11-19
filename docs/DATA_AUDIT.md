@@ -38,15 +38,23 @@ metadata; it does not contain raw API payloads.
 
 | Metric | BTC | ETH | SOL | BNB |
 |---|---|---|---|---|
-| Price | CoinGecko 365 days; Binance 365 days | CoinGecko 365 days; Binance 365 days | CoinGecko 429 stopped daily chart; Binance 365 days | CoinGecko unprobed; Binance 365 days |
-| Volume | CoinGecko 365 days; Binance 365 days | CoinGecko 365 days; Binance 365 days | CoinGecko 429 stopped; Binance 365 days | Binance 365 days; CoinGecko unprobed |
-| Market cap | CoinGecko current and 365-day chart | CoinGecko current and 365-day chart | CoinGecko daily UNVERIFIED after 429 | CoinGecko UNPROBED |
-| Active addresses | AVAILABLE — Coin Metrics community AdrActCnt 200 | AVAILABLE — Coin Metrics community AdrActCnt 200 | UNVERIFIED (403; no aggregate source) | AVAILABLE — Coin Metrics community AdrActCnt 200 |
-| Tx count | AVAILABLE — Coin Metrics community TxCnt 200 | AVAILABLE — Coin Metrics community TxCnt 200 | UNVERIFIED (403; no aggregate source) | AVAILABLE — Coin Metrics community TxCnt 200 |
-| Fees | AVAILABLE — mempool and Blockchain transaction-fees variant; Coin Metrics FeeTotUSD 403 | UNVERIFIED (403; no aggregate source) | UNVERIFIED (403; no aggregate source) | UNVERIFIED (400; unsupported 1d community metric) |
-| TVL | UNVERIFIED (DefiLlama BTC 404) | AVAILABLE — DefiLlama 3341 points | AVAILABLE — DefiLlama 2074 points | AVAILABLE — DefiLlama 2212 points |
-| Stablecoin supply | UNVERIFIED (DefiLlama BTC route 404) | AVAILABLE — DefiLlama 3278 points | AVAILABLE — DefiLlama 1654 points, 243 gaps | AVAILABLE — DefiLlama 2223 points, 51 gaps |
+| Price | AVAILABLE — CoinGecko 365 days; Binance 365 days | AVAILABLE — CoinGecko 365 days; Binance 365 days | UNVERIFIED (CoinGecko 429; Binance 365-day probe) | UNVERIFIED (CoinGecko stopped; Binance 365-day probe) |
+| Volume | AVAILABLE — CoinGecko 365 days; Binance 365 days | AVAILABLE — CoinGecko 365 days; Binance 365 days | AVAILABLE — Binance 365-day probe | AVAILABLE — Binance 365-day probe |
+| Market cap | AVAILABLE — CoinGecko current and 365-day chart | AVAILABLE — CoinGecko current and 365-day chart | UNVERIFIED (CoinGecko 429) | UNVERIFIED (CoinGecko stopped) |
+| Active addresses | AVAILABLE — Coin Metrics community AdrActCnt | AVAILABLE — Coin Metrics community AdrActCnt | UNVERIFIED (HTTP 403) | DISCONTINUED (legacy `bnb` ended 2019-04-22) |
+| Tx count | AVAILABLE — Coin Metrics community TxCnt | AVAILABLE — Coin Metrics community TxCnt | UNVERIFIED (HTTP 403) | DISCONTINUED (legacy `bnb` ended 2019-04-22) |
+| Network fees | AVAILABLE — BTC chart sources | UNVERIFIED (no aggregate source; RPC derivation high cost) | UNVERIFIED (no aggregate source; RPC derivation high cost) | UNVERIFIED (no aggregate source; RPC derivation high cost) |
+| DEX volume | AVAILABLE — Bitcoin chart; unit UNVERIFIED | AVAILABLE — DefiLlama, 2,939 complete days | AVAILABLE — DefiLlama, 1,871 complete days, 3 missing days | AVAILABLE — DefiLlama, 2,252 complete days |
+| Protocol fees (not network fees) | AVAILABLE — DefiLlama, 1,953 complete days, 94 missing days | AVAILABLE — DefiLlama, 3,154 complete days, 6 missing days | AVAILABLE — DefiLlama, 1,739 complete days | AVAILABLE — DefiLlama, 2,101 complete days |
+| TVL | UNVERIFIED (DefiLlama BTC 404) | AVAILABLE — DefiLlama 3,341 points | AVAILABLE — DefiLlama 2,074 points | AVAILABLE — DefiLlama 2,212 points |
+| Stablecoin supply | UNVERIFIED (DefiLlama BTC route 404) | AVAILABLE — DefiLlama 3,278 points | AVAILABLE — DefiLlama 1,654 points, 243 missing days | AVAILABLE — DefiLlama 2,223 points, 51 missing days |
 | Hashrate/validators | AVAILABLE — mempool and Blockchain hash-rate | NOT APPLICABLE — PoS hashrate; validators UNVERIFIED | NOT APPLICABLE — PoS hashrate; validators UNVERIFIED | NOT APPLICABLE — PoS hashrate; validators UNVERIFIED |
+
+`AVAILABLE` here describes a measured current series, not a claim that every
+value is independently verified. DefiLlama's raw overview response does not
+declare a unit; the daily values are numeric, but the USD unit remains
+UNVERIFIED. DefiLlama protocol fees and protocol revenue are separate from
+base/network transaction fees.
 
 ### Corrections
 
@@ -59,7 +67,11 @@ coverage. The matrix and candidate-component table below now reflect that
 evidence. Historical rows were still present in storage at this audit stage;
 the 1,961 stored legacy BNB Coin Metrics observations have since been purged
 explicitly. A subsequent `update --all` left zero BNB Coin Metrics observations
-and preserved the discontinued coverage status.
+and preserved the discontinued coverage status. A new Coin Metrics Community
+catalog probe for `bnb_bsc` also lists only `PriceUSD`; `AdrActCnt`, `TxCnt`,
+`CapMrktCurUSD`, and `FeeTotUSD` are not present in the free catalog. This does
+not change the legacy `bnb` conclusion or make BNB Chain on-chain metrics
+available.
 
 The historical TVL ranges measured in the live run start in 2017-09-27 for
 ETH, 2021-03-17 for SOL, and 2020-10-30 for BNB. The global stablecoin chart
@@ -103,6 +115,63 @@ has 3278 points from 2017-11-29 to 2026-11-19 with no missing days.
 | mempool/Blockchain BTC | 365-day or 1-year bounded measured history | NOT APPLICABLE | NOT APPLICABLE | NOT APPLICABLE | 365d/1y/30d |
 | Coin Metrics | requested 2025-11-20 to 2026-11-19 window | requested 2025-11-20 to 2026-11-19 window | requested 2025-11-20 to 2026-11-19 window | requested 2025-11-20 to 2026-11-19 window | 1d window; one metric per call |
 
+## Targeted BNB Chain and DefiLlama chain analytics probes
+
+The targeted probes used `ChainCompass-audit/0.1`, sequential requests, a
+one-second pause, and a 30-day Coin Metrics window (2026-10-20 through
+2026-11-19). Audit requests were repeated only for the BNB Chain catalog
+endpoint to capture all metric frequency ranges; the complete targeted run
+took 64.24 seconds including that catalog verification.
+
+Coin Metrics Community's `bnb_bsc` catalog response (HTTP 200) listed this
+complete metric/frequency range:
+
+| Asset | Metric | Frequency | First | Last |
+|---|---|---|---|---|
+| `bnb_bsc` | PriceUSD | 1d | 2020-08-29 | 2026-11-18 |
+
+The catalog contains no `AdrActCnt`, `TxCnt`, `CapMrktCurUSD`, or `FeeTotUSD`
+entry for `bnb_bsc`. Each was requested separately:
+
+| Asset | Metric | HTTP | Points | Last point | Evidence and label |
+|---|---|---:|---:|---|---|
+| `bnb_bsc` | AdrActCnt | 403 | — | — | Catalog confirms absent; NOT AVAILABLE FREE |
+| `bnb_bsc` | TxCnt | 403 | — | — | Catalog confirms absent; NOT AVAILABLE FREE |
+| `bnb_bsc` | CapMrktCurUSD | 400 | — | — | Catalog confirms absent; NOT AVAILABLE FREE |
+| `bnb_bsc` | FeeTotUSD | 403 | — | — | Catalog confirms absent; NOT AVAILABLE FREE |
+
+The `sol` catalog included `PriceUSD`, `CapMrktEstUSD`, reference-rate metrics,
+and spot-volume data, but none of the four requested metrics
+(`AdrActCnt`, `TxCnt`, `CapMrktCurUSD`, `FeeTotUSD`).
+
+DefiLlama endpoint documentation identifies `/overview/dexs/{chain}` as
+chain-filtered DEX volume and `/overview/fees/{chain}` as chain-filtered
+protocol fees/revenue; the fees endpoint accepts separate `dailyFees` and
+`dailyRevenue` types. The aggregate response's `totalDataChart` contains
+numeric daily values but has no explicit unit field. Therefore USD units are
+UNVERIFIED. Protocol fees mean fees paid to protocols; they are not network or
+base transaction fees. Revenue is recorded separately and is not substituted
+for fees. See the [DefiLlama free API documentation](https://api-docs.defillama.com/llms-free.txt).
+
+All dates below exclude the current incomplete UTC day (2026-11-19); latest
+complete date is 2026-11-18. “Missing days” counts omitted dates between the
+first and last points; no values are filled.
+
+| Chain | Series | Endpoint | HTTP | First | Last complete | Points | Missing days | Unit | Semantics |
+|---|---|---|---:|---|---|---:|---:|---|---|
+| ETH | DEX volume | `https://api.llama.fi/overview/dexs/ethereum?excludeTotalDataChart=false&excludeTotalDataChartBreakdown=true` | 200 | 2018-11-02 | 2026-11-18 | 2,939 | 0 | UNVERIFIED | Chain-filtered aggregate DEX trading volume |
+| ETH | Protocol fees (`dailyFees`) | `https://api.llama.fi/overview/fees/ethereum?excludeTotalDataChart=false&excludeTotalDataChartBreakdown=true&dataType=dailyFees` | 200 | 2018-03-26 | 2026-11-18 | 3,154 | 6 | UNVERIFIED | Fees paid to protocols; not network fees |
+| ETH | Protocol revenue (`dailyRevenue`) | `https://api.llama.fi/overview/fees/ethereum?excludeTotalDataChart=false&excludeTotalDataChartBreakdown=true&dataType=dailyRevenue` | 200 | 2018-03-26 | 2026-11-18 | 3,154 | 6 | UNVERIFIED | Protocol revenue; separate from fees |
+| SOL | DEX volume | `https://api.llama.fi/overview/dexs/solana?excludeTotalDataChart=false&excludeTotalDataChartBreakdown=true` | 200 | 2021-10-02 | 2026-11-18 | 1,871 | 3 | UNVERIFIED | Chain-filtered aggregate DEX trading volume |
+| SOL | Protocol fees (`dailyFees`) | `https://api.llama.fi/overview/fees/solana?excludeTotalDataChart=false&excludeTotalDataChartBreakdown=true&dataType=dailyFees` | 200 | 2022-02-14 | 2026-11-18 | 1,739 | 0 | UNVERIFIED | Fees paid to protocols; not network fees |
+| SOL | Protocol revenue (`dailyRevenue`) | `https://api.llama.fi/overview/fees/solana?excludeTotalDataChart=false&excludeTotalDataChartBreakdown=true&dataType=dailyRevenue` | 200 | 2022-02-14 | 2026-11-18 | 1,739 | 0 | UNVERIFIED | Protocol revenue; separate from fees |
+| BNB/BSC | DEX volume | `https://api.llama.fi/overview/dexs/bsc?excludeTotalDataChart=false&excludeTotalDataChartBreakdown=true` | 200 | 2020-09-19 | 2026-11-18 | 2,252 | 0 | UNVERIFIED | Chain-filtered aggregate DEX trading volume |
+| BNB/BSC | Protocol fees (`dailyFees`) | `https://api.llama.fi/overview/fees/bsc?excludeTotalDataChart=false&excludeTotalDataChartBreakdown=true&dataType=dailyFees` | 200 | 2021-02-17 | 2026-11-18 | 2,101 | 0 | UNVERIFIED | Fees paid to protocols; not network fees |
+| BNB/BSC | Protocol revenue (`dailyRevenue`) | `https://api.llama.fi/overview/fees/bsc?excludeTotalDataChart=false&excludeTotalDataChartBreakdown=true&dataType=dailyRevenue` | 200 | 2021-02-17 | 2026-11-18 | 2,101 | 0 | UNVERIFIED | Protocol revenue; separate from fees |
+| BTC | DEX volume | `https://api.llama.fi/overview/dexs/bitcoin?excludeTotalDataChart=false&excludeTotalDataChartBreakdown=true` | 200 | 2014-02-17 | 2026-11-18 | 4,507 | 151 | UNVERIFIED | Chain-filtered aggregate DEX trading volume |
+| BTC | Protocol fees (`dailyFees`) | `https://api.llama.fi/overview/fees/bitcoin?excludeTotalDataChart=false&excludeTotalDataChartBreakdown=true&dataType=dailyFees` | 200 | 2021-04-12 | 2026-11-18 | 1,953 | 94 | UNVERIFIED | Fees paid to protocols; not network fees |
+| BTC | Protocol revenue (`dailyRevenue`) | `https://api.llama.fi/overview/fees/bitcoin?excludeTotalDataChart=false&excludeTotalDataChartBreakdown=true&dataType=dailyRevenue` | 200 | 2021-04-12 | 2026-11-18 | 1,840 | 207 | UNVERIFIED | Protocol revenue; separate from fees |
+
 ## Primary and fallback decisions
 
 - **Primary BTC/ETH/SOL/BNB price and volume:** Binance daily klines. Fallback:
@@ -123,6 +192,10 @@ has 3278 points from 2017-11-29 to 2026-11-19 with no missing days.
   verified. Binance price and volume remain available. Hashrate is NOT
   APPLICABLE for PoS.
 - **Primary ETH/SOL/BNB TVL and stablecoin supply:** DefiLlama.
+- **DEX volume and protocol fees:** DefiLlama chain analytics have measured
+  daily history for ETH, SOL, and BSC. The response omits units, and protocol
+  fees are not network fees; consider as USD-derived candidate data only after
+  resolving unit metadata. `dailyRevenue` remains a separate series.
 - **Primary BTC hashrate:** Blockchain.info daily hash-rate chart, converted
   from TH/s to H/s; mempool.space remains a shorter-history fallback.
 - **Primary BTC fees:** Blockchain.info daily `transaction-fees` chart, converted
@@ -135,12 +208,14 @@ has 3278 points from 2017-11-29 to 2026-11-19 with no missing days.
 |---|---|---|---|---|---|---|---|
 | Price | AVAILABLE | AVAILABLE | AVAILABLE via Binance | AVAILABLE via Binance | Binance klines | BTC/ETH/SOL/BNB earliest candles 2017-2020 | computable now |
 | Volume | AVAILABLE | AVAILABLE | AVAILABLE via Binance | AVAILABLE via Binance | Binance klines | BTC/ETH/SOL/BNB earliest candles 2017-2020 | computable now |
-| Market cap | AVAILABLE | AVAILABLE | UNAVAILABLE (403) | DISCONTINUED (legacy `bnb`; last 2019-04-22) | Coin Metrics Community | BTC/ETH current; BNB through 2019-04-22 | not computable for current BNB Chain |
-| Active addresses | AVAILABLE | AVAILABLE | UNAVAILABLE (403) | DISCONTINUED (legacy `bnb`; last 2019-04-22) | Coin Metrics Community | BTC/ETH current; BNB through 2019-04-22 | not computable for current BNB Chain |
-| Tx count | AVAILABLE | AVAILABLE | UNAVAILABLE (403) | DISCONTINUED (legacy `bnb`; last 2019-04-22) | Coin Metrics Community | BTC/ETH current; BNB through 2019-04-22 | not computable for current BNB Chain |
-| Fees | AVAILABLE | UNVERIFIED | UNVERIFIED | UNVERIFIED | Blockchain.info fees converted with Binance BTC close | 2017-08-17 to 2026-11-18 | computable now for BTC only |
-| TVL | UNAVAILABLE (prior HTTP 404) | AVAILABLE | AVAILABLE | AVAILABLE | DefiLlama | stored ranges below | computable now for ETH/SOL/BNB |
-| Stablecoin supply | UNAVAILABLE (prior HTTP 404) | AVAILABLE | AVAILABLE with 243 gaps | AVAILABLE with 51 gaps | DefiLlama | stored ranges below | computable with explicit gaps |
+| Market cap | AVAILABLE | AVAILABLE | UNVERIFIED (HTTP 403) | DISCONTINUED (legacy `bnb`; last 2019-04-22) | Coin Metrics Community | BTC/ETH current; legacy BNB through 2019-04-22 | not computable for current BNB Chain |
+| Active addresses | AVAILABLE | AVAILABLE | UNVERIFIED (HTTP 403) | DISCONTINUED (legacy `bnb`; last 2019-04-22) | Coin Metrics Community | BTC/ETH current; legacy BNB through 2019-04-22 | not computable for current BNB Chain |
+| Tx count | AVAILABLE | AVAILABLE | UNVERIFIED (HTTP 403) | DISCONTINUED (legacy `bnb`; last 2019-04-22) | Coin Metrics Community | BTC/ETH current; legacy BNB through 2019-04-22 | not computable for current BNB Chain |
+| Network fees | AVAILABLE | UNVERIFIED | UNVERIFIED | UNVERIFIED | Blockchain.info fees converted with Binance BTC close | 2017-08-17 to 2026-11-18 | computable now for BTC only |
+| DEX volume | AVAILABLE (unit UNVERIFIED; 151 missing days) | AVAILABLE (unit UNVERIFIED) | AVAILABLE (unit UNVERIFIED; 3 missing days) | AVAILABLE (unit UNVERIFIED) | DefiLlama chain overview | BTC 2014-02-17; ETH 2018-11-02; SOL 2021-10-02; BSC 2020-09-19 | needs unit verification before scoring |
+| Protocol fees (not network fees) | AVAILABLE (unit UNVERIFIED; 94 missing days) | AVAILABLE (unit UNVERIFIED; 6 missing days) | AVAILABLE (unit UNVERIFIED) | AVAILABLE (unit UNVERIFIED) | DefiLlama `dailyFees` | BTC 2021-04-12; ETH 2018-03-26; SOL 2022-02-14; BSC 2021-02-17 | needs unit verification; never substitute for network fees |
+| TVL | UNVERIFIED (HTTP 404; not proof of absence) | AVAILABLE | AVAILABLE | AVAILABLE | DefiLlama | stored ranges below | computable now for ETH/SOL/BNB |
+| Stablecoin supply | UNVERIFIED (HTTP 404; not proof of absence) | AVAILABLE | AVAILABLE with gaps | AVAILABLE with gaps | DefiLlama | stored ranges below | computable with explicit gaps |
 | Hashrate | AVAILABLE | NOT APPLICABLE | NOT APPLICABLE | NOT APPLICABLE | Blockchain.info (TH/s converted to H/s) | 2017-01-01 to 2026-11-18 | computable now for BTC |
 | Validators | UNVERIFIED | UNVERIFIED | UNVERIFIED | UNVERIFIED | UNVERIFIED until dedicated free source | none measured | needs more research |
 

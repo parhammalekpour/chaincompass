@@ -72,6 +72,9 @@ class ProbeResult:
     availability: str | None = None
     catalog_metrics: dict[str, dict[str, str]] | None = None
     catalog_evidence: str | None = None
+    catalog_metric_ranges: dict[str, dict[str, dict[str, dict[str, str]]]] | None = None
+    value_unit: str | None = None
+    series_semantics: str | None = None
 
 
 def _probe_specs() -> tuple[ProbeSpec, ...]:
@@ -457,6 +460,85 @@ def _probe_specs() -> tuple[ProbeSpec, ...]:
             "rpc_bnb.json",
         ),
     ]
+    specs.extend(
+        [
+            ProbeSpec(
+                "Coin Metrics targeted",
+                "https://community-api.coinmetrics.io/v4/catalog/assets?assets=bnb_bsc",
+                ("BNB",),
+                ("asset catalog",),
+                "catalog",
+                "json",
+                "coinmetrics_catalog.json",
+            ),
+            ProbeSpec(
+                "Coin Metrics targeted",
+                "https://community-api.coinmetrics.io/v4/catalog/assets?assets=sol",
+                ("SOL",),
+                ("asset catalog",),
+                "catalog",
+                "json",
+                "coinmetrics_catalog.json",
+            ),
+        ]
+    )
+    targeted_metrics = ("AdrActCnt", "TxCnt", "CapMrktCurUSD", "FeeTotUSD")
+    for metric in targeted_metrics:
+        specs.append(
+            ProbeSpec(
+                "Coin Metrics targeted",
+                "https://community-api.coinmetrics.io/v4/timeseries/"
+                "asset-metrics?assets=bnb_bsc"
+                f"&metrics={metric}&frequency=1d"
+                "&start_time=2026-10-20&end_time=2026-11-19&page_size=1000",
+                ("BNB",),
+                (metric,),
+                "daily; bounded 2026-10-20 to 2026-11-19",
+                "json",
+                "coinmetrics_catalog.json",
+            )
+        )
+
+    def add_defillama_analytics_probe(
+        chain: str,
+        endpoint_type: str,
+        data_type: str,
+    ) -> None:
+        query = "?excludeTotalDataChart=false&excludeTotalDataChartBreakdown=true"
+        if data_type and endpoint_type != "dexs":
+            query += f"&dataType={data_type}"
+        specs.append(
+            ProbeSpec(
+                "DefiLlama chain analytics",
+                f"https://api.llama.fi/overview/{endpoint_type}/{chain}{query}",
+                (
+                    {
+                        "ethereum": "ETH",
+                        "solana": "SOL",
+                        "bsc": "BNB",
+                        "bitcoin": "BTC",
+                    }[chain],
+                ),
+                (
+                    "DEX volume"
+                    if endpoint_type == "dexs"
+                    else (
+                        "protocol fees"
+                        if data_type == "dailyFees"
+                        else "protocol revenue"
+                    ),
+                ),
+                f"daily; {endpoint_type}; {data_type or 'dailyVolume'}",
+                "json",
+                "defillama_chain_analytics.json",
+            )
+        )
+
+    for chain in ("ethereum", "solana", "bsc", "bitcoin"):
+        add_defillama_analytics_probe(chain, "dexs", "dailyVolume")
+        add_defillama_analytics_probe(chain, "fees", "dailyFees")
+        add_defillama_analytics_probe(chain, "fees", "dailyRevenue")
+
     coinmetrics_assets = ("btc", "eth", "sol", "bnb")
     for asset in coinmetrics_assets:
         specs.append(
@@ -564,7 +646,7 @@ def _time_series_summary(
                             "volume": row[5],
                         }
                     )
-    elif spec.source == "Coin Metrics":
+    elif spec.source.startswith("Coin Metrics"):
         rows = payload.get("data", []) if isinstance(payload, dict) else []
         metric = spec.metrics[0] if spec.metrics else ""
         for item in rows:
@@ -623,8 +705,50 @@ def _time_series_summary(
             samples.append(
                 {"date": date, "value": item.get("value") or item.get("tvl")}
             )
+    elif spec.source == "DefiLlama chain analytics":
+        rows = payload.get("totalDataChart", []) if isinstance(payload, dict) else []
+        for item in rows if isinstance(rows, list) else []:
+            if isinstance(item, list) and len(item) >= 2:
+                try:
+                    date_text = (
+                        datetime.fromtimestamp(
+                            float(item[0]),
+                            UTC,
+                        )
+                        .date()
+                        .isoformat()
+                    )
+                except (TypeError, ValueError, OverflowError, OSError):
+                    continue
+                dates.append(date_text)
+                samples.append({"date": date_text, "value": item[1]})
+            elif isinstance(item, dict):
+                timestamp = item.get("date") or item.get("time")
+                value = item.get("total") or item.get("value")
+                if timestamp is None or value is None:
+                    continue
+                try:
+                    if isinstance(timestamp, str) and "-" in timestamp:
+                        date_text = timestamp[:10]
+                    else:
+                        date_text = (
+                            datetime.fromtimestamp(
+                                float(timestamp),
+                                UTC,
+                            )
+                            .date()
+                            .isoformat()
+                        )
+                except (TypeError, ValueError, OverflowError, OSError):
+                    continue
+                dates.append(date_text)
+                samples.append({"date": date_text, "value": value})
 
     unique_dates = sorted(set(dates))
+    if spec.source in {"Coin Metrics targeted", "DefiLlama chain analytics"}:
+        today = datetime.now(UTC).date().isoformat()
+        unique_dates = [date_text for date_text in unique_dates if date_text < today]
+        samples = [sample for sample in samples if sample["date"] < today]
     if not unique_dates:
         empty_count = 0 if spec.granularity.startswith(("daily", "1d")) else None
         return None, None, empty_count, None, None, _safe_rows(samples)
@@ -681,6 +805,74 @@ def _catalog_metric_summary(payload: Any) -> dict[str, dict[str, str]]:
                 asset_metrics[metric] = daily["max_time"][:10]
         summary[asset] = asset_metrics
     return summary
+
+
+def _catalog_metric_ranges(
+    payload: Any,
+) -> dict[str, dict[str, dict[str, dict[str, str]]]]:
+    if not isinstance(payload, dict) or not isinstance(payload.get("data"), list):
+        return {}
+    summary: dict[str, dict[str, dict[str, dict[str, str]]]] = {}
+    for asset_row in payload["data"]:
+        if not isinstance(asset_row, dict) or not isinstance(
+            asset_row.get("asset"), str
+        ):
+            continue
+        metrics = asset_row.get("metrics")
+        if not isinstance(metrics, list):
+            continue
+        asset_metrics: dict[str, dict[str, dict[str, str]]] = {}
+        for metric_row in metrics:
+            if not isinstance(metric_row, dict):
+                continue
+            metric = metric_row.get("metric")
+            frequencies = metric_row.get("frequencies")
+            if not isinstance(metric, str) or not isinstance(frequencies, list):
+                continue
+            metric_frequencies: dict[str, dict[str, str]] = {}
+            for item in frequencies:
+                if not isinstance(item, dict) or not isinstance(
+                    item.get("frequency"), str
+                ):
+                    continue
+                start = item.get("min_time")
+                end = item.get("max_time")
+                metric_frequencies[item["frequency"]] = {
+                    **({"min_time": start[:10]} if isinstance(start, str) else {}),
+                    **({"max_time": end[:10]} if isinstance(end, str) else {}),
+                }
+            if metric_frequencies:
+                asset_metrics[metric] = metric_frequencies
+        summary[asset_row["asset"]] = asset_metrics
+    return summary
+
+
+def _analytics_semantics(spec: ProbeSpec, payload: Any) -> tuple[str | None, str]:
+    unit: str | None = None
+    if isinstance(payload, dict):
+        for key in ("unit", "units", "currency"):
+            candidate = payload.get(key)
+            if isinstance(candidate, str) and candidate.strip():
+                unit = candidate.strip()
+                break
+    if spec.metrics == ("DEX volume",):
+        semantics = (
+            "Aggregate daily DEX trading volume across protocols on this chain; "
+            "the API docs describe chain-filtered DEX volume."
+        )
+    elif spec.metrics == ("protocol fees",):
+        semantics = (
+            "Aggregate daily fees paid to protocols on this chain; these are "
+            "protocol fees, not network/base transaction fees."
+        )
+    else:
+        semantics = (
+            "Aggregate daily revenue reported for protocols on this chain; "
+            "separate from protocol fees and network/base transaction fees."
+        )
+    if unit is None:
+        unit = "UNVERIFIED (unit not declared in response)"
+    return unit, semantics
 
 
 def apply_catalog_freshness(
@@ -962,7 +1154,7 @@ async def probe(
             source_depth_date,
             source_depth_years,
             probe_window,
-            (
+            availability=(
                 daily_availability(
                     time_summary[2],
                     time_summary[1],
@@ -971,9 +1163,26 @@ async def probe(
                 if spec.granularity.startswith(("daily", "1d"))
                 else None
             ),
-            (
+            catalog_metrics=(
                 _catalog_metric_summary(payload)
-                if spec.source == "Coin Metrics" and spec.granularity == "catalog"
+                if spec.source.startswith("Coin Metrics")
+                and spec.granularity == "catalog"
+                else None
+            ),
+            catalog_metric_ranges=(
+                _catalog_metric_ranges(payload)
+                if spec.source == "Coin Metrics targeted"
+                and spec.granularity == "catalog"
+                else None
+            ),
+            value_unit=(
+                _analytics_semantics(spec, payload)[0]
+                if spec.source == "DefiLlama chain analytics"
+                else None
+            ),
+            series_semantics=(
+                _analytics_semantics(spec, payload)[1]
+                if spec.source == "DefiLlama chain analytics"
                 else None
             ),
         ),
@@ -989,6 +1198,7 @@ def _load_offline_fixture(spec: ProbeSpec) -> Any:
 async def run_audit(
     sources: set[str] | None = None,
     *,
+    endpoint_contains: set[str] | None = None,
     offline_fixtures: bool = False,
     transport: httpx.AsyncBaseTransport | None = None,
     daily_freshness_days: int = 30,
@@ -996,6 +1206,12 @@ async def run_audit(
     specs = _probe_specs()
     if sources:
         specs = tuple(spec for spec in specs if spec.source in sources)
+    if endpoint_contains:
+        specs = tuple(
+            spec
+            for spec in specs
+            if any(marker in spec.endpoint for marker in endpoint_contains)
+        )
 
     if offline_fixtures:
         timeout = httpx.Timeout(10)
@@ -1217,6 +1433,97 @@ def markdown_report(report: dict[str, Any]) -> str:
             f"{result['error_class']}: {error} | {http_status} | {latency} | "
             f"{result.get('availability') or '-'} |"
         )
+    targeted_coinmetrics = [
+        result
+        for result in report["results"]
+        if result.get("source") == "Coin Metrics targeted"
+    ]
+    targeted_defillama = [
+        result
+        for result in report["results"]
+        if result.get("source") == "DefiLlama chain analytics"
+    ]
+    if targeted_coinmetrics or targeted_defillama:
+        lines.extend(
+            [
+                "",
+                "## Targeted BNB Chain and DefiLlama probes",
+                "",
+                "### Coin Metrics Community",
+                "",
+                "| Asset | Catalog metrics (frequency: min to max) |",
+                "|---|---|",
+            ]
+        )
+        for result in targeted_coinmetrics:
+            ranges = result.get("catalog_metric_ranges")
+            if not isinstance(ranges, dict):
+                continue
+            for asset, metrics in ranges.items():
+                rendered_entries: list[str] = []
+                for metric, frequencies in metrics.items():
+                    if "min_time" in frequencies or "max_time" in frequencies:
+                        rendered_entries.append(
+                            f"{metric} (1d: {frequencies.get('min_time', '—')} "
+                            f"to {frequencies.get('max_time', '—')})"
+                        )
+                        continue
+                    rendered_entries.extend(
+                        f"{metric} ({frequency}: "
+                        f"{times.get('min_time', '—')} to "
+                        f"{times.get('max_time', '—')})"
+                        for frequency, times in frequencies.items()
+                    )
+                rendered = "; ".join(rendered_entries)
+                lines.append(f"| {asset} | {rendered or 'No catalog metrics'} |")
+        lines.extend(
+            [
+                "",
+                "| Asset | Metric | HTTP | Points | Last point | Probe status |",
+                "|---|---|---:|---:|---|---|",
+            ]
+        )
+        for result in targeted_coinmetrics:
+            if result.get("granularity") == "catalog":
+                continue
+            status = result.get("availability") or (
+                f"UNVERIFIED (HTTP {result.get('http_status')})"
+                if result.get("http_status") is not None
+                else "UNVERIFIED (probe failed)"
+            )
+            daily_points = result.get("daily_points")
+            points = daily_points if daily_points is not None else "—"
+            lines.append(
+                f"| {','.join(result['chains'])} | "
+                f"{','.join(result['metrics'])} | "
+                f"{result.get('http_status') or '—'} | "
+                f"{points} | {result.get('last_date') or '—'} | {status} |"
+            )
+        lines.extend(
+            [
+                "",
+                "### DefiLlama chain analytics",
+                "",
+                "| Chain | Metric | Endpoint | HTTP | First | Last | Points "
+                "| Missing days | Unit | Semantics |",
+                "|---|---|---|---:|---|---|---:|---:|---|---|",
+            ]
+        )
+        for result in targeted_defillama:
+            daily_points = result.get("daily_points")
+            points = daily_points if daily_points is not None else "—"
+            missing_days = result.get("missing_days")
+            gaps = missing_days if missing_days is not None else "—"
+            lines.append(
+                f"| {','.join(result['chains'])} | "
+                f"{','.join(result['metrics'])} | `{result['endpoint']}` | "
+                f"{result.get('http_status') or '—'} | "
+                f"{result.get('first_date') or '—'} | "
+                f"{result.get('last_date') or '—'} | "
+                f"{points} | {gaps} | "
+                f"{result.get('value_unit') or 'UNVERIFIED'} | "
+                f"{result.get('series_semantics') or 'UNVERIFIED'} |"
+            )
     lines.extend(
         [
             "",
@@ -1345,16 +1652,21 @@ def _coinmetrics_cell_is_available(
 def main() -> None:
     parser = argparse.ArgumentParser(description=USER_AGENT)
     parser.add_argument("--sources", default="")
+    parser.add_argument("--endpoints", default="")
     parser.add_argument("--offline-fixtures", action="store_true")
     parser.add_argument("--daily-freshness-days", type=int, default=30)
     args = parser.parse_args()
 
     sources = {item.strip() for item in args.sources.split(",") if item.strip()} or None
+    endpoint_contains = {
+        item.strip() for item in args.endpoints.split(",") if item.strip()
+    } or None
     if args.daily_freshness_days < 0:
         parser.error("--daily-freshness-days must be non-negative")
     report = asyncio.run(
         run_audit(
             sources=sources,
+            endpoint_contains=endpoint_contains,
             offline_fixtures=args.offline_fixtures,
             daily_freshness_days=args.daily_freshness_days,
         )

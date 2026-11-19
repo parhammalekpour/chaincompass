@@ -1,0 +1,34 @@
+{
+  "data": [
+    {
+      "asset": "bnb_bsc",
+      "metrics": [
+        {
+          "metric": "PriceUSD",
+          "frequencies": [
+            {
+              "frequency": "1d",
+              "min_time": "2020-08-29T00:00:00Z",
+              "max_time": "2026-11-18T00:00:00Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "asset": "sol",
+      "metrics": [
+        {
+          "metric": "PriceUSD",
+          "frequencies": [
+            {
+              "frequency": "1d",
+              "min_time": "2020-04-10T00:00:00Z",
+              "max_time": "2026-11-18T00:00:00Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
