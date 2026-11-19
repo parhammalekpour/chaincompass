@@ -1,14 +1,16 @@
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 import httpx
 import pytest
 
 from scripts.data_audit.run import (
+    ProbeResult,
     ProbeSpec,
     _time_series_summary,
+    apply_catalog_freshness,
     markdown_report,
     probe,
     run_audit,
@@ -186,6 +188,179 @@ def test_probe_window_and_source_depth_are_separate_fields() -> None:
     }
     text = markdown_report(report)
     assert "source depth" in text or "probe window" in text
+
+
+@pytest.mark.asyncio
+async def test_coinmetrics_empty_200_is_unverified() -> None:
+    spec = ProbeSpec(
+        "Coin Metrics",
+        "https://fixture.test/timeseries",
+        ("BNB",),
+        ("AdrActCnt",),
+        "daily; bounded 365d",
+        "json",
+        "fixture.json",
+    )
+
+    async def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json={"data": []}, request=request)
+
+    async with httpx.AsyncClient(
+        transport=httpx.MockTransport(handler),
+    ) as client:
+        result, stopped = await probe(client, spec)
+    assert stopped is False
+    assert result.http_status == 200
+    assert result.daily_points == 0
+    assert result.availability == "UNVERIFIED (empty response)"
+
+
+@pytest.mark.asyncio
+async def test_coinmetrics_stale_200_is_discontinued() -> None:
+    spec = ProbeSpec(
+        "Coin Metrics",
+        "https://fixture.test/timeseries",
+        ("BNB",),
+        ("AdrActCnt",),
+        "daily; bounded 365d",
+        "json",
+        "fixture.json",
+    )
+
+    async def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            json={"data": [{"time": "2019-04-22T00:00:00Z", "AdrActCnt": "123"}]},
+            request=request,
+        )
+
+    async with httpx.AsyncClient(
+        transport=httpx.MockTransport(handler),
+    ) as client:
+        result, stopped = await probe(client, spec)
+    assert stopped is False
+    assert result.daily_points == 1
+    assert result.last_date == "2019-04-22"
+    assert result.availability == "DISCONTINUED (last data 2019-04-22)"
+
+
+@pytest.mark.asyncio
+async def test_coinmetrics_fresh_200_is_available() -> None:
+    recent = (datetime.now(UTC) - timedelta(days=1)).date().isoformat()
+    spec = ProbeSpec(
+        "Coin Metrics",
+        "https://fixture.test/timeseries",
+        ("BTC",),
+        ("TxCnt",),
+        "daily; bounded 365d",
+        "json",
+        "fixture.json",
+    )
+
+    async def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            json={"data": [{"time": f"{recent}T00:00:00Z", "TxCnt": "100"}]},
+            request=request,
+        )
+
+    async with httpx.AsyncClient(
+        transport=httpx.MockTransport(handler),
+    ) as client:
+        result, stopped = await probe(client, spec)
+    assert stopped is False
+    assert result.daily_points == 1
+    assert result.availability == "AVAILABLE"
+
+
+def test_markdown_rejects_stale_2xx_as_available() -> None:
+    result = {
+        "source": "Coin Metrics",
+        "endpoint": "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics",
+        "chains": ["BNB"],
+        "metrics": ["AdrActCnt"],
+        "granularity": "daily; bounded 365d",
+        "reachable": True,
+        "http_status": 200,
+        "daily_points": 1,
+        "last_date": "2019-04-22",
+        "availability": "AVAILABLE",
+    }
+    report = {
+        "run_date": "2026-11-19",
+        "duration_seconds": 1,
+        "results": [result],
+        "coverage_matrix": [
+            {
+                "Metric": "Active addresses",
+                "BTC": "UNVERIFIED",
+                "ETH": "UNVERIFIED",
+                "SOL": "UNVERIFIED",
+                "BNB": "AVAILABLE — Coin Metrics",
+            }
+        ],
+    }
+    with pytest.raises(ValueError):
+        markdown_report(report)
+
+
+def test_catalog_stale_maximum_marks_empty_coinmetrics_series_discontinued() -> None:
+    catalog = ProbeResult(
+        source="Coin Metrics",
+        endpoint="https://community-api.coinmetrics.io/v4/catalog/assets?assets=bnb",
+        chains=["BNB"],
+        metrics=["asset catalog"],
+        granularity="catalog",
+        reachable=True,
+        error_class="none",
+        error_detail=None,
+        latency_ms=1,
+        http_status=200,
+        rate_limit_headers={},
+        response_top_level_keys=["data"],
+        first_date=None,
+        last_date=None,
+        daily_points=None,
+        missing_days=None,
+        staleness_hours=None,
+        sample_rows=[],
+        bounded=True,
+        catalog_metrics={
+            "bnb": {
+                "AdrActCnt": "2019-04-22",
+                "TxCnt": "2019-04-22",
+                "CapMrktCurUSD": "2019-04-22",
+            }
+        },
+    )
+    series = ProbeResult(
+        source="Coin Metrics",
+        endpoint="https://community-api.coinmetrics.io/v4/timeseries/asset-metrics",
+        chains=["BNB"],
+        metrics=["AdrActCnt"],
+        granularity="daily; bounded 365d",
+        reachable=True,
+        error_class="none",
+        error_detail=None,
+        latency_ms=1,
+        http_status=200,
+        rate_limit_headers={},
+        response_top_level_keys=["data"],
+        first_date=None,
+        last_date=None,
+        daily_points=0,
+        missing_days=None,
+        staleness_hours=None,
+        sample_rows=[],
+        bounded=True,
+        availability="UNVERIFIED (empty response)",
+    )
+    apply_catalog_freshness(
+        [catalog, series],
+        today=datetime(2026, 11, 19, tzinfo=UTC),
+    )
+    assert series.availability == "DISCONTINUED (last data 2019-04-22)"
+    assert "catalog max_time" in (series.catalog_evidence or "")
 
 
 def test_coin_metrics_requests_use_one_asset_and_one_metric_per_call() -> None:

@@ -48,6 +48,17 @@ metadata; it does not contain raw API payloads.
 | Stablecoin supply | UNVERIFIED (DefiLlama BTC route 404) | AVAILABLE — DefiLlama 3278 points | AVAILABLE — DefiLlama 1654 points, 243 gaps | AVAILABLE — DefiLlama 2223 points, 51 gaps |
 | Hashrate/validators | AVAILABLE — mempool and Blockchain hash-rate | NOT APPLICABLE — PoS hashrate; validators UNVERIFIED | NOT APPLICABLE — PoS hashrate; validators UNVERIFIED | NOT APPLICABLE — PoS hashrate; validators UNVERIFIED |
 
+### Corrections
+
+The earlier audit incorrectly treated Coin Metrics BNB market cap, active
+addresses, and transactions as available because their requests returned HTTP
+200. The bounded live probes on 2026-11-19 each returned zero points. The
+Coin Metrics daily catalog reports `max_time=2019-04-22` for all three metrics,
+so these are discontinued legacy `bnb` asset series, not current BNB Chain
+coverage. The matrix and candidate-component table below now reflect that
+evidence. Historical rows were still present in storage at this audit stage;
+they are handled separately by the ingestion correction.
+
 The historical TVL ranges measured in the live run start in 2017-09-27 for
 ETH, 2021-03-17 for SOL, and 2020-10-30 for BNB. The global stablecoin chart
 has 3278 points from 2017-11-29 to 2026-11-19 with no missing days.
@@ -103,9 +114,12 @@ has 3278 points from 2017-11-29 to 2026-11-19 with no missing days.
 - **Primary SOL metrics:** Coin Metrics PriceUSD 200; active addresses, tx
   count, and fees are UNVERIFIED explicit 403/400. No free aggregate source was
   found in this audit.
-- **Primary BNB active addresses and tx count:** Coin Metrics community
-  `AdrActCnt` and `TxCnt`, both 200. Market cap and price 200. Fees/hashrate
-  are explicit 400; hashrate is also NOT APPLICABLE for PoS.
+- **BNB market cap, active addresses, and tx count:** Coin Metrics legacy `bnb`
+  series are DISCONTINUED (catalog max date 2019-04-22; bounded 2025-11-20 to
+  2026-11-19 requests returned HTTP 200 with zero points). These do not
+  represent current BNB Chain metrics; no current aggregate replacement was
+  verified. Binance price and volume remain available. Hashrate is NOT
+  APPLICABLE for PoS.
 - **Primary ETH/SOL/BNB TVL and stablecoin supply:** DefiLlama.
 - **Primary BTC hashrate:** Blockchain.info daily hash-rate chart, converted
   from TH/s to H/s; mempool.space remains a shorter-history fallback.
@@ -119,9 +133,9 @@ has 3278 points from 2017-11-29 to 2026-11-19 with no missing days.
 |---|---|---|---|---|---|---|---|
 | Price | AVAILABLE | AVAILABLE | AVAILABLE via Binance | AVAILABLE via Binance | Binance klines | BTC/ETH/SOL/BNB earliest candles 2017-2020 | computable now |
 | Volume | AVAILABLE | AVAILABLE | AVAILABLE via Binance | AVAILABLE via Binance | Binance klines | BTC/ETH/SOL/BNB earliest candles 2017-2020 | computable now |
-| Market cap | AVAILABLE | AVAILABLE | UNAVAILABLE (403) | STALE (last 2019-04-22) | Coin Metrics Community | stored ranges below | needs more research for SOL/BNB freshness |
-| Active addresses | AVAILABLE | AVAILABLE | UNAVAILABLE (403) | STALE (last 2019-04-22) | Coin Metrics Community | stored ranges below | needs more research for SOL/BNB freshness |
-| Tx count | AVAILABLE | AVAILABLE | UNAVAILABLE (403) | STALE (last 2019-04-22) | Coin Metrics Community | stored ranges below | needs more research for SOL/BNB freshness |
+| Market cap | AVAILABLE | AVAILABLE | UNAVAILABLE (403) | DISCONTINUED (legacy `bnb`; last 2019-04-22) | Coin Metrics Community | BTC/ETH current; BNB through 2019-04-22 | not computable for current BNB Chain |
+| Active addresses | AVAILABLE | AVAILABLE | UNAVAILABLE (403) | DISCONTINUED (legacy `bnb`; last 2019-04-22) | Coin Metrics Community | BTC/ETH current; BNB through 2019-04-22 | not computable for current BNB Chain |
+| Tx count | AVAILABLE | AVAILABLE | UNAVAILABLE (403) | DISCONTINUED (legacy `bnb`; last 2019-04-22) | Coin Metrics Community | BTC/ETH current; BNB through 2019-04-22 | not computable for current BNB Chain |
 | Fees | AVAILABLE | UNVERIFIED | UNVERIFIED | UNVERIFIED | Blockchain.info fees converted with Binance BTC close | 2017-08-17 to 2026-11-18 | computable now for BTC only |
 | TVL | UNAVAILABLE (prior HTTP 404) | AVAILABLE | AVAILABLE | AVAILABLE | DefiLlama | stored ranges below | computable now for ETH/SOL/BNB |
 | Stablecoin supply | UNAVAILABLE (prior HTTP 404) | AVAILABLE | AVAILABLE with 243 gaps | AVAILABLE with 51 gaps | DefiLlama | stored ranges below | computable with explicit gaps |
@@ -164,7 +178,8 @@ DefiLlama stablecoin supply has two known multi-day gaps: SOL
 their stored ranges; these remain gaps. BTC hashrate on 2026-11-18 was
 approximately `1.0522e21 H/s`; ETH TVL on 2021-11-09 was `$107.424B`.
 
-The ingested Coin Metrics BNB series stops at 2019-04-22 and is therefore
-stale despite historical points. SOL's requested Coin Metrics metrics returned
-HTTP 403 and are stored as unavailable. Coin Metrics Community data is
-non-commercial and requires attribution.
+The ingested Coin Metrics BNB series shown above stops at 2019-04-22 and is
+discontinued despite historical points; the rows are scheduled for explicit
+purge in the follow-up ingestion correction. SOL's requested Coin Metrics
+metrics returned HTTP 403 and are stored as unavailable. Coin Metrics
+Community data is non-commercial and requires attribution.

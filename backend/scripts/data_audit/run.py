@@ -69,6 +69,9 @@ class ProbeResult:
     source_depth_date: str | None = None
     source_depth_years: float | None = None
     probe_window: str | None = None
+    availability: str | None = None
+    catalog_metrics: dict[str, dict[str, str]] | None = None
+    catalog_evidence: str | None = None
 
 
 def _probe_specs() -> tuple[ProbeSpec, ...]:
@@ -235,7 +238,7 @@ def _probe_specs() -> tuple[ProbeSpec, ...]:
         ),
         ProbeSpec(
             "Coin Metrics",
-            "https://community-api.coinmetrics.io/v4/catalog/assets",
+            "https://community-api.coinmetrics.io/v4/catalog/assets?assets=btc,eth,sol,bnb",
             ("BTC", "ETH", "SOL", "BNB"),
             ("catalog",),
             "catalog",
@@ -459,7 +462,8 @@ def _probe_specs() -> tuple[ProbeSpec, ...]:
         specs.append(
             ProbeSpec(
                 "Coin Metrics",
-                f"https://community-api.coinmetrics.io/v4/catalog/assets/{asset}",
+                "https://community-api.coinmetrics.io/v4/catalog/assets?"
+                f"assets={asset}",
                 (asset.upper(),),
                 ("asset catalog",),
                 "catalog",
@@ -560,6 +564,26 @@ def _time_series_summary(
                             "volume": row[5],
                         }
                     )
+    elif spec.source == "Coin Metrics":
+        rows = payload.get("data", []) if isinstance(payload, dict) else []
+        metric = spec.metrics[0] if spec.metrics else ""
+        for item in rows:
+            if not isinstance(item, dict):
+                continue
+            timestamp = item.get("time")
+            if not isinstance(timestamp, str):
+                continue
+            try:
+                date_text = (
+                    datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
+                    .astimezone(UTC)
+                    .date()
+                    .isoformat()
+                )
+            except ValueError:
+                continue
+            dates.append(date_text)
+            samples.append({"date": date_text, "value": item.get(metric)})
     elif spec.source in {"mempool.space", "DefiLlama"}:
         rows = payload if isinstance(payload, list) else []
         if (
@@ -602,7 +626,8 @@ def _time_series_summary(
 
     unique_dates = sorted(set(dates))
     if not unique_dates:
-        return None, None, None, None, None, _safe_rows(samples)
+        empty_count = 0 if spec.granularity.startswith(("daily", "1d")) else None
+        return None, None, empty_count, None, None, _safe_rows(samples)
 
     first_date = unique_dates[0]
     last_date = unique_dates[-1]
@@ -618,6 +643,97 @@ def _time_series_summary(
         round(staleness, 2),
         _safe_rows(samples),
     )
+
+
+def _catalog_metric_summary(payload: Any) -> dict[str, dict[str, str]]:
+    if not isinstance(payload, dict) or not isinstance(payload.get("data"), list):
+        return {}
+    summary: dict[str, dict[str, str]] = {}
+    requested = {"CapMrktCurUSD", "AdrActCnt", "TxCnt"}
+    for asset_row in payload["data"]:
+        if not isinstance(asset_row, dict) or not isinstance(
+            asset_row.get("asset"), str
+        ):
+            continue
+        asset = asset_row["asset"]
+        metrics = asset_row.get("metrics")
+        if not isinstance(metrics, list):
+            continue
+        asset_metrics: dict[str, str] = {}
+        for metric_row in metrics:
+            if not isinstance(metric_row, dict):
+                continue
+            metric = metric_row.get("metric")
+            if metric not in requested:
+                continue
+            frequencies = metric_row.get("frequencies")
+            if not isinstance(frequencies, list):
+                continue
+            daily = next(
+                (
+                    item
+                    for item in frequencies
+                    if isinstance(item, dict) and item.get("frequency") == "1d"
+                ),
+                None,
+            )
+            if isinstance(daily, dict) and isinstance(daily.get("max_time"), str):
+                asset_metrics[metric] = daily["max_time"][:10]
+        summary[asset] = asset_metrics
+    return summary
+
+
+def apply_catalog_freshness(
+    results: list[ProbeResult],
+    *,
+    freshness_days: int = 30,
+    today: datetime | None = None,
+) -> None:
+    catalog_by_asset: dict[str, dict[str, str]] = {}
+    for result in results:
+        if result.source == "Coin Metrics" and result.catalog_metrics:
+            catalog_by_asset.update(result.catalog_metrics)
+    current = today or datetime.now(UTC)
+    for result in results:
+        if (
+            result.source != "Coin Metrics"
+            or not result.granularity.startswith(("daily", "1d"))
+            or result.daily_points != 0
+            or not result.chains
+            or not result.metrics
+        ):
+            continue
+        last_data = catalog_by_asset.get(result.chains[0].lower(), {}).get(
+            result.metrics[0]
+        )
+        if last_data is None:
+            continue
+        last = datetime.fromisoformat(last_data).replace(tzinfo=UTC)
+        if (current.date() - last.date()).days > freshness_days:
+            result.availability = f"DISCONTINUED (last data {last_data})"
+            result.catalog_evidence = (
+                f"Coin Metrics 1d catalog max_time for "
+                f"{result.chains[0]}/{result.metrics[0]}: {last_data}"
+            )
+
+
+def daily_availability(
+    daily_points: int | None,
+    last_date: str | None,
+    *,
+    freshness_days: int = 30,
+    today: datetime | None = None,
+) -> str:
+    if daily_points is None or daily_points == 0 or last_date is None:
+        return "UNVERIFIED (empty response)"
+    current = today or datetime.now(UTC)
+    if current.tzinfo is None:
+        current = current.replace(tzinfo=UTC)
+    last = datetime.fromisoformat(last_date).replace(tzinfo=UTC)
+    age_days = max(0, (current.date() - last.date()).days)
+    if age_days > freshness_days:
+        return f"DISCONTINUED (last data {last_date})"
+    return "AVAILABLE"
 
 
 def _error_class(exc: Exception) -> ErrorClass:
@@ -676,6 +792,7 @@ async def probe(
     spec: ProbeSpec,
     *,
     offline_payload: Any | None = None,
+    daily_freshness_days: int = 30,
 ) -> tuple[ProbeResult, bool]:
     """Run one bounded probe; return a result and whether probing should stop."""
     started = time.perf_counter()
@@ -845,6 +962,20 @@ async def probe(
             source_depth_date,
             source_depth_years,
             probe_window,
+            (
+                daily_availability(
+                    time_summary[2],
+                    time_summary[1],
+                    freshness_days=daily_freshness_days,
+                )
+                if spec.granularity.startswith(("daily", "1d"))
+                else None
+            ),
+            (
+                _catalog_metric_summary(payload)
+                if spec.source == "Coin Metrics" and spec.granularity == "catalog"
+                else None
+            ),
         ),
         False,
     )
@@ -860,6 +991,7 @@ async def run_audit(
     *,
     offline_fixtures: bool = False,
     transport: httpx.AsyncBaseTransport | None = None,
+    daily_freshness_days: int = 30,
 ) -> dict[str, Any]:
     specs = _probe_specs()
     if sources:
@@ -896,9 +1028,18 @@ async def run_audit(
             print(f"probing={spec.source} | bounded={spec.granularity}", flush=True)
             if offline_fixtures:
                 payload = _load_offline_fixture(spec)
-                result, stop = await probe(client, spec, offline_payload=payload)
+                result, stop = await probe(
+                    client,
+                    spec,
+                    offline_payload=payload,
+                    daily_freshness_days=daily_freshness_days,
+                )
             else:
-                result, stop = await probe(client, spec)
+                result, stop = await probe(
+                    client,
+                    spec,
+                    daily_freshness_days=daily_freshness_days,
+                )
                 if result.source == "CoinGecko" and result.http_status == 429:
                     coin_gecko_429_count += 1
                     retry_after = result.rate_limit_headers.get("retry-after")
@@ -939,12 +1080,20 @@ async def run_audit(
                     "TLS",
                 }:
                     await asyncio.sleep(1.0)
-                    retried, stop = await probe(client, spec)
+                    retried, stop = await probe(
+                        client,
+                        spec,
+                        daily_freshness_days=daily_freshness_days,
+                    )
                     result = retried
             results.append(result)
             if stop:
                 stopped_sources.add(spec.source)
 
+    apply_catalog_freshness(
+        results,
+        freshness_days=daily_freshness_days,
+    )
     duration = round(time.perf_counter() - started, 2)
     return {
         "audit": "ChainCompass free public data source audit",
@@ -952,6 +1101,7 @@ async def run_audit(
         "network_condition": "Iran + VPN; results may differ from a server abroad",
         "user_agent": USER_AGENT,
         "bounded_history": True,
+        "daily_freshness_days": daily_freshness_days,
         "duration_seconds": duration,
         "offline_fixtures": offline_fixtures,
         "sources_probed": sorted({result.source for result in results}),
@@ -975,8 +1125,34 @@ def markdown_report(report: dict[str, Any]) -> str:
         "AVAILABLE",
         "NOT AVAILABLE FREE",
         "NOT APPLICABLE",
+        "DISCONTINUED",
         "UNVERIFIED",
     )
+    freshness_days = int(report.get("daily_freshness_days", 30))
+    for result in report["results"]:
+        if (
+            result.get("granularity", "").startswith(("daily", "1d"))
+            and result.get("reachable") is True
+            and result.get("http_status") is not None
+            and 200 <= result["http_status"] < 300
+        ):
+            expected = daily_availability(
+                result.get("daily_points"),
+                result.get("last_date"),
+                freshness_days=freshness_days,
+            )
+            if result.get("catalog_evidence") and expected.startswith("UNVERIFIED"):
+                catalog_date = result["catalog_evidence"].rsplit(": ", 1)[-1]
+                expected = daily_availability(
+                    1,
+                    catalog_date,
+                    freshness_days=freshness_days,
+                )
+            if result.get("availability") != expected:
+                raise ValueError(
+                    "Daily probe availability does not match point count and "
+                    "freshness evidence"
+                )
     if "coverage_matrix" in report:
         has_http_error_only = any(
             result.get("reachable") is False
@@ -987,7 +1163,7 @@ def markdown_report(report: dict[str, Any]) -> str:
         for row in report["coverage_matrix"]:
             for chain in ("BTC", "ETH", "SOL", "BNB"):
                 value = str(row.get(chain, ""))
-                if not any(label in value for label in allowed_labels):
+                if not value.lstrip().startswith(allowed_labels):
                     raise ValueError(
                         f"Coverage matrix cell lacks an allowed label: {value}"
                     )
@@ -999,6 +1175,20 @@ def markdown_report(report: dict[str, Any]) -> str:
                     raise ValueError(
                         "NOT AVAILABLE FREE cannot be based only on HTTP error evidence"
                     )
+                if (
+                    value.startswith("AVAILABLE")
+                    and "Coin Metrics" in value
+                    and not _coinmetrics_cell_is_available(
+                        report,
+                        str(row.get("Metric", "")),
+                        chain,
+                        freshness_days,
+                    )
+                ):
+                    raise ValueError(
+                        f"Coin Metrics {chain} {row.get('Metric')} is not fresh "
+                        "enough to label AVAILABLE"
+                    )
     lines = [
         "# ChainCompass Free Data Audit",
         "",
@@ -1008,8 +1198,9 @@ def markdown_report(report: dict[str, Any]) -> str:
         "",
         "## Reachability",
         "",
-        "| Source | Endpoint | Reachable | Error | HTTP | Latency |",
-        "|---|---|---|---|---:|---:|",
+        "| Source | Endpoint | Reachable | Error | HTTP | Latency "
+        "| Daily availability |",
+        "|---|---|---|---|---:|---:|---|",
     ]
     for result in report["results"]:
         host = urlparse(result["endpoint"]).netloc or "RPC"
@@ -1023,7 +1214,8 @@ def markdown_report(report: dict[str, Any]) -> str:
         lines.append(
             f"| {result['source']} | {host} | "
             f"{'yes' if result['reachable'] else 'no'} | "
-            f"{result['error_class']}: {error} | {http_status} | {latency} |"
+            f"{result['error_class']}: {error} | {http_status} | {latency} | "
+            f"{result.get('availability') or '-'} |"
         )
     lines.extend(
         [
@@ -1116,15 +1308,56 @@ def markdown_report(report: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def _coinmetrics_cell_is_available(
+    report: dict[str, Any],
+    metric_label: str,
+    chain: str,
+    freshness_days: int,
+) -> bool:
+    metric_aliases = {
+        "market cap": "CapMrktCurUSD",
+        "active addresses": "AdrActCnt",
+        "tx count": "TxCnt",
+        "transactions": "TxCnt",
+        "price": "PriceUSD",
+    }
+    metric = metric_aliases.get(metric_label.strip().lower())
+    if metric is None:
+        return False
+    for result in report["results"]:
+        if (
+            result.get("source") == "Coin Metrics"
+            and chain in result.get("chains", [])
+            and metric in result.get("metrics", [])
+        ):
+            return (
+                daily_availability(
+                    result.get("daily_points"),
+                    result.get("last_date"),
+                    freshness_days=freshness_days,
+                )
+                == "AVAILABLE"
+                and result.get("availability") == "AVAILABLE"
+            )
+    return False
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=USER_AGENT)
     parser.add_argument("--sources", default="")
     parser.add_argument("--offline-fixtures", action="store_true")
+    parser.add_argument("--daily-freshness-days", type=int, default=30)
     args = parser.parse_args()
 
     sources = {item.strip() for item in args.sources.split(",") if item.strip()} or None
+    if args.daily_freshness_days < 0:
+        parser.error("--daily-freshness-days must be non-negative")
     report = asyncio.run(
-        run_audit(sources=sources, offline_fixtures=args.offline_fixtures)
+        run_audit(
+            sources=sources,
+            offline_fixtures=args.offline_fixtures,
+            daily_freshness_days=args.daily_freshness_days,
+        )
     )
     json_path = write_json(report)
     logging.basicConfig(level=logging.INFO)
