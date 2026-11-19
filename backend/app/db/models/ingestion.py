@@ -117,7 +117,7 @@ class IngestionRun(Base):
     __tablename__ = "ingestion_runs"
     __table_args__ = (
         CheckConstraint(
-            "status IN ('running','ok','partial','error')",
+            "status IN ('running','ok','partial','error','failed','rate_limited')",
             name="ck_ingestion_runs_status",
         ),
     )
@@ -139,3 +139,4 @@ class IngestionRun(Base):
     rows_upserted: Mapped[int] = mapped_column(BigInteger, nullable=False, default=0)
     rows_rejected: Mapped[int] = mapped_column(BigInteger, nullable=False, default=0)
     error: Mapped[str | None] = mapped_column(String(300), nullable=True)
+    details: Mapped[str | None] = mapped_column(Text, nullable=True)

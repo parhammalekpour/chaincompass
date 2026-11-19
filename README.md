@@ -34,14 +34,17 @@ See [Windows setup](docs/SETUP.md) to prepare the development environment.
 - Per-source coverage including unavailable and discontinued states,
   incremental revision overlap, and metric-specific checks for gaps,
   pre-launch zeros, price/market-cap/TVL changes, and activity outliers.
+- Separate APScheduler worker with PostgreSQL advisory locks, daily scheduled
+  ingestion, and an approximate end-of-day CoinGecko market-cap snapshot with
+  no historical backfill.
 - Explicitly confirmed purge for the discontinued legacy Coin Metrics BNB
   series; BTC USD fees are derived from Blockchain.info fee amounts and Binance
   BTC closes.
 
 ## Planned
 
-- Remaining ingestion providers, scheduler automation, and historical Network
-  Health Score computation.
+- Remaining ingestion providers and historical Network Health Score
+  computation.
 - Production ingestion and on-chain analysis for BTC, ETH, SOL, and BNB,
   limited by the measured sources in [docs/DATA_AUDIT.md](docs/DATA_AUDIT.md).
 - Network Health Score and capital-flow analysis using only proven components.

@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     google_client_secret: str = ""
     trust_proxy: bool = False
     ingestion_discontinued_days: int = Field(default=30, gt=0)
+    coingecko_api_key: str = ""
 
     model_config = SettingsConfigDict(
         env_file=ROOT_ENV_FILE,

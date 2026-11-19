@@ -44,7 +44,7 @@ metadata; it does not contain raw API payloads.
 | Active addresses | AVAILABLE — Coin Metrics community AdrActCnt | AVAILABLE — Coin Metrics community AdrActCnt | UNVERIFIED (HTTP 403) | DISCONTINUED (legacy `bnb` ended 2019-04-22) |
 | Tx count | AVAILABLE — Coin Metrics community TxCnt | AVAILABLE — Coin Metrics community TxCnt | UNVERIFIED (HTTP 403) | DISCONTINUED (legacy `bnb` ended 2019-04-22) |
 | Network fees | AVAILABLE — BTC chart sources | UNVERIFIED (no aggregate source; RPC derivation high cost) | UNVERIFIED (no aggregate source; RPC derivation high cost) | UNVERIFIED (no aggregate source; RPC derivation high cost) |
-| DEX volume | AVAILABLE — Bitcoin chart; unit UNVERIFIED; PROVISIONAL for Health Score (composition unverified) | AVAILABLE — DefiLlama, 2,939 complete days | AVAILABLE — DefiLlama, 1,871 complete days, 3 missing days | AVAILABLE — DefiLlama, 2,252 complete days |
+| DEX volume | AVAILABLE — DefiLlama chain overview; unit UNVERIFIED; PROVISIONAL for Health Score (composition unverified) | AVAILABLE — DefiLlama, 2,939 complete days | AVAILABLE — DefiLlama, 1,871 complete days, 3 missing days | AVAILABLE — DefiLlama, 2,252 complete days |
 | Protocol fees (not network fees) | AVAILABLE — DefiLlama, 1,953 complete days, 94 missing days; PROVISIONAL for Health Score (composition unverified) | AVAILABLE — DefiLlama, 3,154 complete days, 6 missing days | AVAILABLE — DefiLlama, 1,739 complete days | AVAILABLE — DefiLlama, 2,101 complete days |
 | TVL | UNVERIFIED (DefiLlama BTC 404) | AVAILABLE — DefiLlama 3,341 points | AVAILABLE — DefiLlama 2,074 points | AVAILABLE — DefiLlama 2,212 points |
 | Stablecoin supply | UNVERIFIED (DefiLlama BTC route 404) | AVAILABLE — DefiLlama 3,278 points | AVAILABLE — DefiLlama 1,654 points, 243 missing days | AVAILABLE — DefiLlama 2,223 points, 51 missing days |
@@ -289,6 +289,15 @@ unit-UNVERIFIED and must not be used as confirmed USD amounts. Protocol fees
 are fees paid to protocols, not network/base transaction fees, and are stored
 under `protocol_fees_usd`, never `fees_usd`. No BNB Chain Coin Metrics on-chain
 series were ingested: the `bnb_bsc` catalog lacks the requested metrics.
+
+### CoinGecko worker snapshot
+
+The worker's live `/api/v3/coins/markets` request succeeded at
+`2026-11-19T20:52:21.994947Z` (HTTP 200), producing four positive market-cap
+observations for BTC, ETH, SOL, and BNB under the separate `coingecko` source,
+all labeled `obs_date=2026-11-18`. This is a forward-collected snapshot, not
+historical coverage; the earlier audit's CoinGecko chart 429 remains a valid
+result for that different request.
 
 ### DefiLlama composition, unit evidence, and BTC shape
 

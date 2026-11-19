@@ -167,13 +167,42 @@ the explicit, confirmed `python -m app.ingest purge --provider coinmetrics
 The `check` command flags day-over-day moves only for price, market cap, TVL,
 and stablecoin supply (40% by default, configurable with `--jump-threshold`).
 Volume, transactions, and active addresses are compared with their trailing
-30-day median; leading zero runs are reported as informational pre-launch zeros.
+30-day median; a zero median or at least 10 zero observations in the window is
+reported once per sparse series and suppresses its outlier alert. Leading zero
+runs are reported as informational pre-launch zeros.
 
 Coin Metrics Community requires attribution and is non-commercial. Preserve
 attribution for DefiLlama, Blockchain.info, and mempool.space, and review each
 source's current terms before redistribution. Availability differs by asset;
 HTTP 403/404 responses are recorded as `unavailable`, not as successful empty
 series.
+
+## Worker process
+
+Run the ingestion scheduler as a separate process with
+`python -m app.worker`; it does not share the API process and requires no
+Redis. APScheduler's `AsyncIOScheduler` runs `coingecko_snapshot` daily at
+00:05 UTC and `update_all` daily at 00:30 UTC. Jobs use one instance per
+scheduler, coalesce missed invocations, allow a one-hour misfire grace period,
+and include up to 20 seconds of jitter. `update_all` calls the existing
+`app.ingest update --all` path rather than duplicating provider logic.
+
+Before running a job, the worker takes a non-blocking PostgreSQL advisory lock
+keyed by job name. A duplicate process logs `skipped: already running` and
+does not create a run record or write data. Each acquired invocation is tracked
+in `ingestion_runs`; failure, including a handled CoinGecko rate limit, is
+recorded without stopping the scheduler. SIGINT/SIGTERM request shutdown where
+the platform supports signal handlers; Ctrl+C is handled on Windows.
+
+The CoinGecko job makes one `/api/v3/coins/markets` request for BTC, ETH, SOL,
+and BNB. `COINGECKO_API_KEY` is optional. It stores positive finite
+`Decimal` market caps under the separate `coingecko` source; it does not
+backfill history or overwrite Coin Metrics rows. The daily run is scheduled
+around 00:05 UTC, labels the observation with the previous UTC date, and records
+the exact collection timestamp in run details. These are approximate end-of-day
+snapshots, collected forward from the first run; missed days remain gaps.
+Retries are bounded to three after the initial request, honor `Retry-After`,
+and end as `rate_limited` on HTTP 429 or `failed` for other exhausted errors.
 
 ## Key decisions
 

@@ -206,6 +206,29 @@ npm run dev
 Open the app at `http://localhost:3000` so auth requests use the configured
 frontend Origin.
 
+## Ingestion worker
+
+Run the worker in its own PowerShell window, separate from the API and frontend.
+After installing backend dependencies, applying migrations, and running the
+reference-data seed command, use:
+
+```powershell
+Set-Location backend
+& .\.venv\Scripts\python.exe -m alembic upgrade head
+& .\.venv\Scripts\python.exe -m app.ingest seed
+& .\.venv\Scripts\python.exe -m app.worker --list
+& .\.venv\Scripts\python.exe -m app.worker
+```
+
+The scheduler runs CoinGecko snapshots at 00:05 UTC and all configured
+ingestion updates at 00:30 UTC. It is an independent process and does not
+require Redis. For manual operations, use `--once coingecko_snapshot` or
+`--once update_all`; `--run-for-seconds 15` is a short startup/shutdown smoke
+test. Set `COINGECKO_API_KEY` in the ignored root `.env` only if you have an
+optional CoinGecko Demo key; the snapshot job works without one. The snapshot
+has no backfill: it records approximately the previous UTC day's market cap
+from the first run forward, and missed dates remain gaps.
+
 ## CI
 
 GitHub Actions runs three jobs: frontend lint, typecheck, tests, and build;
