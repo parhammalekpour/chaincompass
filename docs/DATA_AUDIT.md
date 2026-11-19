@@ -1,5 +1,9 @@
 # ChainCompass Free Data Audit
 
+The measured audit feeds the SQLAlchemy/UTC-day data model described in
+[ARCHITECTURE.md](ARCHITECTURE.md#data-layer). Binance USDT is a USD proxy,
+not an independent fiat-USD observation.
+
 **Run date:** 2026-11-19
 
 **Network condition:** Iran + VPN. Results may differ from a server abroad.

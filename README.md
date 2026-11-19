@@ -27,9 +27,12 @@ See [Windows setup](docs/SETUP.md) to prepare the development environment.
 - Security settings with email verification status and password changes.
 - Free-source data audit tooling and measured findings in
   [docs/DATA_AUDIT.md](docs/DATA_AUDIT.md).
+- Data model and ingestion framework with Binance daily close/volume backfill.
 
 ## Planned
 
+- Additional ingestion providers, scheduler automation, and historical Network
+  Health Score computation.
 - Production ingestion and on-chain analysis for BTC, ETH, SOL, and BNB,
   limited by the measured sources in [docs/DATA_AUDIT.md](docs/DATA_AUDIT.md).
 - Network Health Score and capital-flow analysis using only proven components.

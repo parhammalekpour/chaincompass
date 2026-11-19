@@ -110,6 +110,35 @@ API must enforce authentication and roles on every protected endpoint.
 
 Real SMTP delivery and a live Google OAuth login have not been verified.
 
+## Data layer
+
+The ingestion data model consists of `chains`, `data_sources`,
+`metric_definitions`, `observations`, `series_coverage`, and `ingestion_runs`.
+Observations use a composite primary key of chain, metric, source, and UTC
+observation date. Values are PostgreSQL `NUMERIC(38,12)` values, never floating
+point.
+
+Providers implement `MetricProvider.fetch(chain, metric, start_date, end_date)`
+and return `Point(date, Decimal)`. The shared HTTP client uses a ChainCompass
+User-Agent, timeouts, bounded retries, exponential backoff with jitter,
+`Retry-After` handling, and a configurable per-provider minimum interval.
+A 429 stops the provider for that ingestion run.
+
+Rows are validated before upsert: finite and non-negative values, dates not in
+the future, and no same-day duplicates. Today's incomplete candle is never
+stored. PostgreSQL `INSERT ... ON CONFLICT DO UPDATE` makes reruns idempotent,
+and writes are batched. Incremental runs start three days before the last stored
+date; backfills start at provider earliest dates.
+
+Coverage is recomputed after each run. A last-date older than two UTC days is
+marked stale, missing days are derived from first/last dates and distinct
+observation points, and runs record success/rejection counts and truncated
+errors.
+
+The first provider is Binance public daily kline data. Binance `USDT` pairs are
+a USD proxy for close and quote-volume metrics; this is not an independent
+fiat-USD market measurement.
+
 ## Key decisions
 
 - **Monorepo:** frontend, API, worker, infrastructure, and shared product

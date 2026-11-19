@@ -140,3 +140,15 @@ async def clean_auth_tables(
         await session.execute(text("DELETE FROM users"))
         await session.commit()
     yield
+
+
+@pytest_asyncio.fixture(loop_scope="session")
+async def clean_ingestion_tables(
+    auth_session_factory: async_sessionmaker[AsyncSession],
+) -> AsyncIterator[None]:
+    async with auth_session_factory() as session:
+        await session.execute(text("DELETE FROM observations"))
+        await session.execute(text("DELETE FROM series_coverage"))
+        await session.execute(text("DELETE FROM ingestion_runs"))
+        await session.commit()
+    yield
