@@ -65,10 +65,14 @@ class ProbeResult:
     staleness_hours: float | None
     sample_rows: list[dict[str, Any]]
     bounded: bool
+    error_body: str | None = None
+    source_depth_date: str | None = None
+    source_depth_years: float | None = None
+    probe_window: str | None = None
 
 
 def _probe_specs() -> tuple[ProbeSpec, ...]:
-    return (
+    specs: list[ProbeSpec] = [
         ProbeSpec(
             "DefiLlama",
             "https://api.llama.fi/v2/chains",
@@ -142,6 +146,24 @@ def _probe_specs() -> tuple[ProbeSpec, ...]:
             "defillama_stablecoins.json",
         ),
         ProbeSpec(
+            "DefiLlama",
+            "https://api.llama.fi/v2/historicalChainTvl/BTC",
+            ("BTC",),
+            ("TVL",),
+            "daily",
+            "json",
+            "defillama_stablecoins.json",
+        ),
+        ProbeSpec(
+            "DefiLlama",
+            "https://stablecoins.llama.fi/stablecoincharts/bitcoin",
+            ("BTC",),
+            ("Stablecoin supply",),
+            "daily",
+            "json",
+            "defillama_stablecoins.json",
+        ),
+        ProbeSpec(
             "CoinGecko",
             "https://api.coingecko.com/api/v3/ping",
             ("BTC", "ETH", "SOL", "BNB"),
@@ -157,6 +179,16 @@ def _probe_specs() -> tuple[ProbeSpec, ...]:
             "&vs_currencies=usd&include_market_cap=true&include_24hr_vol=true",
             ("BTC", "ETH", "SOL", "BNB"),
             ("PriceUSD", "Volume24h", "MarketCap"),
+            "current",
+            "json",
+            "coingecko_price.json",
+        ),
+        ProbeSpec(
+            "CoinGecko",
+            "https://api.coingecko.com/api/v3/coins/markets?"
+            "vs_currency=usd&ids=bitcoin,ethereum,solana,binancecoin",
+            ("BTC", "ETH", "SOL", "BNB"),
+            ("MarketCap", "PriceUSD"),
             "current",
             "json",
             "coingecko_price.json",
@@ -211,52 +243,17 @@ def _probe_specs() -> tuple[ProbeSpec, ...]:
             "coinmetrics_catalog.json",
         ),
         ProbeSpec(
-            "Coin Metrics",
-            "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?"
-            "assets=btc&metrics=PriceUSD,CapMrktCurUSD,AdrActCnt,TxCnt,FeeTotUSD,"
-            "HashRate&frequency=1d&limit=10",
+            "mempool.space",
+            "https://mempool.space/api/v1/mining/difficulty-adjustment",
             ("BTC",),
-            ("PriceUSD", "MarketCap", "AdrActCnt", "TxCnt", "FeeTotUSD", "HashRate"),
-            "daily; bounded 10 points",
+            ("Difficulty", "Hashrate"),
+            "current",
             "json",
-            "coinmetrics_catalog.json",
-        ),
-        ProbeSpec(
-            "Coin Metrics",
-            "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?"
-            "assets=eth&metrics=PriceUSD,CapMrktCurUSD,AdrActCnt,TxCnt,FeeTotUSD,"
-            "HashRate&frequency=1d&limit=10",
-            ("ETH",),
-            ("PriceUSD", "MarketCap", "AdrActCnt", "TxCnt", "FeeTotUSD", "HashRate"),
-            "daily; bounded 10 points",
-            "json",
-            "coinmetrics_catalog.json",
-        ),
-        ProbeSpec(
-            "Coin Metrics",
-            "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?"
-            "assets=sol&metrics=PriceUSD,CapMrktCurUSD,AdrActCnt,TxCnt,FeeTotUSD,"
-            "HashRate&frequency=1d&limit=10",
-            ("SOL",),
-            ("PriceUSD", "MarketCap", "AdrActCnt", "TxCnt", "FeeTotUSD", "HashRate"),
-            "daily; bounded 10 points",
-            "json",
-            "coinmetrics_catalog.json",
-        ),
-        ProbeSpec(
-            "Coin Metrics",
-            "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?"
-            "assets=bnb&metrics=PriceUSD,CapMrktCurUSD,AdrActCnt,TxCnt,FeeTotUSD,"
-            "HashRate&frequency=1d&limit=10",
-            ("BNB",),
-            ("PriceUSD", "MarketCap", "AdrActCnt", "TxCnt", "FeeTotUSD", "HashRate"),
-            "daily; bounded 10 points",
-            "json",
-            "coinmetrics_catalog.json",
+            "mempool_difficulty.json",
         ),
         ProbeSpec(
             "mempool.space",
-            "https://mempool.space/api/v1/mining/difficulty-adjustment",
+            "https://mempool.space/api/v1/difficulty-adjustment",
             ("BTC",),
             ("Difficulty", "Hashrate"),
             "current",
@@ -269,6 +266,15 @@ def _probe_specs() -> tuple[ProbeSpec, ...]:
             ("BTC",),
             ("Hashrate",),
             "1d; bounded 1y",
+            "json",
+            "mempool_hashrate.json",
+        ),
+        ProbeSpec(
+            "mempool.space",
+            "https://mempool.space/api/v1/mining/hashrate/3m",
+            ("BTC",),
+            ("Hashrate",),
+            "3m bounded",
             "json",
             "mempool_hashrate.json",
         ),
@@ -307,6 +313,26 @@ def _probe_specs() -> tuple[ProbeSpec, ...]:
             "timespan=30days&format=json&sampled=false",
             ("BTC",),
             ("Fees",),
+            "daily; bounded 30d",
+            "json",
+            "blockchain_hashrate.json",
+        ),
+        ProbeSpec(
+            "Blockchain.info",
+            "https://api.blockchain.info/charts/transaction-fees?"
+            "timespan=30days&format=json&sampled=false",
+            ("BTC",),
+            ("Fees",),
+            "daily; bounded 30d",
+            "json",
+            "blockchain_hashrate.json",
+        ),
+        ProbeSpec(
+            "Blockchain.info",
+            "https://api.blockchain.info/charts/n-transactions?"
+            "timespan=30days&format=json&sampled=false",
+            ("BTC",),
+            ("TxCount",),
             "daily; bounded 30d",
             "json",
             "blockchain_hashrate.json",
@@ -352,6 +378,46 @@ def _probe_specs() -> tuple[ProbeSpec, ...]:
             "binance_klines.json",
         ),
         ProbeSpec(
+            "Binance",
+            "https://data-api.binance.vision/api/v3/klines?"
+            "symbol=BTCUSDT&interval=1d&startTime=0&limit=1",
+            ("BTC",),
+            ("source depth",),
+            "earliest candle; startTime=0",
+            "binance_klines",
+            "binance_klines.json",
+        ),
+        ProbeSpec(
+            "Binance",
+            "https://data-api.binance.vision/api/v3/klines?"
+            "symbol=ETHUSDT&interval=1d&startTime=0&limit=1",
+            ("ETH",),
+            ("source depth",),
+            "earliest candle; startTime=0",
+            "binance_klines",
+            "binance_klines.json",
+        ),
+        ProbeSpec(
+            "Binance",
+            "https://data-api.binance.vision/api/v3/klines?"
+            "symbol=SOLUSDT&interval=1d&startTime=0&limit=1",
+            ("SOL",),
+            ("source depth",),
+            "earliest candle; startTime=0",
+            "binance_klines",
+            "binance_klines.json",
+        ),
+        ProbeSpec(
+            "Binance",
+            "https://data-api.binance.vision/api/v3/klines?"
+            "symbol=BNBUSDT&interval=1d&startTime=0&limit=1",
+            ("BNB",),
+            ("source depth",),
+            "earliest candle; startTime=0",
+            "binance_klines",
+            "binance_klines.json",
+        ),
+        ProbeSpec(
             "Blockchair",
             "https://api.blockchair.com/stats",
             ("BTC", "ETH"),
@@ -387,7 +453,45 @@ def _probe_specs() -> tuple[ProbeSpec, ...]:
             "rpc",
             "rpc_bnb.json",
         ),
+    ]
+    coinmetrics_assets = ("btc", "eth", "sol", "bnb")
+    for asset in coinmetrics_assets:
+        specs.append(
+            ProbeSpec(
+                "Coin Metrics",
+                f"https://community-api.coinmetrics.io/v4/catalog/assets/{asset}",
+                (asset.upper(),),
+                ("asset catalog",),
+                "catalog",
+                "json",
+                "coinmetrics_catalog.json",
+            )
+        )
+    coinmetrics_metrics = (
+        "PriceUSD",
+        "CapMrktCurUSD",
+        "AdrActCnt",
+        "TxCnt",
+        "FeeTotUSD",
+        "HashRate",
     )
+    for asset in coinmetrics_assets:
+        for metric in coinmetrics_metrics:
+            specs.append(
+                ProbeSpec(
+                    "Coin Metrics",
+                    "https://community-api.coinmetrics.io/v4/timeseries/"
+                    f"asset-metrics?assets={asset}&metrics={metric}"
+                    "&frequency=1d&start_time=2025-11-20"
+                    "&end_time=2026-11-19",
+                    (asset.upper(),),
+                    (metric,),
+                    "daily; bounded 2025-11-20 to 2026-11-19",
+                    "json",
+                    "coinmetrics_catalog.json",
+                )
+            )
+    return tuple(specs)
 
 
 def _top_level_keys(payload: Any) -> list[str]:
@@ -547,6 +651,13 @@ def _rate_headers(response: httpx.Response) -> dict[str, str]:
     }
 
 
+def truncate_error_body(text: str, limit: int = 200) -> str:
+    normalized = " ".join(text.split())
+    if len(normalized) <= limit:
+        return normalized
+    return normalized[: limit - 1] + "…"
+
+
 def _rpc_payload(spec: ProbeSpec) -> dict[str, Any]:
     if spec.source == "PublicNode":
         return {"jsonrpc": "2.0", "id": 1, "method": "eth_blockNumber", "params": []}
@@ -587,6 +698,11 @@ async def probe(
             elapsed = int((time.perf_counter() - started) * 1000)
             headers = response.headers
             response_status = response.status_code
+            response_body = ""
+            if not 200 <= response_status < 300:
+                response_body = truncate_error_body(
+                    response.text,
+                )
             if response_status == 429:
                 return (
                     ProbeResult(
@@ -609,6 +725,7 @@ async def probe(
                         None,
                         [],
                         True,
+                        response_body or None,
                     ),
                     True,
                 )
@@ -629,8 +746,10 @@ async def probe(
         if isinstance(exc, httpx.HTTPStatusError):
             response_status = exc.response.status_code
             detail = f"HTTP {response_status}"
+            error_body = truncate_error_body(exc.response.text)
         else:
             response_status = None
+            error_body = None
         return (
             ProbeResult(
                 spec.source,
@@ -652,6 +771,7 @@ async def probe(
                 None,
                 [],
                 True,
+                error_body,
             ),
             False,
         )
@@ -668,6 +788,32 @@ async def probe(
         time_summary = _time_series_summary(payload, spec)
     elif spec.source == "mempool.space" and "hashrate" in spec.endpoint:
         time_summary = _time_series_summary(payload, spec)
+
+    source_depth_date = time_summary[0]
+    source_depth_years: float | None = None
+    if source_depth_date is not None:
+        first = datetime.fromisoformat(source_depth_date).replace(tzinfo=UTC)
+        elapsed_years = (datetime.now(UTC) - first).total_seconds() / (
+            365.25 * 24 * 3600
+        )
+        source_depth_years = round(max(0.0, elapsed_years), 2)
+
+    probe_window = spec.granularity
+    if spec.source == "Binance" and "earliest candle" in spec.granularity:
+        source_depth_date = None
+        if isinstance(payload, list) and payload and isinstance(payload[0], list):
+            if isinstance(payload[0][0], (int, float)):
+                source_depth_date = _iso_date(float(payload[0][0]) / 1000)
+                first = datetime.fromisoformat(source_depth_date).replace(tzinfo=UTC)
+                source_depth_years = round(
+                    max(
+                        0.0,
+                        (datetime.now(UTC) - first).total_seconds()
+                        / (365.25 * 24 * 3600),
+                    ),
+                    2,
+                )
+        probe_window = "earliest candle; startTime=0"
 
     return (
         ProbeResult(
@@ -695,6 +841,10 @@ async def probe(
             time_summary[4],
             time_summary[5],
             True,
+            None,
+            source_depth_date,
+            source_depth_years,
+            probe_window,
         ),
         False,
     )
@@ -733,6 +883,7 @@ async def run_audit(
     started = time.perf_counter()
     results: list[ProbeResult] = []
     stopped_sources: set[str] = set()
+    coin_gecko_429_count = 0
     async with httpx.AsyncClient(
         headers=headers,
         timeout=timeout,
@@ -748,6 +899,38 @@ async def run_audit(
                 result, stop = await probe(client, spec, offline_payload=payload)
             else:
                 result, stop = await probe(client, spec)
+                if result.source == "CoinGecko" and result.http_status == 429:
+                    coin_gecko_429_count += 1
+                    retry_after = result.rate_limit_headers.get("retry-after")
+                    reset = result.rate_limit_headers.get("x-ratelimit-reset")
+                    wait_seconds = 0.0
+                    if retry_after:
+                        try:
+                            wait_seconds = max(0.0, float(retry_after))
+                        except ValueError:
+                            wait_seconds = 0.0
+                    elif reset:
+                        try:
+                            reset_time = datetime.strptime(
+                                reset,
+                                "%Y-%m-%d %H:%M:%S %z",
+                            )
+                            wait_seconds = max(
+                                0.0,
+                                (reset_time - datetime.now(UTC)).total_seconds(),
+                            )
+                        except ValueError:
+                            wait_seconds = 0.0
+                    if wait_seconds > 0:
+                        await asyncio.sleep(wait_seconds)
+                    if coin_gecko_429_count >= 2:
+                        stop = True
+                if (
+                    result.source == "CoinGecko"
+                    and "market_chart" in spec.endpoint
+                    and not stop
+                ):
+                    await asyncio.sleep(20.0)
                 await asyncio.sleep(1.0)
                 if not stop and result.error_class in {
                     "timeout",
@@ -788,6 +971,34 @@ def write_json(report: dict[str, Any]) -> Path:
 
 
 def markdown_report(report: dict[str, Any]) -> str:
+    allowed_labels = (
+        "AVAILABLE",
+        "NOT AVAILABLE FREE",
+        "NOT APPLICABLE",
+        "UNVERIFIED",
+    )
+    if "coverage_matrix" in report:
+        has_http_error_only = any(
+            result.get("reachable") is False
+            and result.get("http_status") is not None
+            and not result.get("catalog_evidence")
+            for result in report["results"]
+        )
+        for row in report["coverage_matrix"]:
+            for chain in ("BTC", "ETH", "SOL", "BNB"):
+                value = str(row.get(chain, ""))
+                if not any(label in value for label in allowed_labels):
+                    raise ValueError(
+                        f"Coverage matrix cell lacks an allowed label: {value}"
+                    )
+                if (
+                    has_http_error_only
+                    and "NOT AVAILABLE FREE" in value
+                    and "catalog" not in value.lower()
+                ):
+                    raise ValueError(
+                        "NOT AVAILABLE FREE cannot be based only on HTTP error evidence"
+                    )
     lines = [
         "# ChainCompass Free Data Audit",
         "",
@@ -821,33 +1032,45 @@ def markdown_report(report: dict[str, Any]) -> str:
             "",
             "| Metric | BTC | ETH | SOL | BNB |",
             "|---|---|---|---|---|",
-            "| Price | CoinGecko/Binance; bounded | "
-            "CoinGecko/Binance; bounded | "
-            "CoinGecko/Binance; bounded | CoinGecko/Binance; bounded |",
-            "| Volume | CoinGecko/Binance | CoinGecko/Binance | "
-            "CoinGecko/Binance | CoinGecko/Binance |",
-            "| Market cap | CoinGecko community endpoint | "
-            "CoinGecko community endpoint | CoinGecko community endpoint | "
-            "CoinGecko community endpoint |",
-            "| Active addresses | NOT AVAILABLE FREE / UNVERIFIED | "
-            "NOT AVAILABLE FREE / UNVERIFIED | "
-            "NOT AVAILABLE FREE / UNVERIFIED | "
-            "NOT AVAILABLE FREE / UNVERIFIED |",
-            "| Tx count | NOT AVAILABLE FREE / UNVERIFIED | "
-            "NOT AVAILABLE FREE / UNVERIFIED | "
-            "NOT AVAILABLE FREE / UNVERIFIED | "
-            "NOT AVAILABLE FREE / UNVERIFIED |",
-            "| Fees | mempool.space / public fee sample | "
-            "NOT AVAILABLE FREE / UNVERIFIED | "
-            "NOT AVAILABLE FREE / UNVERIFIED | "
-            "NOT AVAILABLE FREE / UNVERIFIED |",
-            "| TVL | NOT AVAILABLE FREE | "
-            "DefiLlama; UNVERIFIED depth | "
-            "DefiLlama; UNVERIFIED depth | "
-            "DefiLlama; UNVERIFIED depth |",
-            "| Stablecoin supply | UNVERIFIED | UNVERIFIED | UNVERIFIED | UNVERIFIED |",
-            "| Hashrate/validators | mempool.space and Blockchain.info; "
-            "bounded BTC history | UNVERIFIED | UNVERIFIED | UNVERIFIED |",
+            "| Price | AVAILABLE — Binance/CoinGecko "
+            "probe window | AVAILABLE — Binance/CoinGecko probe window | "
+            "UNVERIFIED (CoinGecko 429; Binance probe window) | "
+            "UNVERIFIED (CoinGecko stopped; Binance probe window) |",
+            "| Volume | AVAILABLE — Binance 365-day window | "
+            "AVAILABLE — Binance 365-day window | "
+            "AVAILABLE — Binance 365-day window | "
+            "AVAILABLE — Binance 365-day window |",
+            "| Market cap | AVAILABLE — CoinGecko /coins/markets current | "
+            "AVAILABLE — CoinGecko /coins/markets current | "
+            "UNVERIFIED (CoinGecko 429) | "
+            "UNVERIFIED (CoinGecko stopped) |",
+            "| Active addresses | UNVERIFIED (Coin Metrics community 400) | "
+            "UNVERIFIED (no aggregate source found; RPC derivation high cost) | "
+            "UNVERIFIED (no aggregate source found; RPC derivation high cost) | "
+            "UNVERIFIED (no aggregate source found; RPC derivation high cost) |",
+            "| Tx count | "
+            "UNVERIFIED (Coin Metrics community 400; chart probe needed) | "
+            "UNVERIFIED (no aggregate source found; RPC derivation high cost) | "
+            "UNVERIFIED (no aggregate source found; RPC derivation high cost) | "
+            "UNVERIFIED (no aggregate source found; RPC derivation high cost) |",
+            "| Fees | AVAILABLE — mempool recommended fee sample; "
+            "Blockchain fee variant UNVERIFIED | "
+            "UNVERIFIED (no aggregate source found; RPC derivation high cost) | "
+            "UNVERIFIED (no aggregate source found; RPC derivation high cost) | "
+            "UNVERIFIED (no aggregate source found; RPC derivation high cost) |",
+            "| TVL | UNVERIFIED (DefiLlama Bitcoin path not proven) | "
+            "AVAILABLE — DefiLlama chain TVL | "
+            "AVAILABLE — DefiLlama chain TVL | "
+            "AVAILABLE — DefiLlama chain TVL |",
+            "| Stablecoin supply | UNVERIFIED (DefiLlama Bitcoin path not proven) | "
+            "AVAILABLE — DefiLlama | "
+            "AVAILABLE — DefiLlama | "
+            "AVAILABLE — DefiLlama |",
+            "| Hashrate/validators | AVAILABLE — mempool / Blockchain; "
+            "validator status UNVERIFIED | "
+            "NOT APPLICABLE — PoS hashrate; validators UNVERIFIED | "
+            "NOT APPLICABLE — PoS hashrate; validators UNVERIFIED | "
+            "NOT APPLICABLE — PoS hashrate; validators UNVERIFIED |",
             "",
             "## Source licenses and terms",
             "",

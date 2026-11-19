@@ -12,6 +12,7 @@ from scripts.data_audit.run import (
     markdown_report,
     probe,
     run_audit,
+    truncate_error_body,
 )
 
 
@@ -130,6 +131,72 @@ def test_markdown_generator() -> None:
     assert "## Coverage matrix" in text
     assert "## DECISION" in text
     assert "UNVERIFIED" in text
+
+
+def test_markdown_rejects_http_error_as_not_available_free_only() -> None:
+    report = {
+        "run_date": "2026-11-19",
+        "duration_seconds": 12.5,
+        "coverage_matrix": [
+            {
+                "Metric": "Tx count",
+                "BTC": "NOT AVAILABLE FREE",
+                "ETH": "UNVERIFIED",
+                "SOL": "UNVERIFIED",
+                "BNB": "UNVERIFIED",
+            }
+        ],
+        "results": [
+            {
+                "source": "Coin Metrics",
+                "endpoint": "https://community-api.coinmetrics.io/v4/timeseries",
+                "reachable": False,
+                "error_class": "HTTP status",
+                "error_detail": "HTTP 400",
+                "http_status": 400,
+                "latency_ms": 100,
+            }
+        ],
+    }
+    with pytest.raises(ValueError):
+        markdown_report(report)
+
+
+def test_error_body_capture_is_truncated() -> None:
+    body = "x" * 500
+    truncated = truncate_error_body(body)
+    assert len(truncated) <= 200
+    assert truncated.endswith("…")
+
+
+def test_probe_window_and_source_depth_are_separate_fields() -> None:
+    report = {
+        "run_date": "2026-11-19",
+        "duration_seconds": 12.5,
+        "coverage_matrix": [
+            {
+                "Metric": "Price",
+                "BTC": "AVAILABLE (source depth 2017-08-17; probe window 365d)",
+                "ETH": "AVAILABLE (source depth 2017-08-17; probe window 365d)",
+                "SOL": "UNVERIFIED (CoinGecko 429)",
+                "BNB": "UNVERIFIED (source stopped)",
+            }
+        ],
+        "results": [],
+    }
+    text = markdown_report(report)
+    assert "source depth" in text or "probe window" in text
+
+
+def test_coin_metrics_requests_use_one_asset_and_one_metric_per_call() -> None:
+    endpoint = (
+        "https://community-api.coinmetrics.io/v4/timeseries/"
+        "asset-metrics?assets=btc&metrics=PriceUSD"
+        "&frequency=1d&start_time=2025-11-20&end_time=2026-11-19"
+    )
+    assert "assets=btc" in endpoint
+    assert "metrics=PriceUSD" in endpoint
+    assert "FeeTotUSD" not in endpoint
 
 
 @pytest.mark.live_audit

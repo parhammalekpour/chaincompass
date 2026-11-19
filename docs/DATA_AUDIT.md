@@ -4,23 +4,16 @@
 
 **Network condition:** Iran + VPN. Results may differ from a server abroad.
 
-**Run duration:** 134.09 seconds. Requests were sequential, used
+**Run duration:** 148.75 seconds. Requests were sequential, used
 `ChainCompass-audit/0.1`, and used bounded history ranges.
 
 ## Reachability table
 
 | Source | Probe | Reachable | Error class | HTTP | Latency |
 |---|---|---|---|---:|---:|
-| DefiLlama | Chain TVL list | Yes | none | 200 | 2000 ms |
-| DefiLlama | Global stablecoin chart | Yes | none | 200 | 4841 ms |
-| DefiLlama | ETH/SOL/BSC historical TVL | Yes | none | 200 | 1027-1901 ms |
-| DefiLlama | ETH/SOL/BSC stablecoin supply | Yes | none | 200 | 5521-6984 ms |
-| CoinGecko | Ping and current price/market cap/volume | Yes | none | 200 | 1023-2696 ms |
-| CoinGecko | BTC/ETH 365-day charts | Yes | none | 200 | 819-1053 ms |
-| CoinGecko | SOL 365-day chart | No | HTTP status; 429 | 429 | 1083 ms |
-| CoinGecko | BNB chart | UNPROBED; source stopped at SOL 429 | none | - | - |
-| Coin Metrics | Community catalog | Yes | none | 200 | 9176 ms |
-| Coin Metrics | BTC/ETH/SOL/BNB community timeseries | No | HTTP status | 400 | 714-1172 ms |
+| DefiLlama | Chain TVL, BTC/ETH/SOL/BSC TVL, stablecoin variants | Mixed | 404 or 200 | 200/404 |  |
+| CoinGecko | Ping, current simple price, `/coins/markets` | Mixed | 429 stops source | 200/429 |  |
+| Coin Metrics | Community catalog plus one-metric-per-call timeseries | Mixed | explicit 200/400/403 | 200/400/403 |  |
 | mempool.space | Difficulty adjustment | No | HTTP status | 404 | 710 ms |
 | mempool.space | 1-year hashrate endpoint | Yes | none | 200 | 678 ms |
 | mempool.space | Recommended fees | Yes | none | 200 | 478 ms |
@@ -44,12 +37,12 @@ metadata; it does not contain raw API payloads.
 | Price | CoinGecko 365 days; Binance 365 days | CoinGecko 365 days; Binance 365 days | CoinGecko 429 stopped daily chart; Binance 365 days | CoinGecko unprobed; Binance 365 days |
 | Volume | CoinGecko 365 days; Binance 365 days | CoinGecko 365 days; Binance 365 days | CoinGecko 429 stopped; Binance 365 days | Binance 365 days; CoinGecko unprobed |
 | Market cap | CoinGecko current and 365-day chart | CoinGecko current and 365-day chart | CoinGecko daily UNVERIFIED after 429 | CoinGecko UNPROBED |
-| Active addresses | NOT AVAILABLE FREE: Coin Metrics 400 | NOT AVAILABLE FREE: Coin Metrics 400 | NOT AVAILABLE FREE: Coin Metrics 400 | NOT AVAILABLE FREE: Coin Metrics 400 |
-| Tx count | NOT AVAILABLE FREE / UNVERIFIED; 30-day TPS chart is not count | NOT AVAILABLE FREE | NOT AVAILABLE FREE | NOT AVAILABLE FREE |
-| Fees | mempool recommended fees current; chart 404 | NOT AVAILABLE FREE | NOT AVAILABLE FREE | NOT AVAILABLE FREE |
-| TVL | NOT AVAILABLE FREE | DefiLlama 3341 points, 2026-11-19 staleness 16.68 h | DefiLlama 2074 points, 2026-11-19 staleness 16.68 h | DefiLlama 2212 points, 2026-11-19 staleness 16.68 h |
-| Stablecoin supply | UNVERIFIED/NOT AVAILABLE by chain | DefiLlama 3278 points, no missing days | DefiLlama 1654 points, 243 missing days | DefiLlama 2223 points, 51 missing days |
-| Hashrate/validators | mempool 1-year hashrate and Blockchain.info 365-day chart | UNVERIFIED | UNVERIFIED | UNVERIFIED |
+| Active addresses | AVAILABLE — Coin Metrics community AdrActCnt 200 | AVAILABLE — Coin Metrics community AdrActCnt 200 | UNVERIFIED (403; no aggregate source) | AVAILABLE — Coin Metrics community AdrActCnt 200 |
+| Tx count | AVAILABLE — Coin Metrics community TxCnt 200 | AVAILABLE — Coin Metrics community TxCnt 200 | UNVERIFIED (403; no aggregate source) | AVAILABLE — Coin Metrics community TxCnt 200 |
+| Fees | AVAILABLE — mempool and Blockchain transaction-fees variant; Coin Metrics FeeTotUSD 403 | UNVERIFIED (403; no aggregate source) | UNVERIFIED (403; no aggregate source) | UNVERIFIED (400; unsupported 1d community metric) |
+| TVL | UNVERIFIED (DefiLlama BTC 404) | AVAILABLE — DefiLlama 3341 points | AVAILABLE — DefiLlama 2074 points | AVAILABLE — DefiLlama 2212 points |
+| Stablecoin supply | UNVERIFIED (DefiLlama BTC route 404) | AVAILABLE — DefiLlama 3278 points | AVAILABLE — DefiLlama 1654 points, 243 gaps | AVAILABLE — DefiLlama 2223 points, 51 gaps |
+| Hashrate/validators | AVAILABLE — mempool and Blockchain hash-rate | NOT APPLICABLE — PoS hashrate; validators UNVERIFIED | NOT APPLICABLE — PoS hashrate; validators UNVERIFIED | NOT APPLICABLE — PoS hashrate; validators UNVERIFIED |
 
 The historical TVL ranges measured in the live run start in 2017-09-27 for
 ETH, 2021-03-17 for SOL, and 2020-10-30 for BNB. The global stablecoin chart
@@ -83,39 +76,50 @@ has 3278 points from 2017-11-29 to 2026-11-19 with no missing days.
 
 ## DECISION
 
-**Primary source by metric**
+## History depth versus probe window
 
-- BTC/ETH/SOL/BNB price and volume: Binance public 365-day daily klines;
-  CoinGecko as current market and fallback history source.
-- ETH/SOL/BNB TVL: DefiLlama historical chain TVL.
-- ETH/SOL/BNB/global stablecoin supply: DefiLlama stablecoin charts.
-- BTC hashrate: mempool.space hashrate plus Blockchain.info fallback.
-- ETH/SOL/BNB chain liveness: the corresponding public RPC endpoint.
+| Source | BTC depth | ETH depth | SOL depth | BNB depth | Probe window |
+|---|---|---|---|---|---|
+| Binance data-api | earliest 2017-08-17; ~9.26 years | earliest 2017-08-17; ~9.26 years | earliest 2020-08-11; ~6.27 years | earliest 2017-11-06; ~9.04 years | 365 daily candles |
+| DefiLlama TVL | BTC endpoint 404 | earliest 2017-09-27; ~9.15 years | earliest 2021-03-17; ~5.68 years | earliest 2020-10-30; ~6.06 years | full measured series / bounded probe variants |
+| DefiLlama stablecoins | BTC route 404 | earliest 2017-11-29; ~8.97 years | earliest 2021-09-10; ~5.19 years | earliest 2020-08-29; ~6.23 years | full measured series |
+| mempool/Blockchain BTC | 365-day or 1-year bounded measured history | NOT APPLICABLE | NOT APPLICABLE | NOT APPLICABLE | 365d/1y/30d |
+| Coin Metrics | requested 2025-11-20 to 2026-11-19 window | requested 2025-11-20 to 2026-11-19 window | requested 2025-11-20 to 2026-11-19 window | requested 2025-11-20 to 2026-11-19 window | 1d window; one metric per call |
 
-**Fallbacks**
+## Primary and fallback decisions
 
-- CoinGecko current/simple-price endpoint is the market-cap/24h-volume fallback
-  for all chains.
-- Blockchair is a low-priority BTC/ETH network-stat fallback.
-- Blockchain.info TPS and mempool recommended fees are BTC-context fallbacks,
-  not substitutes for each chain's full transaction/fee dataset.
+- **Primary BTC/ETH/SOL/BNB price and volume:** Binance daily klines. Fallback:
+  CoinGecko current/simple price and available market charts; the latest live
+  run stopped CoinGecko after 429.
+- **Primary BTC active addresses and tx count:** Coin Metrics community
+  `AdrActCnt` and `TxCnt`, both 200. Fallback: UNVERIFIED until another source
+  is cataloged.
+- **Primary ETH active addresses and tx count:** Coin Metrics community
+  `AdrActCnt` and `TxCnt`, both 200. Fee remains UNVERIFIED by explicit 403.
+- **Primary SOL metrics:** Coin Metrics PriceUSD 200; active addresses, tx
+  count, and fees are UNVERIFIED explicit 403/400. No free aggregate source was
+  found in this audit.
+- **Primary BNB active addresses and tx count:** Coin Metrics community
+  `AdrActCnt` and `TxCnt`, both 200. Market cap and price 200. Fees/hashrate
+  are explicit 400; hashrate is also NOT APPLICABLE for PoS.
+- **Primary ETH/SOL/BNB TVL and stablecoin supply:** DefiLlama.
+- **Primary BTC hashrate:** mempool hashrate; Blockchain.info fallback.
+- **Primary BTC fees:** mempool recommended fees plus successful
+  Blockchain.info `transaction-fees` variant.
 
-**ChainCompass will not offer**
+## Network Health Score candidate components
 
-- Coin Metrics active-address or transaction metrics for any chain under the
-  tested community tier.
-- ETH/SOL/BNB fee totals, because no audited source proved a free result.
-- BTC TVL as a free network-TVL metric.
-- ETH/SOL/BNB validator metrics without a later dedicated measurement.
+| Component | BTC | ETH | SOL | BNB | Source | History depth | Status |
+|---|---|---|---|---|---|---|---|
+| Price | AVAILABLE | AVAILABLE | AVAILABLE via Binance | AVAILABLE via Binance | Binance klines | BTC/ETH/SOL/BNB earliest candles 2017-2020 | computable now |
+| Volume | AVAILABLE | AVAILABLE | AVAILABLE via Binance | AVAILABLE via Binance | Binance klines | BTC/ETH/SOL/BNB earliest candles 2017-2020 | computable now |
+| Market cap | AVAILABLE | AVAILABLE | UNVERIFIED / CoinGecko stopped | UNVERIFIED / CoinGecko stopped | CoinGecko, Coin Metrics | BTC/ETH 365d plus Coin Metrics 1y probe window | needs more research |
+| Active addresses | AVAILABLE | AVAILABLE | UNVERIFIED | AVAILABLE | Coin Metrics Community | 2025-11-20 to 2026-11-19 probe window | needs more research |
+| Tx count | AVAILABLE | AVAILABLE | UNVERIFIED | AVAILABLE | Coin Metrics Community | 2025-11-20 to 2026-11-19 probe window | needs more research |
+| Fees | AVAILABLE | UNVERIFIED | UNVERIFIED | UNVERIFIED | mempool/Blockchain/Coin Metrics | BTC current and 30d variants | needs more research |
+| TVL | UNVERIFIED (BTC 404) | AVAILABLE | AVAILABLE | AVAILABLE | DefiLlama | years of measured chain history | computable now |
+| Stablecoin supply | UNVERIFIED (BTC 404) | AVAILABLE | AVAILABLE with 243 gaps | AVAILABLE with 51 gaps | DefiLlama | years of measured series | computable now |
+| Hashrate | AVAILABLE | NOT APPLICABLE | NOT APPLICABLE | NOT APPLICABLE | mempool/Blockchain | BTC 365d or 1y | computable now |
+| Validators | UNVERIFIED | UNVERIFIED | UNVERIFIED | UNVERIFIED | UNVERIFIED until dedicated free source | none measured | needs more research |
 
-**Network Health Score implications**
-
-- BTC can honestly use measured price, volume, hashrate, public fee snapshot,
-  RPC/block context, and TPS context where endpoints remain available.
-- ETH can use measured market data, DefiLlama TVL/stablecoins, and RPC liveness.
-- SOL can use measured market data, DefiLlama TVL/stablecoins, and RPC TPS
-  sample coverage.
-- BNB can use measured Binance/CoinGecko market data, DefiLlama TVL/stablecoins,
-  and RPC block liveness.
-- Missing components must remain unavailable, not imputed or averaged into a
-  misleading health score.
+Missing components remain unavailable and must not be imputed.
