@@ -143,8 +143,15 @@ absence), and `discontinued`. Runs record success/rejection counts and
 truncated errors.
 
 The providers currently ingest Binance daily klines, Coin Metrics Community
-daily market-cap/on-chain metrics, DefiLlama TVL/stablecoin histories, and
-Blockchain.info BTC hashrate and fees. Binance `USDT` pairs are a USD proxy for
+daily market-cap/on-chain metrics, DefiLlama TVL/stablecoin plus chain-level
+DEX-volume and protocol-fee histories, and Blockchain.info BTC hashrate and
+fees. The metric definitions include `dex_volume_usd` and
+`protocol_fees_usd`; the latter is fees paid to protocols, not network/base
+transaction fees. DefiLlama's chart response does not declare a unit, so the
+USD suffix is a schema convention and the raw unit remains unverified. These
+two metrics are admitted only when complete-day values parse as `Decimal`,
+span at least 365 days, and the latest point is at most three days old. Gaps
+remain visible and are never filled. Binance `USDT` pairs are a USD proxy for
 close and quote-volume metrics, not an independent fiat-USD measurement.
 Blockchain.info reports hashrate in TH/s, converted to H/s by multiplying by
 10^12. Its transaction-fees chart is BTC-denominated; daily fees are converted

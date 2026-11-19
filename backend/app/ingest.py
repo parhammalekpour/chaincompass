@@ -25,7 +25,7 @@ from app.ingestion.btcnet import BtcNetworkProvider, btc_fees_to_usd
 from app.ingestion.coinmetrics import CoinMetricsProvider
 from app.ingestion.defillama import DefiLlamaProvider
 from app.ingestion.http import ProviderStopped
-from app.ingestion.provider import ChainContext
+from app.ingestion.provider import ChainContext, Point
 from app.ingestion.seed import seed_reference_data
 from app.ingestion.service import IngestionService
 
@@ -44,7 +44,12 @@ PROVIDER_TYPES: dict[str, type[Provider]] = {
 PROVIDER_METRICS: dict[str, tuple[str, ...]] = {
     "binance": ("price_close_usd", "volume_usd"),
     "coinmetrics": ("market_cap_usd", "active_addresses", "tx_count"),
-    "defillama": ("tvl_usd", "stablecoin_supply_usd"),
+    "defillama": (
+        "tvl_usd",
+        "stablecoin_supply_usd",
+        "dex_volume_usd",
+        "protocol_fees_usd",
+    ),
     "btcnet": ("hashrate", "fees_usd"),
 }
 PROVIDER_CHAINS: dict[str, tuple[str, ...]] = {
@@ -64,6 +69,37 @@ LEGACY_BNB_COINMETRICS_METRICS = {
 def legacy_bnb_coinmetrics_reason(chain_code: str, metric_code: str) -> str | None:
     if chain_code == "bnb" and metric_code in LEGACY_BNB_COINMETRICS_METRICS:
         return "legacy BNB asset series ended 2019-04-22; not BNB Chain"
+    return None
+
+
+ANALYTICS_METRICS = {"dex_volume_usd", "protocol_fees_usd"}
+
+
+def analytics_ingestion_ineligibility(
+    existing: list[Observation],
+    points: list[Point],
+    today: date,
+) -> str | None:
+    for point in points:
+        if not isinstance(point.value, Decimal):
+            return "daily values did not parse as Decimal"
+        if not point.value.is_finite():
+            return "daily values include a non-finite Decimal"
+        if point.value < 0:
+            return "daily values include a negative amount"
+    values_by_day = {row.obs_date: row.value for row in existing}
+    values_by_day.update({point.date: point.value for point in points})
+    if not values_by_day:
+        return "no complete daily data points"
+    first = min(values_by_day)
+    last = max(values_by_day)
+    if (last - first).days < 365:
+        return f"history is shorter than 365 days ({first} to {last})"
+    age = (today - last).days
+    if age < 0:
+        return f"last point {last} is in the future"
+    if age > 3:
+        return f"last complete point {last} is {age} days old (maximum is 3)"
     return None
 
 
@@ -150,7 +186,11 @@ async def run_provider(
                             discontinued_reason,
                         )
                         continue
-                    if provider_name == "defillama" and chain.code == "btc":
+                    if (
+                        provider_name == "defillama"
+                        and chain.code == "btc"
+                        and metric in {"tvl_usd", "stablecoin_supply_usd"}
+                    ):
                         await service.record_unavailable(
                             chain.code,
                             metric,
@@ -177,6 +217,39 @@ async def run_provider(
                             start_date,
                             end_date,
                         )
+                        if provider_name == "defillama" and metric in ANALYTICS_METRICS:
+                            existing = list(
+                                (
+                                    await session.scalars(
+                                        select(Observation).where(
+                                            Observation.chain_code == chain.code,
+                                            Observation.metric_code == metric,
+                                            Observation.source_code
+                                            == provider.source_code,
+                                        )
+                                    )
+                                ).all()
+                            )
+                            reason = analytics_ingestion_ineligibility(
+                                existing,
+                                points,
+                                datetime.now(UTC).date(),
+                            )
+                            if reason is not None:
+                                message = (
+                                    f"series did not pass ingestion rules: {reason}"
+                                )[:300]
+                                await service.record_error(
+                                    chain.code,
+                                    metric,
+                                    message,
+                                )
+                                failures.append(f"{chain.code}/{metric}: {message}")
+                                print(
+                                    f"Skipped {chain.code}/{metric}: {reason}",
+                                    file=sys.stderr,
+                                )
+                                continue
                         if provider_name == "btcnet" and metric == "fees_usd":
                             fee_dates = [point.date for point in points]
                             price_rows = (
@@ -459,7 +532,13 @@ def analyze_series(
         "tvl_usd",
         "stablecoin_supply_usd",
     }
-    median_metrics = {"volume_usd", "tx_count", "active_addresses"}
+    median_metrics = {
+        "volume_usd",
+        "tx_count",
+        "active_addresses",
+        "dex_volume_usd",
+        "protocol_fees_usd",
+    }
     jumps: list[tuple[Observation, Observation, Decimal]] = []
     for index, current in enumerate(series):
         if current.metric_code in relative_jump_metrics:

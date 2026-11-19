@@ -227,9 +227,9 @@ Missing components remain unavailable and must not be imputed.
 UTC day available at the run (`2026-11-18`). Where the first stored date equals
 the requested `--since 2017-01-01`, it is reported as `>=2017-01-01`, not as a
 proven source start. Point counts are stored observation counts; missing days
-are not filled. After the confirmed BNB purge and `update --all`, the database
-contains 68,120 observations; update rewrote overlap rows without increasing
-the total.
+are not filled. After the confirmed legacy-BNB purge, DefiLlama analytics backfill, and
+successful `update --all`, the database contains 87,738 observations. The
+follow-up update rewrote overlap rows without increasing the total.
 
 | Chain | Metric | Source | First stored date | Last stored date | Points | Missing days | Status |
 |---|---|---|---|---|---:|---:|---|
@@ -251,12 +251,35 @@ the total.
 | BNB | Transactions | Coin Metrics Community | — | — | 0 | 0 | discontinued; legacy asset ended 2019-04-22, purged |
 | BNB | TVL | DefiLlama | 2020-10-30 | 2026-11-18 | 2211 | 0 | ok |
 | BNB | Stablecoin supply | DefiLlama | 2020-08-29 | 2026-11-18 | 2222 | 51 | ok; gap preserved |
+| BTC | DEX volume | DefiLlama | >=2017-01-01 | 2026-11-18 | 3609 | 0 | ok; unit UNVERIFIED |
+| BTC | Protocol fees | DefiLlama | 2021-04-12 | 2026-11-18 | 1953 | 94 | ok; unit UNVERIFIED; not network fees |
+| ETH | DEX volume | DefiLlama | 2018-11-02 | 2026-11-18 | 2939 | 0 | ok; unit UNVERIFIED |
+| ETH | Protocol fees | DefiLlama | 2018-03-26 | 2026-11-18 | 3154 | 6 | ok; unit UNVERIFIED; not network fees |
+| SOL | DEX volume | DefiLlama | 2021-10-02 | 2026-11-18 | 1871 | 3 | ok; unit UNVERIFIED |
+| SOL | Protocol fees | DefiLlama | 2022-02-14 | 2026-11-18 | 1739 | 0 | ok; unit UNVERIFIED; not network fees |
+| BNB (BSC) | DEX volume | DefiLlama | 2020-09-19 | 2026-11-18 | 2252 | 0 | ok; unit UNVERIFIED |
+| BNB (BSC) | Protocol fees | DefiLlama | 2021-02-17 | 2026-11-18 | 2101 | 0 | ok; unit UNVERIFIED; not network fees |
 
 DefiLlama stablecoin supply has two known multi-day gaps: SOL
 2021-09-11 through 2022-05-11 (243 days), and BNB 2020-08-30 through
 2020-10-19 (51 days). BTC hashrate and fees each have three missing days in
-their stored ranges; these remain gaps. BTC hashrate on 2026-11-18 was
-approximately `1.0522e21 H/s`; ETH TVL on 2021-11-09 was `$107.424B`.
+their stored ranges; these remain gaps. BTC DefiLlama protocol-fee gaps longer
+than three days are 2021-07-08 through 2021-07-13 (6 days), 2021-07-17 through
+2021-09-28 (74 days), 2021-11-13 through 2021-11-17 (5 days), and 2023-05-08
+through 2023-05-12 (5 days); these are reported, not filled. The other
+DefiLlama analytics gaps are shorter than four consecutive days. BTC hashrate
+on 2026-11-18 was approximately `1.0522e21 H/s`; ETH TVL on 2021-11-09 was
+`$107.424B`.
+
+DefiLlama DEX-volume and `dailyFees` protocol-fee observations passed the
+minimum 365-day history, recent-complete-day, and Decimal checks for BTC, ETH,
+SOL, and BSC. The BTC DEX backfill begins at the requested 2017-01-01 floor;
+this is not evidence that the source begins on that date. No values were
+forward-filled. The API response does not declare a unit, so these rows remain
+unit-UNVERIFIED and must not be used as confirmed USD amounts. Protocol fees
+are fees paid to protocols, not network/base transaction fees, and are stored
+under `protocol_fees_usd`, never `fees_usd`. No BNB Chain Coin Metrics on-chain
+series were ingested: the `bnb_bsc` catalog lacks the requested metrics.
 
 The Coin Metrics BNB history stopped at 2019-04-22; all 1,961 legacy rows were
 purged, and the three corresponding coverage rows remain `discontinued` after

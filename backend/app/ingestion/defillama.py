@@ -12,10 +12,17 @@ class DefiLlamaProvider:
     source_code = "defillama"
     provider_code = "defillama"
     overlap_days = 3
-    chain_names = {"eth": "ethereum", "sol": "solana", "bnb": "bsc"}
+    chain_names = {
+        "btc": "bitcoin",
+        "eth": "ethereum",
+        "sol": "solana",
+        "bnb": "bsc",
+    }
     endpoints = {
         "tvl_usd": "https://api.llama.fi/v2/historicalChainTvl/",
         "stablecoin_supply_usd": "https://stablecoins.llama.fi/stablecoincharts/",
+        "dex_volume_usd": "https://api.llama.fi/overview/dexs/",
+        "protocol_fees_usd": "https://api.llama.fi/overview/fees/",
     }
 
     def __init__(
@@ -42,6 +49,24 @@ class DefiLlamaProvider:
         chain_name = self.chain_names.get(chain.code)
         if base_url is None or chain_name is None:
             return []
+        if metric in {"dex_volume_usd", "protocol_fees_usd"}:
+            params: dict[str, str | int] = {
+                "excludeTotalDataChart": "false",
+                "excludeTotalDataChartBreakdown": "true",
+            }
+            if metric == "protocol_fees_usd":
+                params["dataType"] = "dailyFees"
+            payload = await self.http.get_json(
+                base_url + chain_name,
+                params,
+            )
+            analytics_points = self._analytics_points(payload)
+            current_day = datetime.now(UTC).date()
+            return [
+                point
+                for point in analytics_points
+                if start_date <= point.date <= end_date and point.date < current_day
+            ]
         payload = await self.http.get_json(
             base_url + chain_name,
             {
@@ -63,6 +88,32 @@ class DefiLlamaProvider:
                 if point.date < current_day:
                     points.append(point)
         return points
+
+    @classmethod
+    def _analytics_points(cls, payload: Any) -> list[Point]:
+        if not isinstance(payload, dict):
+            raise ValueError("DefiLlama analytics response was not an object")
+        chart = payload.get("totalDataChart")
+        if not isinstance(chart, list):
+            raise ValueError("DefiLlama analytics response had no daily chart")
+        points: list[Point] = []
+        for row in chart:
+            if not isinstance(row, (list, tuple)) or len(row) != 2:
+                continue
+            point = cls._analytics_point(row)
+            if point is not None:
+                points.append(point)
+        return points
+
+    @staticmethod
+    def _analytics_point(row: list[Any] | tuple[Any, ...]) -> Point | None:
+        try:
+            timestamp = int(Decimal(str(row[0])))
+            obs_date = datetime.fromtimestamp(timestamp, UTC).date()
+            value = Decimal(str(row[1]))
+        except (InvalidOperation, TypeError, ValueError, OverflowError):
+            return None
+        return Point(obs_date, value)
 
     @classmethod
     def _point(cls, row: Any, metric: str) -> Point | None:

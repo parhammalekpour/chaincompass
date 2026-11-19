@@ -19,6 +19,7 @@ from app.db.models.ingestion import (
     SeriesCoverage,
 )
 from app.ingest import (
+    analytics_ingestion_ineligibility,
     analyze_series,
     format_status,
     gap_ranges,
@@ -370,6 +371,199 @@ async def test_defillama_preserves_gaps_and_drops_today() -> None:
     ]
     assert len(gap_ranges([point.date for point in points])) == 1
     assert all(point.date < today for point in points)
+
+
+@pytest.mark.asyncio
+async def test_defillama_chain_analytics_parses_decimals_maps_bsc_and_drops_today() -> (
+    None
+):
+    fixture = read_fixture("defillama_chain_analytics.json")
+    today = datetime.now(UTC).date()
+    today_timestamp = int(datetime.combine(today, datetime.min.time(), UTC).timestamp())
+    payload = {
+        "totalDataChart": [
+            *fixture["totalDataChart"],
+            [today_timestamp, "999.125"],
+        ]
+    }
+    requests: list[httpx.Request] = []
+
+    async def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        return httpx.Response(200, json=payload, request=request)
+
+    http = PoliteHttpClient(
+        minimum_interval_seconds=0,
+        transport=httpx.MockTransport(handler),
+    )
+    provider = DefiLlamaProvider(http=http)
+    try:
+        volume = await provider.fetch(
+            ChainContext("bnb", "BNB"),
+            "dex_volume_usd",
+            date(2025, 11, 17),
+            today,
+        )
+        fees = await provider.fetch(
+            ChainContext("bnb", "BNB"),
+            "protocol_fees_usd",
+            date(2025, 11, 17),
+            today,
+        )
+    finally:
+        await provider.close()
+
+    assert [point.value for point in volume] == [
+        Decimal("20.125"),
+        Decimal("21.500"),
+    ]
+    assert [point.value for point in fees] == [
+        Decimal("20.125"),
+        Decimal("21.500"),
+    ]
+    assert all(point.date < today for point in volume + fees)
+    assert [request.url.path for request in requests] == [
+        "/overview/dexs/bsc",
+        "/overview/fees/bsc",
+    ]
+    assert requests[0].url.params["excludeTotalDataChart"] == "false"
+    assert requests[1].url.params["dataType"] == "dailyFees"
+
+
+def test_chain_analytics_ingestion_rule_requires_history_freshness_and_decimals() -> (
+    None
+):
+    today = date(2026, 1, 1)
+    existing = [
+        Observation(
+            chain_code="eth",
+            metric_code="dex_volume_usd",
+            source_code="defillama",
+            obs_date=date(2024, 11, 30),
+            value=Decimal("10"),
+        )
+    ]
+    fresh_point = Point(date(2025, 12, 31), Decimal("11.25"))
+
+    assert analytics_ingestion_ineligibility(existing, [fresh_point], today) is None
+    assert "shorter than 365 days" in (
+        analytics_ingestion_ineligibility(
+            [],
+            [Point(date(2025, 12, 31), Decimal("11.25"))],
+            today,
+        )
+        or ""
+    )
+    assert "5 days old" in (
+        analytics_ingestion_ineligibility(
+            existing,
+            [Point(date(2025, 12, 27), Decimal("11.25"))],
+            today,
+        )
+        or ""
+    )
+    assert "did not parse as Decimal" in (
+        analytics_ingestion_ineligibility(
+            existing,
+            [Point(date(2025, 12, 31), 11.25)],  # type: ignore[arg-type]
+            today,
+        )
+        or ""
+    )
+
+
+@pytest.mark.asyncio
+async def test_ineligible_defillama_analytics_are_not_persisted(
+    auth_session_factory,
+    clean_ingestion_tables,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import app.ingest as ingest
+
+    monkeypatch.setattr(ingest, "SessionFactory", auth_session_factory)
+
+    async with auth_session_factory() as session:
+        await ensure_reference(
+            session,
+            Chain(
+                code="eth",
+                name="Ethereum",
+                native_symbol="ETH",
+                consensus="pos",
+                enabled=True,
+            ),
+            DataSource(
+                code="defillama",
+                name="DefiLlama",
+                url="https://api.llama.fi/",
+                license_note="Public API terms apply.",
+                attribution_required=True,
+            ),
+            MetricDefinition(
+                code="tvl_usd",
+                unit="USD",
+                frequency="1d",
+                description="Daily TVL",
+            ),
+        )
+        for metric in ("stablecoin_supply_usd", "dex_volume_usd", "protocol_fees_usd"):
+            session.add(
+                MetricDefinition(
+                    code=metric,
+                    unit="USD",
+                    frequency="1d",
+                    description=metric,
+                )
+            )
+        await session.commit()
+
+    class OneDayProvider:
+        source_code = "defillama"
+        overlap_days = 3
+
+        async def fetch(
+            self,
+            chain: ChainContext,
+            metric: str,
+            start_date: date,
+            end_date: date,
+        ) -> list[Point]:
+            del chain, start_date, end_date
+            if metric in {"dex_volume_usd", "protocol_fees_usd"}:
+                return [
+                    Point(datetime.now(UTC).date() - timedelta(days=1), Decimal("1.25"))
+                ]
+            return []
+
+        async def close(self) -> None:
+            return None
+
+    monkeypatch.setitem(ingest.PROVIDER_TYPES, "defillama", OneDayProvider)
+    assert (
+        await ingest.run_provider(
+            job="backfill",
+            provider_name="defillama",
+            chains=["eth"],
+            since=date(2025, 1, 1),
+        )
+        == 1
+    )
+    async with auth_session_factory() as session:
+        assert (
+            await session.scalars(
+                select(Observation).where(
+                    Observation.metric_code.in_(("dex_volume_usd", "protocol_fees_usd"))
+                )
+            )
+        ).all() == []
+        for metric in ("dex_volume_usd", "protocol_fees_usd"):
+            coverage = await session.get(
+                SeriesCoverage,
+                ("eth", metric, "defillama"),
+            )
+            assert coverage is not None
+            assert coverage.status == "error"
+            assert "shorter than 365 days" in (coverage.last_error or "")
 
 
 @pytest.mark.asyncio

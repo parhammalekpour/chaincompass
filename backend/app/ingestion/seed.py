@@ -86,6 +86,20 @@ METRICS = (
     ),
     ("tvl_usd", "USD", "1d", "Daily total value locked."),
     ("stablecoin_supply_usd", "USD", "1d", "Daily stablecoin supply."),
+    (
+        "dex_volume_usd",
+        "USD",
+        "1d",
+        "Daily chain-level DEX trading volume from DefiLlama; unit is not "
+        "declared in the raw response.",
+    ),
+    (
+        "protocol_fees_usd",
+        "USD",
+        "1d",
+        "Daily fees paid to protocols from DefiLlama; not network transaction "
+        "fees. Unit is not declared in the raw response.",
+    ),
     ("hashrate", "H/s", "1d", "Daily network hash rate."),
     ("validators", "validators", "1d", "Active-validator count."),
 )

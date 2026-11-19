@@ -31,6 +31,8 @@ class IngestionService:
         "fees_usd": 3,
         "tvl_usd": 3,
         "stablecoin_supply_usd": 3,
+        "dex_volume_usd": 3,
+        "protocol_fees_usd": 3,
         "hashrate": 3,
         "validators": 3,
     }
