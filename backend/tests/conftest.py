@@ -23,6 +23,28 @@ from app.services.email import OutgoingEmail
 from app.services.rate_limit import reset_rate_limiter
 
 
+def pytest_configure(config: pytest.Config) -> None:
+    config.addinivalue_line(
+        "markers",
+        "live_audit: live public-API audit; opt in with RUN_LIVE_AUDIT=1",
+    )
+
+
+def pytest_collection_modifyitems(
+    config: pytest.Config,
+    items: list[pytest.Item],
+) -> None:
+    del config
+    if os.getenv("RUN_LIVE_AUDIT") == "1":
+        return
+    skip_live = pytest.mark.skip(
+        reason="live public-API audit disabled; set RUN_LIVE_AUDIT=1"
+    )
+    for item in items:
+        if "live_audit" in item.keywords:
+            item.add_marker(skip_live)
+
+
 class CapturingEmailSender:
     def __init__(self) -> None:
         self.messages: list[OutgoingEmail] = []

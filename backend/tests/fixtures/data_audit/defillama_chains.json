@@ -1,0 +1,4 @@
+[
+  {"name": "Ethereum", "tvl": 123456789, "tokenSymbol": "ETH"},
+  {"name": "BNB Chain", "tvl": 23456789, "tokenSymbol": "BNB"}
+]

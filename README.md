@@ -25,11 +25,14 @@ See [Windows setup](docs/SETUP.md) to prepare the development environment.
   forgot/reset password, email verification, Google callback, and client-side
   app route guard.
 - Security settings with email verification status and password changes.
+- Free-source data audit tooling and measured findings in
+  [docs/DATA_AUDIT.md](docs/DATA_AUDIT.md).
 
 ## Planned
 
-- On-chain data ingestion and analysis for BTC, ETH, SOL, and BNB.
-- Network Health Score and capital-flow analysis.
+- Production ingestion and on-chain analysis for BTC, ETH, SOL, and BNB,
+  limited by the measured sources in [docs/DATA_AUDIT.md](docs/DATA_AUDIT.md).
+- Network Health Score and capital-flow analysis using only proven components.
 - Historical-distribution scenarios.
 - Risk alerts and watchlists.
 - Tool-grounded AI analyst.
