@@ -4,6 +4,9 @@ import asyncio
 import json
 import logging
 import random
+from datetime import UTC, datetime
+from decimal import Decimal
+from email.utils import parsedate_to_datetime
 
 import httpx
 
@@ -39,7 +42,11 @@ class PoliteHttpClient:
     async def close(self) -> None:
         await self.client.aclose()
 
-    async def get_json(self, url: str, params: dict[str, str | int]) -> object:
+    async def get_json(
+        self,
+        url: str,
+        params: dict[str, str | int] | None = None,
+    ) -> object:
         loop = asyncio.get_running_loop()
         if self._last_request_at is not None:
             elapsed = loop.time() - self._last_request_at
@@ -72,7 +79,18 @@ class PoliteHttpClient:
                     try:
                         await asyncio.sleep(max(0.0, float(retry_after)))
                     except ValueError:
-                        pass
+                        try:
+                            retry_at = parsedate_to_datetime(retry_after)
+                            if retry_at.tzinfo is None:
+                                retry_at = retry_at.replace(tzinfo=UTC)
+                            await asyncio.sleep(
+                                max(
+                                    0.0,
+                                    (retry_at - datetime.now(UTC)).total_seconds(),
+                                )
+                            )
+                        except (TypeError, ValueError, OverflowError):
+                            logger.warning("Ignoring invalid Retry-After header")
                 raise ProviderStopped("provider rate limited with HTTP 429")
             if response.status_code >= 400:
                 body = " ".join(response.text.split())[:200]
@@ -82,7 +100,7 @@ class PoliteHttpClient:
                     response=response,
                 )
             try:
-                return response.json()
+                return json.loads(response.content, parse_float=Decimal)
             except json.JSONDecodeError as exc:
                 raise ValueError("Provider response was not JSON") from exc
         raise RuntimeError("Provider request exhausted retries")

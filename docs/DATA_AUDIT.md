@@ -56,11 +56,11 @@ has 3278 points from 2017-11-29 to 2026-11-19 with no missing days.
 
 | Source | Terms link | Attribution or legal status |
 |---|---|---|
-| DefiLlama | https://defillama.com/terms | UNVERIFIED; preserve attribution and review terms |
+| DefiLlama | https://defillama.com/terms | Preserve attribution; review terms before redistribution |
 | CoinGecko | https://www.coingecko.com/en/api_terms | Attribution required by its free API terms |
-| Coin Metrics | https://coinmetrics.io/terms/ | UNVERIFIED; community terms apply |
-| mempool.space | https://mempool.space/docs/api/rest | UNVERIFIED; rate-limit/attribution terms must be reviewed |
-| Blockchain.info | https://www.blockchain.com/legal/privacy | UNVERIFIED; chart/API terms require review |
+| Coin Metrics | https://coinmetrics.io/terms/ | Attribution required; Community API data is non-commercial |
+| mempool.space | https://mempool.space/docs/api/rest | Preserve attribution; review rate-limit and redistribution terms |
+| Blockchain.info | https://www.blockchain.com/legal/privacy | Preserve attribution; chart/API terms require review |
 | Binance data-api | https://data-api.binance.vision/ | UNVERIFIED; redistribution terms require review |
 | Blockchair | https://blockchair.com/api/docs | UNVERIFIED; free-plan limits and attribution require review |
 | PublicNode | https://www.publicnode.com/terms | UNVERIFIED; public RPC terms apply |
@@ -107,9 +107,11 @@ has 3278 points from 2017-11-29 to 2026-11-19 with no missing days.
   `AdrActCnt` and `TxCnt`, both 200. Market cap and price 200. Fees/hashrate
   are explicit 400; hashrate is also NOT APPLICABLE for PoS.
 - **Primary ETH/SOL/BNB TVL and stablecoin supply:** DefiLlama.
-- **Primary BTC hashrate:** mempool hashrate; Blockchain.info fallback.
-- **Primary BTC fees:** mempool recommended fees plus successful
-  Blockchain.info `transaction-fees` variant.
+- **Primary BTC hashrate:** Blockchain.info daily hash-rate chart, converted
+  from TH/s to H/s; mempool.space remains a shorter-history fallback.
+- **Primary BTC fees:** Blockchain.info daily `transaction-fees` chart, converted
+  from BTC to USD with the same-day Binance BTC close. mempool.space's
+  recommended-fee endpoint is a current fee-rate measure, not a daily total.
 
 ## Network Health Score candidate components
 
@@ -117,13 +119,52 @@ has 3278 points from 2017-11-29 to 2026-11-19 with no missing days.
 |---|---|---|---|---|---|---|---|
 | Price | AVAILABLE | AVAILABLE | AVAILABLE via Binance | AVAILABLE via Binance | Binance klines | BTC/ETH/SOL/BNB earliest candles 2017-2020 | computable now |
 | Volume | AVAILABLE | AVAILABLE | AVAILABLE via Binance | AVAILABLE via Binance | Binance klines | BTC/ETH/SOL/BNB earliest candles 2017-2020 | computable now |
-| Market cap | AVAILABLE | AVAILABLE | UNVERIFIED / CoinGecko stopped | UNVERIFIED / CoinGecko stopped | CoinGecko, Coin Metrics | BTC/ETH 365d plus Coin Metrics 1y probe window | needs more research |
-| Active addresses | AVAILABLE | AVAILABLE | UNVERIFIED | AVAILABLE | Coin Metrics Community | 2025-11-20 to 2026-11-19 probe window | needs more research |
-| Tx count | AVAILABLE | AVAILABLE | UNVERIFIED | AVAILABLE | Coin Metrics Community | 2025-11-20 to 2026-11-19 probe window | needs more research |
-| Fees | AVAILABLE | UNVERIFIED | UNVERIFIED | UNVERIFIED | mempool/Blockchain/Coin Metrics | BTC current and 30d variants | needs more research |
-| TVL | UNVERIFIED (BTC 404) | AVAILABLE | AVAILABLE | AVAILABLE | DefiLlama | years of measured chain history | computable now |
-| Stablecoin supply | UNVERIFIED (BTC 404) | AVAILABLE | AVAILABLE with 243 gaps | AVAILABLE with 51 gaps | DefiLlama | years of measured series | computable now |
-| Hashrate | AVAILABLE | NOT APPLICABLE | NOT APPLICABLE | NOT APPLICABLE | mempool/Blockchain | BTC 365d or 1y | computable now |
+| Market cap | AVAILABLE | AVAILABLE | UNAVAILABLE (403) | STALE (last 2019-04-22) | Coin Metrics Community | stored ranges below | needs more research for SOL/BNB freshness |
+| Active addresses | AVAILABLE | AVAILABLE | UNAVAILABLE (403) | STALE (last 2019-04-22) | Coin Metrics Community | stored ranges below | needs more research for SOL/BNB freshness |
+| Tx count | AVAILABLE | AVAILABLE | UNAVAILABLE (403) | STALE (last 2019-04-22) | Coin Metrics Community | stored ranges below | needs more research for SOL/BNB freshness |
+| Fees | AVAILABLE | UNVERIFIED | UNVERIFIED | UNVERIFIED | Blockchain.info fees converted with Binance BTC close | 2017-08-17 to 2026-11-18 | computable now for BTC only |
+| TVL | UNAVAILABLE (prior HTTP 404) | AVAILABLE | AVAILABLE | AVAILABLE | DefiLlama | stored ranges below | computable now for ETH/SOL/BNB |
+| Stablecoin supply | UNAVAILABLE (prior HTTP 404) | AVAILABLE | AVAILABLE with 243 gaps | AVAILABLE with 51 gaps | DefiLlama | stored ranges below | computable with explicit gaps |
+| Hashrate | AVAILABLE | NOT APPLICABLE | NOT APPLICABLE | NOT APPLICABLE | Blockchain.info (TH/s converted to H/s) | 2017-01-01 to 2026-11-18 | computable now for BTC |
 | Validators | UNVERIFIED | UNVERIFIED | UNVERIFIED | UNVERIFIED | UNVERIFIED until dedicated free source | none measured | needs more research |
 
 Missing components remain unavailable and must not be imputed.
+
+## What ingestion actually stored
+
+**Measured run:** 2026-11-19, Iran + VPN. `last_date` is the latest complete
+UTC day available at the run (`2026-11-18`). Where the first stored date equals
+the requested `--since 2017-01-01`, it is reported as `>=2017-01-01`, not as a
+proven source start. Point counts are stored observation counts; missing days
+are not filled.
+
+| Chain | Metric | Source | First stored date | Last stored date | Points | Missing days | Status |
+|---|---|---|---|---|---:|---:|---|
+| BTC | Market cap | Coin Metrics Community | >=2017-01-01 | 2026-11-18 | 3609 | 0 | ok |
+| BTC | Active addresses | Coin Metrics Community | >=2017-01-01 | 2026-11-18 | 3609 | 0 | ok |
+| BTC | Transactions | Coin Metrics Community | >=2017-01-01 | 2026-11-18 | 3609 | 0 | ok |
+| BTC | Hashrate (H/s) | Blockchain.info | >=2017-01-01 | 2026-11-18 | 3606 | 3 | ok |
+| BTC | Fees (USD) | Blockchain.info + Binance close conversion | 2017-08-17 | 2026-11-18 | 3378 | 3 | ok |
+| ETH | Market cap | Coin Metrics Community | >=2017-01-01 | 2026-11-18 | 3609 | 0 | ok |
+| ETH | Active addresses | Coin Metrics Community | >=2017-01-01 | 2026-11-18 | 3609 | 0 | ok |
+| ETH | Transactions | Coin Metrics Community | >=2017-01-01 | 2026-11-18 | 3609 | 0 | ok |
+| ETH | TVL | DefiLlama | 2017-09-27 | 2026-11-18 | 3340 | 0 | ok |
+| ETH | Stablecoin supply | DefiLlama | 2017-11-29 | 2026-11-18 | 3277 | 0 | ok |
+| SOL | Market cap, active addresses, transactions | Coin Metrics Community | — | — | 0 | 0 | unavailable (HTTP 403) |
+| SOL | TVL | DefiLlama | 2021-03-17 | 2026-11-18 | 2073 | 0 | ok |
+| SOL | Stablecoin supply | DefiLlama | 2021-09-10 | 2026-11-18 | 1653 | 243 | ok; gap preserved |
+| BNB | Market cap | Coin Metrics Community | 2017-07-15 | 2019-04-22 | 647 | 0 | stale |
+| BNB | Active addresses, transactions | Coin Metrics Community | 2017-07-05 | 2019-04-22 | 657 each | 0 | stale |
+| BNB | TVL | DefiLlama | 2020-10-30 | 2026-11-18 | 2211 | 0 | ok |
+| BNB | Stablecoin supply | DefiLlama | 2020-08-29 | 2026-11-18 | 2222 | 51 | ok; gap preserved |
+
+DefiLlama stablecoin supply has two known multi-day gaps: SOL
+2021-09-11 through 2022-05-11 (243 days), and BNB 2020-08-30 through
+2020-10-19 (51 days). BTC hashrate and fees each have three missing days in
+their stored ranges; these remain gaps. BTC hashrate on 2026-11-18 was
+approximately `1.0522e21 H/s`; ETH TVL on 2021-11-09 was `$107.424B`.
+
+The ingested Coin Metrics BNB series stops at 2019-04-22 and is therefore
+stale despite historical points. SOL's requested Coin Metrics metrics returned
+HTTP 403 and are stored as unavailable. Coin Metrics Community data is
+non-commercial and requires attribution.

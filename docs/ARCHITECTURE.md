@@ -124,20 +124,36 @@ User-Agent, timeouts, bounded retries, exponential backoff with jitter,
 `Retry-After` handling, and a configurable per-provider minimum interval.
 A 429 stops the provider for that ingestion run.
 
-Rows are validated before upsert: finite and non-negative values, dates not in
-the future, and no same-day duplicates. Today's incomplete candle is never
-stored. PostgreSQL `INSERT ... ON CONFLICT DO UPDATE` makes reruns idempotent,
-and writes are batched. Incremental runs start three days before the last stored
-date; backfills start at provider earliest dates.
+Rows are validated before upsert: finite, non-negative values that fit
+`NUMERIC(38,12)`, dates not in the future, and no same-day duplicates. Extra
+source decimal places are rounded to the database's 12-place scale using
+`Decimal`; today's incomplete UTC day is never stored. PostgreSQL
+`INSERT ... ON CONFLICT DO UPDATE` makes reruns idempotent, and writes are
+batched. Incremental runs overlap the last three days by default; Coin Metrics
+uses a seven-day overlap for revised on-chain observations.
 
-Coverage is recomputed after each run. A last-date older than two UTC days is
-marked stale, missing days are derived from first/last dates and distinct
-observation points, and runs record success/rejection counts and truncated
-errors.
+Coverage is recomputed after each run. Prices and volumes become stale after
+two UTC days; on-chain, fees, TVL, stablecoin, and network metrics use a
+three-day threshold. Missing days remain gaps; providers never forward-fill or
+interpolate. `series_coverage` distinguishes `ok`, `stale`, `error`,
+`never_run`, and `unavailable` (verified HTTP 403/404 or documented absence).
+Runs record success/rejection counts and truncated errors.
 
-The first provider is Binance public daily kline data. Binance `USDT` pairs are
-a USD proxy for close and quote-volume metrics; this is not an independent
-fiat-USD market measurement.
+The providers currently ingest Binance daily klines, Coin Metrics Community
+daily market-cap/on-chain metrics, DefiLlama TVL/stablecoin histories, and
+Blockchain.info BTC hashrate and fees. Binance `USDT` pairs are a USD proxy for
+close and quote-volume metrics, not an independent fiat-USD measurement.
+Blockchain.info reports hashrate in TH/s, converted to H/s by multiplying by
+10^12. Its transaction-fees chart is BTC-denominated; daily fees are converted
+to USD with the matching Binance BTC close and remain stored under the
+Blockchain.info fee source. Chart response spans are limited, so the provider
+fetches sequential bounded windows.
+
+Coin Metrics Community requires attribution and is non-commercial. Preserve
+attribution for DefiLlama, Blockchain.info, and mempool.space, and review each
+source's current terms before redistribution. Availability differs by asset;
+HTTP 403/404 responses are recorded as `unavailable`, not as successful empty
+series.
 
 ## Key decisions
 

@@ -1,0 +1,7 @@
+{
+  "data": [
+    {"time": "2026-01-01T00:00:00Z", "CapMrktCurUSD": "100.123456789012"},
+    {"time": "2026-01-02T00:00:00Z", "CapMrktCurUSD": "101.25"}
+  ],
+  "next_page_url": "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?page=2"
+}

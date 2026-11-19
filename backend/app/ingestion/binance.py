@@ -10,6 +10,7 @@ from app.ingestion.provider import ChainContext, Point
 class BinanceKlinesProvider:
     source_code = "binance"
     provider_code = "binance"
+    overlap_days = 3
     symbols = {
         "btc": "BTCUSDT",
         "eth": "ETHUSDT",

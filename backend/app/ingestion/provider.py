@@ -17,6 +17,8 @@ class ChainContext:
 
 
 class MetricProvider(Protocol):
+    overlap_days: int
+
     async def fetch(
         self,
         chain: ChainContext,

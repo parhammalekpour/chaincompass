@@ -2,7 +2,7 @@
 
 Bilingual foundation for an on-chain intelligence app for long-term crypto investors.
 
-## Status: early development (frontend authentication flows implemented)
+## Status: early development (auth core and first data-ingestion providers implemented)
 
 **Disclaimer:** ChainCompass is for informational purposes only, is not financial advice, and does not provide buy or sell recommendations.
 
@@ -27,11 +27,14 @@ See [Windows setup](docs/SETUP.md) to prepare the development environment.
 - Security settings with email verification status and password changes.
 - Free-source data audit tooling and measured findings in
   [docs/DATA_AUDIT.md](docs/DATA_AUDIT.md).
-- Data model and ingestion framework with Binance daily close/volume backfill.
+- Data model and ingestion framework with Binance, Coin Metrics Community,
+  DefiLlama, and Blockchain.info BTC daily-series ingestion.
+- Per-source coverage and unavailable states, incremental revision overlap,
+  and data-quality checks for gaps, zeros, and large daily changes.
 
 ## Planned
 
-- Additional ingestion providers, scheduler automation, and historical Network
+- Remaining ingestion providers, scheduler automation, and historical Network
   Health Score computation.
 - Production ingestion and on-chain analysis for BTC, ETH, SOL, and BNB,
   limited by the measured sources in [docs/DATA_AUDIT.md](docs/DATA_AUDIT.md).

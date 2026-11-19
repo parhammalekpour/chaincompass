@@ -1,7 +1,9 @@
 from __future__ import annotations
 
-from datetime import UTC, date, datetime
-from decimal import Decimal, InvalidOperation
+import logging
+from collections import Counter
+from datetime import UTC, date, datetime, timedelta
+from decimal import ROUND_HALF_EVEN, Decimal, InvalidOperation, localcontext
 from typing import Literal
 
 from sqlalchemy import and_, func, select
@@ -14,8 +16,24 @@ from app.db.models.ingestion import (
 )
 from app.ingestion.provider import ChainContext, MetricProvider, Point
 
+logger = logging.getLogger(__name__)
+NUMERIC_QUANTUM = Decimal("0.000000000001")
+
 
 class IngestionService:
+    staleness_days = {
+        "price_close_usd": 2,
+        "volume_usd": 2,
+        "market_cap_usd": 3,
+        "active_addresses": 3,
+        "tx_count": 3,
+        "fees_usd": 3,
+        "tvl_usd": 3,
+        "stablecoin_supply_usd": 3,
+        "hashrate": 3,
+        "validators": 3,
+    }
+
     def __init__(
         self,
         session: AsyncSession,
@@ -44,12 +62,8 @@ class IngestionService:
             return False, "non_finite"
         if point.value < Decimal("0"):
             return False, "negative"
-        try:
-            exponent = point.value.as_tuple().exponent
-            if isinstance(exponent, int) and exponent < -12:
-                return False, "precision_over_12"
-        except (InvalidOperation, ValueError):
-            return False, "invalid_decimal"
+        if point.value != 0 and point.value.adjusted() > 25:
+            return False, "numeric_overflow"
         return True, None
 
     async def last_stored_date(
@@ -68,6 +82,12 @@ class IngestionService:
         )
         return result.scalar_one_or_none()
 
+    @staticmethod
+    def incremental_start(last_date: date | None, overlap_days: int) -> date | None:
+        if last_date is None:
+            return None
+        return last_date - timedelta(days=overlap_days)
+
     async def upsert_points(
         self,
         chain: ChainContext,
@@ -79,15 +99,36 @@ class IngestionService:
         fetched_at = datetime.now(UTC)
         unique: dict[date, Decimal] = {}
         rejected = 0
+        reasons: Counter[str] = Counter()
         for point in points:
-            valid, _reason = self.validate_point(chain, metric, point, today)
+            valid, reason = self.validate_point(chain, metric, point, today)
             if not valid:
                 rejected += 1
+                reasons[reason or "invalid"] += 1
                 continue
             if point.date in unique:
                 rejected += 1
+                reasons["duplicate_date"] += 1
                 continue
-            unique[point.date] = point.value
+            try:
+                with localcontext() as context:
+                    context.prec = 40
+                    unique[point.date] = point.value.quantize(
+                        NUMERIC_QUANTUM,
+                        rounding=ROUND_HALF_EVEN,
+                    )
+            except InvalidOperation:
+                rejected += 1
+                reasons["numeric_precision_overflow"] += 1
+
+        if reasons:
+            logger.info(
+                "Rejected ingestion rows for %s/%s/%s: %s",
+                chain.code,
+                metric,
+                self.source_code,
+                dict(reasons),
+            )
 
         rows = [
             {
@@ -145,10 +186,10 @@ class IngestionService:
         if first is not None and last is not None:
             missing = max(0, (last - first).days + 1 - int(count))
         today = datetime.now(UTC).date()
-        status: Literal["ok", "stale", "error", "never_run"] = "ok"
+        status: Literal["ok", "stale", "error", "never_run", "unavailable"] = "ok"
         if last is None:
             status = "never_run"
-        elif (today - last).days > 2:
+        elif (today - last).days > self.staleness_days.get(metric_code, 3):
             status = "stale"
         coverage = await self.session.get(
             SeriesCoverage,
@@ -190,4 +231,25 @@ class IngestionService:
             self.session.add(coverage)
         coverage.last_error = error[:300]
         coverage.status = "error"
+        await self.session.commit()
+
+    async def record_unavailable(
+        self,
+        chain_code: str,
+        metric_code: str,
+        reason: str,
+    ) -> None:
+        coverage = await self.session.get(
+            SeriesCoverage,
+            (chain_code, metric_code, self.source_code),
+        )
+        if coverage is None:
+            coverage = SeriesCoverage(
+                chain_code=chain_code,
+                metric_code=metric_code,
+                source_code=self.source_code,
+            )
+            self.session.add(coverage)
+        coverage.last_error = reason[:300]
+        coverage.status = "unavailable"
         await self.session.commit()

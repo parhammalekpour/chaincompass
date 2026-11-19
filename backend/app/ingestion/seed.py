@@ -34,7 +34,8 @@ DATA_SOURCES = (
         "coin_metrics",
         "Coin Metrics Community",
         "https://community-api.coinmetrics.io/",
-        "Community API terms; measured availability can differ by asset and metric.",
+        "Attribution required; Community API tier is non-commercial. "
+        "Availability differs by asset and metric.",
         True,
     ),
     (
