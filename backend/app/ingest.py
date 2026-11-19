@@ -501,6 +501,7 @@ def analyze_series(
     list[Observation],
     list[tuple[Observation, Observation, Decimal]],
     tuple[date, date] | None,
+    tuple[int, int, int] | None,
 ]:
     gaps = gap_ranges([row.obs_date for row in series])
     zero_metrics = {
@@ -540,6 +541,9 @@ def analyze_series(
         "protocol_fees_usd",
     }
     jumps: list[tuple[Observation, Observation, Decimal]] = []
+    sparse_windows = 0
+    sparse_zero_days = 0
+    suppressed_outliers = 0
     for index, current in enumerate(series):
         if current.metric_code in relative_jump_metrics:
             if index == 0:
@@ -567,7 +571,16 @@ def analyze_series(
                 if len(values) % 2
                 else (values[middle - 1] + values[middle]) / Decimal(2)
             )
-            if median <= 0:
+            zero_days = sum(row.value == 0 for row in trailing)
+            if median <= 0 or zero_days >= 10:
+                sparse_windows += 1
+                sparse_zero_days += zero_days
+                if median <= 0 and current.value > 0:
+                    suppressed_outliers += 1
+                elif median > 0 and (
+                    current.value > median * 10 or current.value < median / 10
+                ):
+                    suppressed_outliers += 1
                 continue
             if current.value > median * 10 or current.value < median / 10:
                 change = current.value / median - Decimal(1)
@@ -577,7 +590,12 @@ def analyze_series(
         if leading_zero_rows
         else None
     )
-    return gaps, zero_rows, jumps, prelaunch_zeros
+    sparse_summary = (
+        (sparse_windows, sparse_zero_days, suppressed_outliers)
+        if sparse_windows
+        else None
+    )
+    return gaps, zero_rows, jumps, prelaunch_zeros, sparse_summary
 
 
 async def check_data(jump_threshold: Decimal) -> int:
@@ -602,8 +620,14 @@ async def check_data(jump_threshold: Decimal) -> int:
     daily_move_count = 0
     median_outlier_count = 0
     jump_series_count = 0
+    sparse_series_count = 0
+    sparse_window_count = 0
+    suppressed_outlier_count = 0
     for (chain, metric, source), series in sorted(grouped.items()):
-        gaps, zero_rows, jumps, prelaunch_zeros = analyze_series(series, jump_threshold)
+        gaps, zero_rows, jumps, prelaunch_zeros, sparse_summary = analyze_series(
+            series,
+            jump_threshold,
+        )
         for start, end in gaps:
             gap_count += 1
             length = (end - start).days + 1
@@ -614,6 +638,16 @@ async def check_data(jump_threshold: Decimal) -> int:
             print(
                 f"pre-launch zeros {chain}/{metric}/{source}: "
                 f"{start}..{end} (informational)"
+            )
+        if sparse_summary is not None:
+            window_count, zero_days, suppressed = sparse_summary
+            sparse_series_count += 1
+            sparse_window_count += window_count
+            suppressed_outlier_count += suppressed
+            print(
+                f"sparse series {chain}/{metric}/{source}: "
+                f"windows={window_count} zero_days_in_windows={zero_days} "
+                f"outliers_suppressed={suppressed}"
             )
         if zero_rows:
             spans = ", ".join(
@@ -664,7 +698,10 @@ async def check_data(jump_threshold: Decimal) -> int:
         f"suspicious_zero_rows={zero_count} "
         f"daily_moves_over_{jump_threshold}={daily_move_count} "
         f"trailing_median_outliers={median_outlier_count} "
-        f"series_with_alerts={jump_series_count}"
+        f"series_with_alerts={jump_series_count} "
+        f"sparse_series={sparse_series_count} "
+        f"sparse_windows={sparse_window_count} "
+        f"suppressed_outliers={suppressed_outlier_count}"
     )
     return 0
 

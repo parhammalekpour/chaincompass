@@ -706,12 +706,16 @@ def test_check_finds_planted_gap_and_jump() -> None:
             strict=True,
         )
     ]
-    gaps, zeros, jumps, prelaunch_zeros = analyze_series(series, Decimal("0.4"))
+    gaps, zeros, jumps, prelaunch_zeros, sparse = analyze_series(
+        series,
+        Decimal("0.4"),
+    )
     assert gaps == [(date(2026, 1, 3), date(2026, 1, 3))]
     assert zeros == []
     assert prelaunch_zeros is None
     assert len(jumps) == 1
     assert jumps[0][2] == Decimal(1)
+    assert sparse is None
 
 
 def test_check_uses_trailing_median_for_volume_and_prelaunch_zeros() -> None:
@@ -726,8 +730,12 @@ def test_check_uses_trailing_median_for_volume_and_prelaunch_zeros() -> None:
         )
         for offset, value in enumerate([Decimal("100")] * 30 + [Decimal("110")])
     ]
-    _, _, volume_jumps, _ = analyze_series(volume_series, Decimal("0.4"))
+    _, _, volume_jumps, _, volume_sparse = analyze_series(
+        volume_series,
+        Decimal("0.4"),
+    )
     assert volume_jumps == []
+    assert volume_sparse is None
 
     activity_series = [
         Observation(
@@ -742,12 +750,51 @@ def test_check_uses_trailing_median_for_volume_and_prelaunch_zeros() -> None:
             map(Decimal, ("0", "0", "100", "0")),
         )
     ]
-    _, suspicious_zeros, _, prelaunch_zeros = analyze_series(
+    _, suspicious_zeros, _, prelaunch_zeros, _ = analyze_series(
         activity_series,
         Decimal("0.4"),
     )
     assert len(suspicious_zeros) == 1
     assert prelaunch_zeros == (date(2026, 1, 1), date(2026, 1, 2))
+
+
+def test_check_suppresses_outlier_in_sparse_volume_window() -> None:
+    series = [
+        Observation(
+            chain_code="btc",
+            metric_code="volume_usd",
+            source_code="binance",
+            obs_date=date(2026, 1, 1) + timedelta(days=offset),
+            value=value,
+            fetched_at=datetime.now(UTC),
+        )
+        for offset, value in enumerate(
+            [Decimal("0")] * 10 + [Decimal("100")] * 20 + [Decimal("5000")]
+        )
+    ]
+    _, _, jumps, _, sparse = analyze_series(series, Decimal("0.4"))
+    assert jumps == []
+    assert sparse is not None
+    assert sparse[0] > 0
+    assert sparse[1] >= 10
+    assert sparse[2] > 0
+
+
+def test_check_alerts_for_dense_volume_window() -> None:
+    series = [
+        Observation(
+            chain_code="eth",
+            metric_code="volume_usd",
+            source_code="binance",
+            obs_date=date(2026, 1, 1) + timedelta(days=offset),
+            value=value,
+            fetched_at=datetime.now(UTC),
+        )
+        for offset, value in enumerate([Decimal("100")] * 30 + [Decimal("1200")])
+    ]
+    _, _, jumps, _, sparse = analyze_series(series, Decimal("0.4"))
+    assert len(jumps) == 1
+    assert sparse is None
 
 
 def test_status_renders_unavailable_reason() -> None:
