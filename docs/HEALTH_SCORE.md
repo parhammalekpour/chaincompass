@@ -149,14 +149,16 @@ of the previous five score dates. The November 19 component rows for
 `hashrate_chg90` and `fees_usd_chg90` were absent; their trailing windows
 contained 1,094 feature rows, and both source series (`hashrate` and
 `fees_usd`, Blockchain.info) had `series_coverage.last_date = 2026-11-18`.
-This verifies a one-day data lag for those source series in this snapshot and
-coincides with the BTC coverage decrease. It does not establish a general
-publication schedule.
+This verifies that those two series were one complete UTC day behind the other
+inputs in this snapshot and coincided with the BTC coverage decrease. It does
+not establish a general publication schedule.
 
-For all registered score-input series, the same November 20 snapshot showed
-last observation date November 19 (one-day lag), except BTC Blockchain.info
-hashrate and fees, whose last date was November 18 (two-day lag). A typical or
-persistent provider-lag pattern beyond this snapshot is **UNVERIFIED**.
+All other registered score-input series ended on November 19, the latest
+complete UTC day available on November 20. That one-calendar-day offset is
+expected by design, not a provider lag. BTC Blockchain.info hashrate and fees
+ended on November 18, one complete UTC day behind that baseline (two calendar
+days before November 20). A typical or persistent provider-lag pattern beyond
+this snapshot is **UNVERIFIED**.
 
 ### Interpretation guidance
 
