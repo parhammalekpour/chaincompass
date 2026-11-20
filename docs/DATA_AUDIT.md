@@ -66,6 +66,18 @@ particular, the protocol-fees endpoint reports fees attributed to protocols
 network/base transaction fees. The official API docs describe endpoint
 contents but do not specify units; USD remains UNVERIFIED. The latest stored
 data being numerically plausible against Binance volume is not unit evidence.
+The BTC DEX breakdown is approximately 65% LN Exchange Spot and 35% Bisq;
+the BTC protocol-fees breakdown is approximately 78% THORChain. Those totals
+are therefore ecosystem-activity proxies, not verified measures of Bitcoin
+chain usage. Protocol fees on every chain are CONTEXT ONLY and are excluded
+from the Health Score. BTC DEX volume is CONTEXT ONLY. ETH/SOL/BNB DEX volume
+is a low-weight Health Score CANDIDATE, with units still UNVERIFIED-but-
+plausible, not confirmed USD.
+
+The ETH protocol-fees total is also heterogeneous: its latest-30-day
+composition includes liquid staking (Lido), block builders (Titan Builder),
+lending (Aave), and stablecoin issuance (Ethena). As with the other chain
+totals, it is an ecosystem-activity proxy, not chain usage.
 
 The earlier audit incorrectly treated Coin Metrics BNB market cap, active
 addresses, and transactions as available because their requests returned HTTP
@@ -221,8 +233,8 @@ first and last points; no values are filled.
 | Active addresses | AVAILABLE | AVAILABLE | UNVERIFIED (HTTP 403) | DISCONTINUED (legacy `bnb`; last 2019-04-22) | Coin Metrics Community | BTC/ETH current; legacy BNB through 2019-04-22 | not computable for current BNB Chain |
 | Tx count | AVAILABLE | AVAILABLE | UNVERIFIED (HTTP 403) | DISCONTINUED (legacy `bnb`; last 2019-04-22) | Coin Metrics Community | BTC/ETH current; legacy BNB through 2019-04-22 | not computable for current BNB Chain |
 | Network fees | AVAILABLE | UNVERIFIED | UNVERIFIED | UNVERIFIED | Blockchain.info fees converted with Binance BTC close | 2017-08-17 to 2026-11-18 | computable now for BTC only |
-| DEX volume | PROVISIONAL (composition unverified; excluded until verified) | AVAILABLE (unit UNVERIFIED) | AVAILABLE (unit UNVERIFIED; 3 missing days) | AVAILABLE (unit UNVERIFIED) | DefiLlama chain overview | BTC 2014-02-17; ETH 2018-11-02; SOL 2021-10-02; BSC 2020-09-19 | BTC excluded; other units need verification |
-| Protocol fees (not network fees) | PROVISIONAL (composition unverified; not network fees; excluded until verified) | AVAILABLE (unit UNVERIFIED; 6 missing days) | AVAILABLE (unit UNVERIFIED) | AVAILABLE (unit UNVERIFIED) | DefiLlama `dailyFees` | BTC 2021-04-12; ETH 2018-03-26; SOL 2022-02-14; BSC 2021-02-17 | BTC excluded; never substitute for network fees |
+| DEX volume | CONTEXT ONLY (composition unverified) | CANDIDATE (low weight; unit UNVERIFIED-but-plausible) | CANDIDATE (low weight; unit UNVERIFIED-but-plausible; 3 missing days) | CANDIDATE (low weight; unit UNVERIFIED-but-plausible) | DefiLlama chain overview | BTC 2014-02-17; ETH 2018-11-02; SOL 2021-10-02; BSC 2020-09-19 | BTC excluded; other chains require unit and methodology validation |
+| Protocol fees (not network fees) | CONTEXT ONLY (composition unverified; not network fees) | CONTEXT ONLY | CONTEXT ONLY | CONTEXT ONLY | DefiLlama `dailyFees` | BTC 2021-04-12; ETH 2018-03-26; SOL 2022-02-14; BSC 2021-02-17 | Excluded from Health Score; never substitute for network fees |
 | TVL | UNVERIFIED (HTTP 404; not proof of absence) | AVAILABLE | AVAILABLE | AVAILABLE | DefiLlama | stored ranges below | computable now for ETH/SOL/BNB |
 | Stablecoin supply | UNVERIFIED (HTTP 404; not proof of absence) | AVAILABLE | AVAILABLE with gaps | AVAILABLE with gaps | DefiLlama | stored ranges below | computable with explicit gaps |
 | Hashrate | AVAILABLE | NOT APPLICABLE | NOT APPLICABLE | NOT APPLICABLE | Blockchain.info (TH/s converted to H/s) | 2017-01-01 to 2026-11-18 | computable now for BTC |
@@ -242,6 +254,10 @@ follow-up update rewrote overlap rows without increasing the total.
 
 | Chain | Metric | Source | First stored date | Last stored date | Points | Missing days | Status |
 |---|---|---|---|---|---:|---:|---|
+| BTC | Market cap snapshot | CoinGecko | 2026-11-18 | 2026-11-18 | 1 | 0 | approximate snapshot; context/cross-check only |
+| ETH | Market cap snapshot | CoinGecko | 2026-11-18 | 2026-11-18 | 1 | 0 | approximate snapshot; context/cross-check only |
+| SOL | Market cap snapshot | CoinGecko | 2026-11-18 | 2026-11-18 | 1 | 0 | approximate snapshot; context/cross-check only |
+| BNB | Market cap snapshot | CoinGecko | 2026-11-18 | 2026-11-18 | 1 | 0 | approximate snapshot; context/cross-check only |
 | BTC | Market cap | Coin Metrics Community | >=2017-01-01 | 2026-11-18 | 3609 | 0 | ok |
 | BTC | Active addresses | Coin Metrics Community | >=2017-01-01 | 2026-11-18 | 3609 | 0 | ok |
 | BTC | Transactions | Coin Metrics Community | >=2017-01-01 | 2026-11-18 | 3609 | 0 | ok |
@@ -289,6 +305,11 @@ unit-UNVERIFIED and must not be used as confirmed USD amounts. Protocol fees
 are fees paid to protocols, not network/base transaction fees, and are stored
 under `protocol_fees_usd`, never `fees_usd`. No BNB Chain Coin Metrics on-chain
 series were ingested: the `bnb_bsc` catalog lacks the requested metrics.
+CoinGecko market-cap snapshots are forward-collected approximate
+end-of-day observations used only for cross-checks/context, never a score input.
+An invocation run manually during the UTC day still writes that intraday value
+under the previous UTC date; that is a date-label convention, not a true
+end-of-day capture.
 
 ### CoinGecko worker snapshot
 
@@ -355,6 +376,11 @@ in its preceding 30-day window. One event had a baseline at or below 1; three
 were at or below 10. The new rule suppresses only zero-median windows and
 windows containing at least 10 zero observations, leaving these measured
 events unchanged.
+These 208 alerts are informational, not conclusions about bad data. One
+possible explanation is that DefiLlama's chain totals change composition as
+protocols are listed or delisted; this is a hypothesis, not verified causation.
+Any future Health Score use should use robust statistics such as medians and
+quantiles rather than raw point changes or outlier counts.
 
 | Chain | Metric | Outlier count | Typical trailing median |
 |---|---|---:|---:|
