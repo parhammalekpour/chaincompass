@@ -2,6 +2,7 @@ import en from "../../../messages/en.json";
 import fa from "../../../messages/fa.json";
 import { describe, expect, it } from "vitest";
 import {
+  getPublicApiErrorMessage,
   getPublicApiErrorMessageKey,
   publicApiErrorCodes,
 } from "./error-codes";
@@ -31,4 +32,24 @@ describe("public API error messages", () => {
       "publicErrors.unknown",
     );
   });
+
+  it("uses a localized duration when a valid Retry-After value exists", () => {
+    expect(getPublicApiErrorMessage("rate_limited", "30", "en")).toEqual({
+      key: "publicErrors.rateLimitedRetry",
+      values: { retryAfter: "30 seconds" },
+    });
+    expect(getPublicApiErrorMessage("rate_limited", "75", "fa")).toEqual({
+      key: "publicErrors.rateLimitedRetry",
+      values: { retryAfter: "1 دقیقه و 15 ثانیه" },
+    });
+  });
+
+  it.each([undefined, "not-a-duration", "0", "-2"])(
+    "uses the plain rate-limit message without a valid duration (%s)",
+    (retryAfter) => {
+      expect(
+        getPublicApiErrorMessage("rate_limited", retryAfter, "en"),
+      ).toEqual({ key: "publicErrors.rateLimited" });
+    },
+  );
 });
