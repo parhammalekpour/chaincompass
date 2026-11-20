@@ -391,6 +391,7 @@
     "notFoundDescription": "داده‌ای برای این شبکه در دسترس نیست.",
     "regimeLabel": "روند",
     "methodologyVersion": "نسخهٔ روش‌شناسی: {version}",
+    "componentPercentile": "رتبهٔ صدکی",
     "pillarUnavailable": "برای این شبکه در دسترس نیست",
     "pillarNominalWeight": "وزن اسمی",
     "pillarNames": {

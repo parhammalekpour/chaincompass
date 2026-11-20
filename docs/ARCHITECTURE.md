@@ -91,8 +91,9 @@ The chain detail route validates the slug before querying and uses separate
 TanStack Query keys for the snapshot, score history, regimes, price series,
 scenarios, and methodology. Each section owns its loading, empty, retryable
 error, and resolved states, so one failed endpoint does not hide the rest of the
-page. Pillar weights come from methodology; values unavailable for a chain are
-shown as unavailable rather than inferred. The score-history and price charts
+page. Pillar and component weights come from methodology; component
+percentiles are shown when present, and values unavailable for a chain are
+identified rather than inferred. The score-history and price charts
 load Recharts through a client-side dynamic chunk, plot Decimal strings only
 after converting at the chart boundary, and keep missing dates as null gaps.
 The history range is UTC-based (1Y, 3Y, or up to 3650 days). The regime

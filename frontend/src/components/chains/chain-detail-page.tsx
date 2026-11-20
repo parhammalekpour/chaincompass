@@ -305,6 +305,9 @@ function ScorePillars({
   if (!detail.score) {
     return <SectionEmpty message={t("emptySnapshot")} />;
   }
+  const scoreComponents = new Map(
+    detail.score.components.map((component) => [component.feature, component]),
+  );
 
   return (
     <section className="space-y-3" aria-labelledby="chain-detail-pillars">
@@ -350,6 +353,45 @@ function ScorePillars({
                     {t("pillarUnavailable")}
                   </p>
                 )}
+                <ul className="mt-3 space-y-2 border-t border-border pt-3">
+                  {pillar.components.map((component) => {
+                    const scoreComponent = scoreComponents.get(
+                      component.feature,
+                    );
+                    return (
+                      <li
+                        key={component.feature}
+                        className="flex flex-wrap items-center justify-between gap-2 text-xs"
+                      >
+                        <code dir="ltr" className="text-muted">
+                          {component.feature}
+                        </code>
+                        <span className="text-muted">
+                          {t("pillarNominalWeight")}{" "}
+                          <bdi dir="ltr" className="tabular-nums">
+                            {new Intl.NumberFormat("en-US").format(
+                              component.weight,
+                            )}
+                            %
+                          </bdi>
+                        </span>
+                        {component.chains.includes(detail.slug) &&
+                        scoreComponent ? (
+                          <span>
+                            {t("componentPercentile")}{" "}
+                            <bdi dir="ltr" className="tabular-nums">
+                              {formatScore(scoreComponent.percentile)} /100
+                            </bdi>
+                          </span>
+                        ) : (
+                          <span className="text-muted">
+                            {t("pillarUnavailable")}
+                          </span>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
               </li>
             );
           })}

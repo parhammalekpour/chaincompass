@@ -391,6 +391,7 @@
     "notFoundDescription": "That chain is not available in the public data.",
     "regimeLabel": "Regime",
     "methodologyVersion": "Methodology {version}",
+    "componentPercentile": "Percentile",
     "pillarUnavailable": "Not available for this chain",
     "pillarNominalWeight": "Nominal weight",
     "pillarNames": {

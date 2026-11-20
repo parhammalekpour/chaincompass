@@ -117,6 +117,10 @@ describe("ChainDetailPage", () => {
       "dir",
       "ltr",
     );
+    expect(screen.getByText("active_addresses_chg90")).toBeVisible();
+    expect(
+      screen.getAllByText("برای این شبکه در دسترس نیست").length,
+    ).toBeGreaterThan(0);
   });
 
   it("keeps other sections rendered when one endpoint fails and removes resolved loading skeletons", async () => {
