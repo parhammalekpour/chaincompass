@@ -45,9 +45,9 @@ See [Windows setup](docs/SETUP.md) to prepare the development environment.
 - Point-in-time v1 Network Health Score with coverage/confidence, regimes, and
   risk flags (backend tables, analytics CLI, and worker job `scores`), plus a
   public read-only `/api/v1` data API for chains, score history, regimes, flags,
-  methodology, and registry-allow-listed raw series. There is no dashboard UI
-  for these outputs yet. See [docs/API.md](docs/API.md) and
-  [docs/HEALTH_SCORE.md](docs/HEALTH_SCORE.md).
+  methodology, registry-allow-listed raw series, and historical-return
+  scenarios. There is no dashboard UI for these outputs yet. See
+  [docs/API.md](docs/API.md) and [docs/HEALTH_SCORE.md](docs/HEALTH_SCORE.md).
 - Not implemented yet: an analytical dashboard, an AI agent, or alert delivery.
   Existing dashboard, chat, and alert pages are placeholders.
 - Explicitly confirmed purge for the discontinued legacy Coin Metrics BNB
@@ -60,7 +60,8 @@ See [Windows setup](docs/SETUP.md) to prepare the development environment.
   SOL, and BNB, limited by the measured sources in
   [docs/DATA_AUDIT.md](docs/DATA_AUDIT.md).
 - Capital-flow analysis beyond the implemented score components.
-- Historical-distribution scenarios and walk-forward backtesting.
+- User-facing scenario and score visualizations, plus walk-forward calibration
+  evaluation.
 - User-facing risk-alert delivery and watchlists.
 - Tool-grounded AI analyst.
 - Admin audit logs and additional management controls.

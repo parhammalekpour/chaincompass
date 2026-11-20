@@ -14,6 +14,7 @@ details.
 | GET | `/api/v1/chains/{slug}/score-history` | `from`, `to` (optional ISO dates) | `ScoreHistoryResponse` |
 | GET | `/api/v1/chains/{slug}/regimes` | `from`, `to` (optional ISO dates) | `RegimesResponse` |
 | GET | `/api/v1/chains/{slug}/series` | `metric` (required), `source` (conditional), `from`, `to` | `SeriesResponse` |
+| GET | `/api/v1/chains/{slug}/scenarios` | `as_of` (optional ISO date) | `ScenariosResponse` |
 | GET | `/api/v1/methodology` | — | `MethodologyResponse` |
 
 `slug` is one of `btc`, `eth`, `sol`, or `bnb`. Every response includes a UTC
@@ -100,12 +101,56 @@ Example series response, shortened:
 }
 ```
 
+## Historical-return scenarios
+
+`GET /api/v1/chains/{slug}/scenarios` reports descriptive historical return
+quantiles for 30-, 90-, and 365-calendar-day horizons. By default, `as_of_date`
+is the latest Binance close date for the chain. An explicit `as_of` must have
+an exact Binance close row; a missing row returns `404 no_snapshot_for_date`,
+and a future date returns `422`.
+
+For horizon `H`, each realised return uses exact closes at dates `d` and
+`d + H`:
+
+```text
+return(d, H) = close(d + H) / close(d) - 1
+```
+
+Only windows whose end date is on or before `as_of_date` are included. Both
+endpoint closes must exist; missing days are not filled. The engine uses all
+eligible history from the chain's first price. Returns are rounded to six
+decimal places.
+
+Quantiles use Hyndman-Fan type 7 with Decimal arithmetic. Sort returns as
+`x[0] <= ... <= x[n-1]`; for probability `p`, compute `h = (n - 1) * p`,
+`j = floor(h)`, `k = min(j + 1, n - 1)`, and
+`Q(p) = x[j] + (h - j) * (x[k] - x[j])`. Scenario mapping is fixed:
+pessimistic = p10, base = p50, optimistic = p90.
+`illustrative_price_usd` is the latest eligible close multiplied by
+`1 + return`; it is a historical-return illustration, not a forecast.
+
+`n_independent = n_windows // horizon_days` is a conservative effective-sample
+count because adjacent windows overlap. Fewer than 5 independent windows makes
+the horizon unavailable with `reason: "insufficient_history"`; counts and
+window dates remain visible, while `share_negative` is null and `scenarios`
+is empty. From 5 to 9 independent windows, results are available with
+`low_sample: true`; 10 or more is the normal sample state. `share_negative`
+counts strictly negative window returns and is rounded to four decimal places.
+All return and price numbers are Decimal strings.
+
+Every response carries `not_a_forecast: true`, `analysis_only: true`, a method
+note, and a disclaimer. These results describe historical outcomes only; they
+are not a forecast or financial advice. The `/chains/{slug}` detail response
+does not embed a scenario summary; use the dedicated endpoint.
+
 ## Methodology
 
 `GET /api/v1/methodology` is generated from the v1 score configuration and
 reports percentile windows, components and weights, coverage/confidence
 thresholds, registry-derived maximum coverage, regime and volatility rules,
-risk-flag rules, source homepages and terms notes, and known limitations.
+risk-flag rules, scenario horizons/quantiles/sample gates, source homepages and
+terms notes, and known limitations. Scenario parameters are generated from
+the same configuration used by the pure engine.
 
 ## Errors and operational limits
 
@@ -117,7 +162,8 @@ Errors use the same envelope:
 
 Relevant codes include `chain_not_found`, `no_snapshot_for_date`,
 `series_not_available`, `source_required`, `validation_error`,
-`invalid_date_range`, `range_too_large`, `too_many_points`, and `rate_limited`.
+`future_as_of_date`, `invalid_date_range`, `range_too_large`, `too_many_points`,
+and `rate_limited`.
 Date parsing and range validation return 422; unknown chains, missing snapshots,
 and unavailable series return 404.
 

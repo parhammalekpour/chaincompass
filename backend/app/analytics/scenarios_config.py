@@ -30,3 +30,11 @@ METHOD_NOTE = (
     "Historical realised calendar-day return quantiles applied to the latest "
     "close; descriptive statistics only, not a forecast."
 )
+SCENARIO_DISCLAIMER = (
+    "Scenarios summarise historical returns only; not a forecast and not "
+    "financial advice."
+)
+SCENARIO_LIMITATION = (
+    "Scenarios are historical return quantiles, not forecasts; overlapping "
+    "windows reduce the effective sample size."
+)

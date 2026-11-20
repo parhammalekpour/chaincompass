@@ -4,7 +4,7 @@ from datetime import date, datetime
 from decimal import Decimal
 from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, PlainSerializer, WithJsonSchema
+from pydantic import BaseModel, Field, PlainSerializer, WithJsonSchema
 
 
 def _decimal_string(value: Decimal) -> str:
@@ -174,6 +174,42 @@ class SeriesResponse(AnalysisResponse):
     points: list[SeriesPoint]
 
 
+class ScenarioBasePrice(BaseModel):
+    close_usd: DecimalString
+    date: date
+
+
+class ScenarioValue(BaseModel):
+    name: Literal["pessimistic", "base", "optimistic"]
+    quantile: Literal["p10", "p50", "p90"]
+    return_value: DecimalString = Field(serialization_alias="return")
+    illustrative_price_usd: DecimalString
+
+
+class ScenarioHorizon(BaseModel):
+    days: int
+    available: bool
+    reason: str | None
+    low_sample: bool
+    n_windows: int
+    n_independent: int
+    first_window_start: date | None
+    last_window_end: date | None
+    share_negative: DecimalString | None
+    scenarios: list[ScenarioValue]
+
+
+class ScenariosResponse(AnalysisResponse):
+    chain: str
+    version: str
+    as_of_date: date
+    base_price: ScenarioBasePrice
+    horizons: list[ScenarioHorizon]
+    not_a_forecast: Literal[True]
+    method_note: str
+    disclaimer: str
+
+
 class PillarMethodology(BaseModel):
     name: str
     weight: int
@@ -224,6 +260,20 @@ class SourceMethodology(BaseModel):
     terms_note: str
 
 
+class ScenarioQuantileMethodology(BaseModel):
+    name: Literal["pessimistic", "base", "optimistic"]
+    quantile: Literal["p10", "p50", "p90"]
+    probability: DecimalString
+
+
+class ScenarioMethodology(BaseModel):
+    version: str
+    horizons_days: list[int]
+    quantiles: list[ScenarioQuantileMethodology]
+    minimum_independent_windows: int
+    low_sample_below_independent_windows: int
+
+
 class MethodologyResponse(AnalysisResponse):
     version: str
     percentile_window_days: int
@@ -237,3 +287,4 @@ class MethodologyResponse(AnalysisResponse):
     risk_flags: list[RiskRuleMethodology]
     sources: list[SourceMethodology]
     limitations: list[str]
+    scenarios: ScenarioMethodology

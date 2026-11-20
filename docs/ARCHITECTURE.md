@@ -48,25 +48,30 @@ or alert-delivery implementation yet.
 Implemented: bilingual Next.js routes and auth UI, FastAPI health/auth/admin
 endpoints, the public read-only data API under `/api/v1`, ingestion providers,
 the separate APScheduler worker, RPC probes, and the point-in-time feature
-engine with its CLI.
+engine with its CLI, plus a pure historical-return scenario engine and public
+scenario endpoint.
 
 The Network Health Score, regimes, and risk flags are implemented in the
-the backend scoring layer: database tables, analytics CLI, and worker job
+backend scoring layer: database tables, analytics CLI, and worker job
 `scores`. The read-only public API exposes their results, but no dashboard UI
 consumes them yet. The API is documented in [API.md](API.md).
 
 Public data routes are GET-only and unauthenticated. They expose chain
 snapshots, score history, reported regimes, risk flags, methodology, and
-allow-listed raw series. Decimal values serialize as strings; unavailable and
-context-only series carry explicit status/role metadata. Public responses are
-cached for five minutes and use an in-process per-IP rate limiter. No CORS
-settings were added for this API; development remains same-origin through the
-Next.js rewrite.
+allow-listed raw series and historical-return scenarios. Decimal values
+serialize as strings; unavailable and context-only series carry explicit
+status/role metadata. Public responses are cached for five minutes and use an
+in-process per-IP rate limiter. No CORS settings were added for this API;
+development remains same-origin through the Next.js rewrite.
+
+The scenario engine uses Binance close-to-close returns from exact calendar-day
+endpoints, with no gap filling or look-ahead. Its public results are historical
+quantiles, not forecasts; no scenario UI is implemented yet.
 
 Planned, not implemented: an LLM provider, AI agent and tool-calling, Telegram
-notifications, user-facing alert delivery, historical-distribution scenarios,
-and walk-forward backtesting. Existing dashboard, chat, and alert routes are
-placeholders, not working analysis or notification features.
+notifications, user-facing alert delivery, and walk-forward calibration
+evaluation. Existing dashboard, chat, and alert routes are placeholders, not
+working analysis or notification features.
 
 ## Auth
 

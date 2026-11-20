@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from collections.abc import AsyncIterator
 from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
@@ -389,6 +390,131 @@ async def test_point_in_time_snapshots_and_unknown_chain_errors(
     assert unknown.json()["error"]["code"] == "chain_not_found"
 
 
+async def test_scenarios_are_point_in_time_and_decimal_serialized(
+    public_client: AsyncClient,
+    public_session_factory: async_sessionmaker[AsyncSession],
+    seeded_public_data: date,
+) -> None:
+    start = date(2019, 1, 1)
+    historical_closes = [
+        Observation(
+            chain_code="btc",
+            metric_code="price_close_usd",
+            source_code="binance",
+            obs_date=start + timedelta(days=index),
+            value=Decimal(100 + index),
+            fetched_at=datetime.now(UTC),
+        )
+        for index in range(180)
+    ]
+    as_of = date(2020, 3, 13)
+    future_close = Observation(
+        chain_code="btc",
+        metric_code="price_close_usd",
+        source_code="binance",
+        obs_date=as_of + timedelta(days=30),
+        value=Decimal("999999.000000000000"),
+        fetched_at=datetime.now(UTC),
+    )
+    async with public_session_factory() as session:
+        session.add_all([*historical_closes, future_close])
+        await session.commit()
+
+    response = await public_client.get("/api/v1/chains/btc/scenarios")
+    assert response.status_code == 200
+    assert response.headers["Cache-Control"] == (
+        "public, max-age=300, stale-while-revalidate=600"
+    )
+    body = response.json()
+    assert body["analysis_only"] is True
+    assert body["not_a_forecast"] is True
+    assert body["version"] == "scenarios-v1"
+    assert body["as_of_date"] == seeded_public_data.isoformat()
+    assert body["method_note"]
+    assert body["disclaimer"]
+    assert isinstance(body["base_price"]["close_usd"], str)
+    assert body["horizons"][0]["available"] is True
+    assert body["horizons"][0]["low_sample"] is True
+    assert body["horizons"][0]["n_windows"] == 151
+    assert body["horizons"][0]["n_independent"] == 5
+    assert [scenario["name"] for scenario in body["horizons"][0]["scenarios"]] == [
+        "pessimistic",
+        "base",
+        "optimistic",
+    ]
+    assert body["horizons"][2]["available"] is False
+    assert body["horizons"][2]["reason"] == "insufficient_history"
+    assert body["horizons"][2]["share_negative"] is None
+    assert body["horizons"][2]["scenarios"] == []
+    for horizon in body["horizons"]:
+        if horizon["share_negative"] is not None:
+            assert isinstance(horizon["share_negative"], str)
+        for scenario in horizon["scenarios"]:
+            assert isinstance(scenario["return"], str)
+            assert isinstance(scenario["illustrative_price_usd"], str)
+    text_fields = [
+        body["method_note"],
+        body["disclaimer"],
+        *(
+            scenario[key]
+            for horizon in body["horizons"]
+            for scenario in horizon["scenarios"]
+            for key in ("name", "quantile")
+        ),
+    ]
+    banned = re.compile(r"\b(target|predict|will|buy|sell|guarantee)\b", re.I)
+    assert all(banned.search(value) is None for value in text_fields)
+
+    historical = await public_client.get(
+        "/api/v1/chains/btc/scenarios",
+        params={"as_of": as_of.isoformat()},
+    )
+    assert historical.status_code == 200
+    historical_body = historical.json()
+    assert historical_body["as_of_date"] == as_of.isoformat()
+    assert historical_body["base_price"]["date"] == as_of.isoformat()
+    assert historical_body["horizons"][0]["n_windows"] == 150
+    assert historical_body["horizons"][0]["n_independent"] == 5
+    assert historical_body["horizons"][2]["available"] is False
+    assert historical_body["horizons"][2]["reason"] == "insufficient_history"
+
+
+async def test_scenario_snapshot_validation_and_methodology(
+    public_client: AsyncClient,
+    seeded_public_data: date,
+) -> None:
+    missing = await public_client.get(
+        "/api/v1/chains/btc/scenarios",
+        params={"as_of": (seeded_public_data - timedelta(days=1)).isoformat()},
+    )
+    assert missing.status_code == 404
+    assert missing.json()["error"]["code"] == "no_snapshot_for_date"
+
+    future = await public_client.get(
+        "/api/v1/chains/btc/scenarios",
+        params={"as_of": (datetime.now(UTC).date() + timedelta(days=1)).isoformat()},
+    )
+    assert future.status_code == 422
+    assert future.json()["error"]["code"] == "future_as_of_date"
+
+    unknown = await public_client.get("/api/v1/chains/unknown/scenarios")
+    assert unknown.status_code == 404
+    assert unknown.json()["error"]["code"] == "chain_not_found"
+
+    methodology = (await public_client.get("/api/v1/methodology")).json()
+    assert methodology["scenarios"] == {
+        "version": "scenarios-v1",
+        "horizons_days": [30, 90, 365],
+        "quantiles": [
+            {"name": "pessimistic", "quantile": "p10", "probability": "0.10"},
+            {"name": "base", "quantile": "p50", "probability": "0.50"},
+            {"name": "optimistic", "quantile": "p90", "probability": "0.90"},
+        ],
+        "minimum_independent_windows": 5,
+        "low_sample_below_independent_windows": 10,
+    }
+
+
 async def test_history_validation_and_ascending_order(
     public_client: AsyncClient,
     seeded_public_data: date,
@@ -597,6 +723,7 @@ async def test_public_routes_do_not_expose_internal_fields_or_provider_errors(
             "/api/v1/chains/bnb/series",
             params={"metric": "active_addresses", "source": "coin_metrics"},
         ),
+        await public_client.get("/api/v1/chains/btc/scenarios"),
         await public_client.get("/api/v1/methodology"),
     ]
     assert [response.status_code for response in responses] == [
@@ -607,6 +734,7 @@ async def test_public_routes_do_not_expose_internal_fields_or_provider_errors(
         200,
         200,
         404,
+        200,
         200,
     ]
 
@@ -664,6 +792,11 @@ async def test_public_cache_rate_limit_and_decimal_openapi_schema(
         ("ScoreSummary", "coverage"),
         ("PriceResponse", "close_usd"),
         ("SeriesPoint", "value"),
+        ("ScenarioBasePrice", "close_usd"),
+        ("ScenarioValue", "return"),
+        ("ScenarioValue", "illustrative_price_usd"),
+        ("ScenarioHorizon", "share_negative"),
+        ("ScenarioQuantileMethodology", "probability"),
     )
     for model_name, property_name in decimal_properties:
         property_schema = schema[model_name]["properties"][property_name]
@@ -676,7 +809,7 @@ async def test_public_cache_rate_limit_and_decimal_openapi_schema(
         limited = await public_client.get("/api/v1/methodology")
         assert limited.status_code == 200
     assert limited is not None
-    response = await public_client.get("/api/v1/methodology")
+    response = await public_client.get("/api/v1/chains/btc/scenarios")
     assert response.status_code == 429
     assert response.headers.get("Retry-After")
     assert response.json()["error"]["code"] == "rate_limited"

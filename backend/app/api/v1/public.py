@@ -15,6 +15,20 @@ from app.analytics.registry import (
     get_public_series_inputs,
     public_series_inputs,
 )
+from app.analytics.scenarios import calculate_scenarios
+from app.analytics.scenarios_config import (
+    HORIZONS_DAYS as SCENARIO_HORIZONS_DAYS,
+)
+from app.analytics.scenarios_config import (
+    LOW_SAMPLE_INDEPENDENT_WINDOWS,
+    MIN_INDEPENDENT_WINDOWS,
+    QUANTILES,
+    SCENARIO_DISCLAIMER,
+    SCENARIO_LIMITATION,
+)
+from app.analytics.scenarios_config import (
+    VERSION as SCENARIO_VERSION,
+)
 from app.analytics.score_config import (
     CHAINS,
     COMPONENTS,
@@ -64,6 +78,12 @@ from app.schemas.public_api import (
     RegimesResponse,
     RegimeSummary,
     RiskRuleMethodology,
+    ScenarioBasePrice,
+    ScenarioHorizon,
+    ScenarioMethodology,
+    ScenarioQuantileMethodology,
+    ScenariosResponse,
+    ScenarioValue,
     ScoreDetail,
     ScoreHistoryItem,
     ScoreHistoryResponse,
@@ -587,6 +607,90 @@ async def get_chain(
     return ChainDetailResponse(**payload)
 
 
+@router.get(
+    "/chains/{slug}/scenarios",
+    response_model=ScenariosResponse,
+    summary="Get historical-return scenario statistics",
+    responses=PUBLIC_ERRORS,
+)
+async def get_chain_scenarios(
+    slug: str,
+    as_of: date | None = Query(default=None),
+    session: AsyncSession = Depends(get_session),
+) -> ScenariosResponse:
+    chain, _, _ = _require_chain(slug)
+    today = datetime.now(UTC).date()
+    if as_of is not None and as_of > today:
+        raise APIError(422, "future_as_of_date", "as_of cannot be in the future")
+
+    price, _ = await _price_at(session, chain, as_of or today)
+    if (
+        price.as_of_date is None
+        or price.close_usd is None
+        or (as_of is not None and price.as_of_date != as_of)
+    ):
+        requested_date = as_of.isoformat() if as_of is not None else "latest"
+        raise APIError(
+            404,
+            "no_snapshot_for_date",
+            f"No Binance price snapshot for {chain} on {requested_date}",
+        )
+
+    analysis_date = as_of or price.as_of_date
+    rows = (
+        await session.execute(
+            select(Observation.obs_date, Observation.value)
+            .where(
+                Observation.chain_code == chain,
+                Observation.metric_code == "price_close_usd",
+                Observation.source_code == "binance",
+                Observation.obs_date <= analysis_date,
+            )
+            .order_by(Observation.obs_date)
+        )
+    ).all()
+    analysis = calculate_scenarios(
+        [(row.obs_date, row.value) for row in rows],
+        analysis_date,
+    )
+    return ScenariosResponse(
+        generated_at=_generated_at(),
+        chain=chain,
+        version=analysis.version,
+        as_of_date=analysis.as_of_date,
+        base_price=ScenarioBasePrice(
+            close_usd=analysis.base_price.close_usd,
+            date=analysis.base_price.date,
+        ),
+        horizons=[
+            ScenarioHorizon(
+                days=horizon.days,
+                available=horizon.available,
+                reason=horizon.reason,
+                low_sample=horizon.low_sample,
+                n_windows=horizon.n_windows,
+                n_independent=horizon.n_independent,
+                first_window_start=horizon.first_window_start,
+                last_window_end=horizon.last_window_end,
+                share_negative=horizon.share_negative,
+                scenarios=[
+                    ScenarioValue(
+                        name=scenario.name,
+                        quantile=scenario.quantile,
+                        return_value=scenario.return_value,
+                        illustrative_price_usd=scenario.illustrative_price_usd,
+                    )
+                    for scenario in horizon.scenarios
+                ],
+            )
+            for horizon in analysis.horizons
+        ],
+        not_a_forecast=analysis.not_a_forecast,
+        method_note=analysis.method_note,
+        disclaimer=SCENARIO_DISCLAIMER,
+    )
+
+
 async def _date_range(
     session: AsyncSession,
     chain: str,
@@ -908,7 +1012,7 @@ def _source_methodology() -> list[SourceMethodology]:
 @router.get(
     "/methodology",
     response_model=MethodologyResponse,
-    summary="Get the configured v1 score methodology",
+    summary="Get configured score and scenario methodology",
     responses=PUBLIC_ERRORS,
 )
 async def get_methodology() -> MethodologyResponse:
@@ -984,7 +1088,22 @@ async def get_methodology() -> MethodologyResponse:
             "Regime labels confirm only after five consecutive raw labels, so "
             "regime changes lag by design.",
             "DefiLlama series unit semantics are UNVERIFIED.",
-            "Analysis only: not financial advice, not a prediction, and no "
-            "buy/sell calls.",
+            "Analysis only: not financial advice, not a forecast, and no "
+            "transaction recommendations.",
+            SCENARIO_LIMITATION,
         ],
+        scenarios=ScenarioMethodology(
+            version=SCENARIO_VERSION,
+            horizons_days=list(SCENARIO_HORIZONS_DAYS),
+            quantiles=[
+                ScenarioQuantileMethodology(
+                    name=item.name,
+                    quantile=item.label,
+                    probability=item.probability,
+                )
+                for item in QUANTILES
+            ],
+            minimum_independent_windows=MIN_INDEPENDENT_WINDOWS,
+            low_sample_below_independent_windows=LOW_SAMPLE_INDEPENDENT_WINDOWS,
+        ),
     )
