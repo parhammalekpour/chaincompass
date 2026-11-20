@@ -46,12 +46,22 @@ or alert-delivery implementation yet.
 ## Implemented vs Planned
 
 Implemented: bilingual Next.js routes and auth UI, FastAPI health/auth/admin
-endpoints, ingestion providers, the separate APScheduler worker, RPC probes,
-and the point-in-time feature engine with its CLI.
+endpoints, the public read-only data API under `/api/v1`, ingestion providers,
+the separate APScheduler worker, RPC probes, and the point-in-time feature
+engine with its CLI.
 
 The Network Health Score, regimes, and risk flags are implemented in the
-**backend only**: database tables, analytics CLI, and worker job `scores`.
-There is **no public API and no UI** for these outputs yet.
+the backend scoring layer: database tables, analytics CLI, and worker job
+`scores`. The read-only public API exposes their results, but no dashboard UI
+consumes them yet. The API is documented in [API.md](API.md).
+
+Public data routes are GET-only and unauthenticated. They expose chain
+snapshots, score history, reported regimes, risk flags, methodology, and
+allow-listed raw series. Decimal values serialize as strings; unavailable and
+context-only series carry explicit status/role metadata. Public responses are
+cached for five minutes and use an in-process per-IP rate limiter. No CORS
+settings were added for this API; development remains same-origin through the
+Next.js rewrite.
 
 Planned, not implemented: an LLM provider, AI agent and tool-calling, Telegram
 notifications, user-facing alert delivery, historical-distribution scenarios,

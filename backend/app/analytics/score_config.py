@@ -310,3 +310,16 @@ RISK_FEATURES: dict[str, tuple[str, str]] = {
     and spec.source_metric is not None
     and spec.source is not None
 }
+
+
+def maximum_coverage_by_chain() -> dict[str, Decimal]:
+    return {
+        chain: (
+            sum(
+                (Decimal(spec.weight) for spec in COMPONENTS if chain in spec.chains),
+                Decimal(0),
+            )
+            / WEIGHT_DENOMINATOR
+        ).quantize(COVERAGE_QUANTUM)
+        for chain in CHAINS
+    }
