@@ -4,6 +4,9 @@ The measured audit feeds the SQLAlchemy/UTC-day data model described in
 [ARCHITECTURE.md](ARCHITECTURE.md#data-layer). Binance USDT is a USD proxy,
 not an independent fiat-USD observation.
 
+Counts in this document are a dated snapshot; use `python -m app.ingest status`
+for live numbers.
+
 **Run date:** 2026-11-19
 
 **Network condition:** Iran + VPN. Results may differ from a server abroad.
@@ -125,7 +128,23 @@ has 3278 points from 2017-11-29 to 2026-11-19 with no missing days.
 - DefiLlama, Binance, and CoinGecko market histories were bounded.
 - No other source returned a 429 in this run.
 
-## DECISION
+## Decision summary
+
+- Score-eligible inputs in the registry are Binance `price_close_usd` and
+  `volume_usd` for all four chains; Coin Metrics `active_addresses` and
+  `tx_count` for BTC/ETH; DefiLlama TVL, stablecoin supply, and DEX volume for
+  ETH/SOL/BNB; and BTC hashrate plus derived BTC `fees_usd`. The Health Score
+  itself is not implemented.
+- Context-only inputs are Coin Metrics and CoinGecko market cap, DefiLlama
+  protocol fees on every chain, and BTC DefiLlama DEX volume. Protocol fees
+  describe ecosystem activity, not network fees.
+- BTC DefiLlama `tvl_usd`/`stablecoin_supply_usd` and SOL Coin Metrics
+  `active_addresses`, `tx_count`, and `market_cap_usd` are unavailable; legacy
+  BNB Coin Metrics `market_cap_usd`, `active_addresses`, and `tx_count` are
+  discontinued. Gaps remain missing and are not imputed.
+- DefiLlama units remain UNVERIFIED. ETH/SOL/BNB DEX volume is a low-weight
+  score candidate with units UNVERIFIED-but-plausible; all protocol fees and
+  BTC DEX volume remain context-only.
 
 ## History depth versus probe window
 

@@ -27,10 +27,10 @@ See [Windows setup](docs/SETUP.md) to prepare the development environment.
 - Security settings with email verification status and password changes.
 - Free-source data audit tooling and measured findings in
   [docs/DATA_AUDIT.md](docs/DATA_AUDIT.md).
-- Data model and ingestion framework with Binance, Coin Metrics Community,
-  DefiLlama, and Blockchain.info BTC daily-series ingestion. DefiLlama
-  chain-level DEX volume and protocol fees are stored separately; their raw
-  units are unverified, and protocol fees are not network transaction fees.
+- Ingestion provider implementations for Binance, Coin Metrics Community,
+  DefiLlama, and Blockchain.info BTC, plus CoinGecko snapshots and RPC probes.
+  Per-chain coverage limits and unavailable/discontinued series are documented
+  in [docs/DATA_AUDIT.md](docs/DATA_AUDIT.md).
 - Per-source coverage including unavailable and discontinued states,
   incremental revision overlap, and metric-specific checks for gaps,
   pre-launch zeros, price/market-cap/TVL changes, and activity outliers.
@@ -40,19 +40,20 @@ See [Windows setup](docs/SETUP.md) to prepare the development environment.
 - 15-minute BTC/ETH/SOL/BNB RPC liveness probes with 30-day retention and
   read-only, role-protected admin data-freshness, pipeline, and RPC-health
   endpoints.
-- A point-in-time Decimal feature engine with an explicit score/context input
-  registry and backfill/update CLI; the Network Health Score itself remains
-  planned.
+- A point-in-time Decimal features layer with an explicit score/context input
+  registry and backfill/update CLI.
+- Not implemented yet: the Network Health Score, regimes, risk flags, the
+  analytical dashboard, an AI agent, or alert delivery. Existing dashboard,
+  chat, and alert pages are placeholders.
 - Explicitly confirmed purge for the discontinued legacy Coin Metrics BNB
   series; BTC USD fees are derived from Blockchain.info fee amounts and Binance
   BTC closes.
 
 ## Planned
 
-- Remaining ingestion providers and historical Network Health Score
-  computation.
-- Production ingestion and on-chain analysis for BTC, ETH, SOL, and BNB,
-  limited by the measured sources in [docs/DATA_AUDIT.md](docs/DATA_AUDIT.md).
+- Broader production data coverage and complete on-chain analysis for BTC, ETH,
+  SOL, and BNB, limited by the measured sources in
+  [docs/DATA_AUDIT.md](docs/DATA_AUDIT.md).
 - Network Health Score and capital-flow analysis using only proven components.
 - Regime labels, risk flags, scenarios, and walk-forward backtesting.
 - Risk alerts and watchlists.

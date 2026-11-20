@@ -18,9 +18,9 @@
                          +----+----------+----+
                               |          |
                    +----------v--+    +--v----------------------+
-                   | PostgreSQL  |    | LLM provider interface  |
-                   +-----^------+    | Ollama / OpenAI-compatible|
-                         |           +--------------------------+
+                   | PostgreSQL  |    | Planned: LLM provider  |
+                   +-----^------+    | and AI agent           |
+                         |           +------------------------+
                          |
               +----------+----------+
               | Worker (APScheduler)|
@@ -33,15 +33,26 @@
               | Coin Metrics, etc.       |
               +--------------------------+
 
-       FastAPI / Worker ---> Notifiers: Email SMTP, Telegram
+       Planned: alert delivery (email/Telegram)
 ```
 
 The browser and API share one development origin: Next.js forwards `/api` to
 FastAPI. FastAPI serves validated application requests and reads/writes
 PostgreSQL. A separate APScheduler worker collects and normalizes data from
-swappable external providers before storing it. The API calls language models
-through a provider interface, and notification adapters deliver email or
-Telegram messages.
+swappable external providers before storing them. Account emails are handled by
+the auth email sender. There is no LLM provider, AI agent, Telegram notifier,
+or alert-delivery implementation yet.
+
+## Implemented vs Planned
+
+Implemented: bilingual Next.js routes and auth UI, FastAPI health/auth/admin
+endpoints, ingestion providers, the separate APScheduler worker, RPC probes,
+and the point-in-time feature engine with its CLI.
+
+Planned, not implemented: an LLM provider, AI agent and tool-calling, Telegram
+notifications, alert delivery, the Network Health Score, regimes, risk flags,
+scenarios, and walk-forward backtesting. Existing dashboard, chat, and alert
+routes are placeholders, not working analysis or notification features.
 
 ## Auth
 
@@ -112,11 +123,11 @@ Real SMTP delivery and a live Google OAuth login have not been verified.
 
 ## Data layer
 
-The ingestion data model consists of `chains`, `data_sources`,
-`metric_definitions`, `observations`, `series_coverage`, `ingestion_runs`, and
-`rpc_probes`. Observations use a composite primary key of chain, metric, source, and UTC
-observation date. Values are PostgreSQL `NUMERIC(38,12)` values, never floating
-point.
+The database contains `chains`, `data_sources`, `metric_definitions`,
+`observations`, `series_coverage`, `ingestion_runs`, `rpc_probes`, and
+`features`, in addition to the auth tables. Observations use a composite
+primary key of chain, metric, source, and UTC observation date. Values are
+PostgreSQL `NUMERIC(38,12)` values, never floating point.
 
 Providers implement `MetricProvider.fetch(chain, metric, start_date, end_date)`
 and return `Point(date, Decimal)`. The shared HTTP client uses a ChainCompass
@@ -181,9 +192,14 @@ series.
 
 Run the ingestion scheduler as a separate process with
 `python -m app.worker`; it does not share the API process and requires no
-Redis. APScheduler's `AsyncIOScheduler` runs `coingecko_snapshot` daily at
-00:05 UTC, `update_all` daily at 00:30 UTC, `rpc_probe` every 15 minutes, and
-`prune_rpc_probes` daily at 00:45 UTC. Jobs use one instance per
+Redis. The implemented APScheduler jobs are:
+
+- `coingecko_snapshot`: daily at 00:05 UTC.
+- `update_all`: daily at 00:30 UTC.
+- `rpc_probe`: every 15 minutes.
+- `prune_rpc_probes`: daily at 00:45 UTC.
+
+Jobs use one instance per
 scheduler, coalesce missed invocations, allow a one-hour misfire grace period,
 and include up to 20 seconds of jitter. `update_all` calls the existing
 `app.ingest update --all` path rather than duplicating provider logic.
@@ -264,10 +280,11 @@ previous UTC date.
   cross-component changes easier to review.
 - **No Redis in phase 1:** a separate APScheduler process is sufficient for the
   initial workload and avoids operating an additional service before needed.
-- **Rule-based score first:** transparent, explainable rules provide a
+- **Planned rule-based score:** use transparent, explainable rules for a
   reproducible baseline before considering more complex scoring approaches.
-- **Historical-quantile scenarios:** use return distributions to communicate
-  ranges and uncertainty, not point predictions or claims of predictive accuracy.
+- **Planned historical-quantile scenarios:** use return distributions to
+  communicate ranges and uncertainty, not point predictions or claims of
+  predictive accuracy.
 - **Tokens in memory + httpOnly refresh cookie:** keep access tokens out of
   persistent browser storage; protect the rotating refresh token from
   JavaScript access with an httpOnly cookie.
