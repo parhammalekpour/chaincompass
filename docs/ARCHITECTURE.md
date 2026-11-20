@@ -50,9 +50,9 @@ endpoints, ingestion providers, the separate APScheduler worker, RPC probes,
 and the point-in-time feature engine with its CLI.
 
 Planned, not implemented: an LLM provider, AI agent and tool-calling, Telegram
-notifications, alert delivery, the Network Health Score, regimes, risk flags,
-scenarios, and walk-forward backtesting. Existing dashboard, chat, and alert
-routes are placeholders, not working analysis or notification features.
+notifications, user-facing alert delivery, historical-distribution scenarios,
+and walk-forward backtesting. Existing dashboard, chat, and alert routes are
+placeholders, not working analysis or notification features.
 
 ## Auth
 
@@ -125,7 +125,8 @@ Real SMTP delivery and a live Google OAuth login have not been verified.
 
 The database contains `chains`, `data_sources`, `metric_definitions`,
 `observations`, `series_coverage`, `ingestion_runs`, `rpc_probes`, and
-`features`, in addition to the auth tables. Observations use a composite
+`features`, `health_scores`, `regimes`, and `risk_flags`, in addition to the
+auth tables. Observations use a composite
 primary key of chain, metric, source, and UTC observation date. Values are
 PostgreSQL `NUMERIC(38,12)` values, never floating point.
 
@@ -198,6 +199,8 @@ Redis. The implemented APScheduler jobs are:
 - `update_all`: daily at 00:30 UTC.
 - `rpc_probe`: every 15 minutes.
 - `prune_rpc_probes`: daily at 00:45 UTC.
+- `scores`: daily at 01:00 UTC; updates features, then computes scores,
+  regimes, and flags.
 
 Jobs use one instance per
 scheduler, coalesce missed invocations, allow a one-hour misfire grace period,
@@ -248,9 +251,8 @@ The feature engine reads only the explicit chain/metric/source allow-list in
 `app.analytics.registry`. It computes daily trailing-window features using
 `Decimal`, stores them in `features`, and records each run as job `features`.
 Features are keyed by chain/name/as-of date and retain source metric/source
-metadata. Context-only inputs are feature-computable but are not score
-eligible; future score code must consult the registry rather than infer
-eligibility from names.
+metadata. Context-only inputs are feature-computable but are not score eligible; score
+code consults the registry rather than inferring eligibility from names.
 
 Every as-of calculation is causal: exact return endpoints, daily log-return
 windows, medians, drawdowns, and moving averages use only rows dated at or
@@ -260,6 +262,16 @@ series' effective start only on its 30th day; earlier features are not
 retroactively emitted. Values are rounded to 12 decimal places with Decimal
 arithmetic. See [FEATURES.md](FEATURES.md) for formulas, coverage rules, and
 registry roles.
+
+## Health Score, regimes, and risk flags
+
+The deterministic, point-in-time `v1` scoring layer uses only score-role inputs
+from the feature registry. It stores chain-relative percentile scores with
+coverage/confidence, price-based regimes with five-day hysteresis, and
+threshold-based risk flags. Percentile history availability limits early score
+dates. See [HEALTH_SCORE.md](HEALTH_SCORE.md) for the fixed weights, thresholds,
+confidence limits, calculations, and limitations. These outputs are analysis,
+not advice or predictions.
 
 DefiLlama chain-level DEX volume for ETH, SOL, and BNB is only a low-weight
 Health Score candidate pending unit and methodology validation. BTC DEX volume
@@ -280,8 +292,9 @@ previous UTC date.
   cross-component changes easier to review.
 - **No Redis in phase 1:** a separate APScheduler process is sufficient for the
   initial workload and avoids operating an additional service before needed.
-- **Planned rule-based score:** use transparent, explainable rules for a
-  reproducible baseline before considering more complex scoring approaches.
+- **Rule-based score v1:** fixed, documented percentiles and weights make the
+  first Health Score reproducible and explainable before considering more
+  complex scoring approaches.
 - **Planned historical-quantile scenarios:** use return distributions to
   communicate ranges and uncertainty, not point predictions or claims of
   predictive accuracy.

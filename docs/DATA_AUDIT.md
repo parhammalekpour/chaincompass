@@ -134,7 +134,8 @@ has 3278 points from 2017-11-29 to 2026-11-19 with no missing days.
   `volume_usd` for all four chains; Coin Metrics `active_addresses` and
   `tx_count` for BTC/ETH; DefiLlama TVL, stablecoin supply, and DEX volume for
   ETH/SOL/BNB; and BTC hashrate plus derived BTC `fees_usd`. The Health Score
-  itself is not implemented.
+  itself is now implemented as version `v1`; these registered inputs describe
+  eligibility, not a claim that every chain has every component.
 - Context-only inputs are Coin Metrics and CoinGecko market cap, DefiLlama
   protocol fees on every chain, and BTC DefiLlama DEX volume. Protocol fees
   describe ecosystem activity, not network fees.

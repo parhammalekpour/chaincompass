@@ -44,6 +44,7 @@ from app.analytics.score_config import (
     VOL_STATE_HIGH,
     VOL_STATE_LOW,
     VOL_STATE_NORMAL,
+    WEIGHT_DENOMINATOR,
 )
 
 
@@ -336,7 +337,7 @@ def _score_for_date(
         )
         available_weight = sum(component.weight for component in components)
         coverage = _quantize(
-            Decimal(available_weight) / Decimal(100),
+            Decimal(available_weight) / WEIGHT_DENOMINATOR,
             COVERAGE_QUANTUM,
         )
         score: Decimal | None = None
@@ -604,7 +605,20 @@ def compute_analytics(
         ("realized_vol_90d", "higher_is_better"),
         {},
     )
-    regimes = _regime_values(chain, by_feature, vol90_percentiles)
+    regime_records = {
+        feature: {
+            record.as_of_date: record
+            for record in _component_records(
+                chain,
+                by_feature,
+                feature,
+                source_metric,
+                source,
+            )
+        }
+        for feature, (source_metric, source) in REGIME_FEATURES.items()
+    }
+    regimes = _regime_values(chain, regime_records, vol90_percentiles)
 
     risk_flags: list[RiskFlagValue] = []
     score_by_date = {score.as_of_date: score for score in scores}
@@ -651,7 +665,7 @@ def maximum_coverage(chain: str) -> Decimal:
         raise ValueError(f"unsupported chain: {chain}")
     return _quantize(
         Decimal(sum(spec.weight for spec in COMPONENTS if chain in spec.chains))
-        / Decimal(100),
+        / WEIGHT_DENOMINATOR,
         COVERAGE_QUANTUM,
     )
 

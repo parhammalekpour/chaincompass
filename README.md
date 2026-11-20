@@ -42,9 +42,11 @@ See [Windows setup](docs/SETUP.md) to prepare the development environment.
   endpoints.
 - A point-in-time Decimal features layer with an explicit score/context input
   registry and backfill/update CLI.
-- Not implemented yet: the Network Health Score, regimes, risk flags, the
-  analytical dashboard, an AI agent, or alert delivery. Existing dashboard,
-  chat, and alert pages are placeholders.
+- A point-in-time v1 Network Health Score with coverage/confidence, price-based
+  regimes, and deterministic risk flags. Methodology and limits are documented
+  in [docs/HEALTH_SCORE.md](docs/HEALTH_SCORE.md).
+- Not implemented yet: an analytical dashboard, an AI agent, or alert delivery.
+  Existing dashboard, chat, and alert pages are placeholders.
 - Explicitly confirmed purge for the discontinued legacy Coin Metrics BNB
   series; BTC USD fees are derived from Blockchain.info fee amounts and Binance
   BTC closes.
@@ -54,9 +56,9 @@ See [Windows setup](docs/SETUP.md) to prepare the development environment.
 - Broader production data coverage and complete on-chain analysis for BTC, ETH,
   SOL, and BNB, limited by the measured sources in
   [docs/DATA_AUDIT.md](docs/DATA_AUDIT.md).
-- Network Health Score and capital-flow analysis using only proven components.
-- Regime labels, risk flags, scenarios, and walk-forward backtesting.
-- Risk alerts and watchlists.
+- Capital-flow analysis beyond the implemented score components.
+- Historical-distribution scenarios and walk-forward backtesting.
+- User-facing risk-alert delivery and watchlists.
 - Tool-grounded AI analyst.
 - Admin audit logs and additional management controls.
 

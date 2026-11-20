@@ -7,6 +7,7 @@ from decimal import Decimal
 
 import pytest
 
+from app.analytics.cli import parse_args
 from app.analytics.registry import get_feature_input
 from app.analytics.score_config import (
     CHAINS,
@@ -36,6 +37,17 @@ from app.analytics.scoring import (
 )
 
 START = date(2020, 1, 1)
+
+
+def test_score_cli_commands_and_modes_parse() -> None:
+    backfill = parse_args(["compute-scores", "--backfill", "--chain", "btc"])
+    update = parse_args(["compute-scores", "--update"])
+    status = parse_args(["score-status", "--chain", "eth"])
+
+    assert backfill.command == "compute-scores" and backfill.backfill
+    assert backfill.chain == "btc"
+    assert update.command == "compute-scores" and update.update
+    assert status.command == "score-status" and status.chain == "eth"
 
 
 def _record(

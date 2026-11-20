@@ -24,6 +24,7 @@ from app.worker import (
     execute_job,
     format_job_list,
     rpc_probe_job,
+    scores_job,
 )
 
 
@@ -334,12 +335,14 @@ def test_worker_job_registry_and_schedules() -> None:
         ("update_all", 0, 30),
         ("rpc_probe", 0, 0),
         ("prune_rpc_probes", 0, 45),
+        ("scores", 1, 0),
     ]
     assert format_job_list().splitlines() == [
         "coingecko_snapshot: daily at 00:05 UTC",
         "update_all: daily at 00:30 UTC",
         "rpc_probe: every 15 minutes",
         "prune_rpc_probes: daily at 00:45 UTC",
+        "scores: daily at 01:00 UTC",
     ]
     scheduler = build_scheduler()
     jobs = {job.id: job for job in scheduler.get_jobs()}
@@ -348,10 +351,100 @@ def test_worker_job_registry_and_schedules() -> None:
         "update_all",
         "rpc_probe",
         "prune_rpc_probes",
+        "scores",
     }
     assert all(job.max_instances == 1 and job.coalesce for job in jobs.values())
     assert all(job.misfire_grace_time == 3600 for job in jobs.values())
     assert all(job.trigger.jitter == 20 for job in jobs.values())
+
+
+@pytest.mark.asyncio
+async def test_scores_job_runs_feature_update_before_score_update(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from app import worker
+    from app.analytics.repository import ComputeSummary
+    from app.analytics.score_repository import (
+        ScoreComputeSummary,
+        ScoreRowCounts,
+    )
+
+    calls: list[str] = []
+
+    async def compute_features(**kwargs):
+        calls.append(f"features:{kwargs['mode']}")
+        return ComputeSummary(
+            rows_upserted=10,
+            rows_deleted=3,
+            rows_by_chain={"btc": 10},
+        )
+
+    async def compute_scores(**kwargs):
+        calls.append(f"scores:{kwargs['mode']}:{kwargs['record_run']}")
+        return ScoreComputeSummary(
+            rows_upserted=5,
+            rows_deleted=2,
+            rows_by_chain={
+                "btc": ScoreRowCounts(scores=1, regimes=3, risk_flags=1),
+            },
+        )
+
+    monkeypatch.setattr(worker, "compute_features_and_store", compute_features)
+    monkeypatch.setattr(worker, "compute_scores_and_store", compute_scores)
+
+    outcome = await scores_job()
+
+    assert calls == ["features:update", "scores:update:False"]
+    assert outcome == JobOutcome(
+        status="ok",
+        rows_upserted=5,
+        details="feature_rows=10 score/regime/flag_rows=btc:1/3/1",
+    )
+
+
+@pytest.mark.asyncio
+async def test_failed_scores_job_is_recorded_and_next_job_runs(
+    auth_session_factory,
+    clean_ingestion_tables,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from app import worker
+
+    async def failing_features(**kwargs):
+        raise RuntimeError(f"failure in {kwargs['mode']}")
+
+    next_job_ran: list[bool] = []
+
+    async def next_job() -> JobOutcome:
+        next_job_ran.append(True)
+        return JobOutcome(status="ok")
+
+    monkeypatch.setattr(worker, "compute_features_and_store", failing_features)
+
+    assert (
+        await execute_job(
+            "scores",
+            handlers={"scores": worker.scores_job},
+            session_factory=auth_session_factory,
+        )
+        == 1
+    )
+    assert (
+        await execute_job(
+            "after_scores",
+            handlers={"after_scores": next_job},
+            session_factory=auth_session_factory,
+        )
+        == 0
+    )
+    assert next_job_ran == [True]
+    async with auth_session_factory() as session:
+        run = await session.scalar(
+            select(IngestionRun).where(IngestionRun.job == "scores")
+        )
+    assert run is not None
+    assert run.status == "failed"
+    assert run.error == "job raised RuntimeError"
 
 
 @pytest.mark.asyncio

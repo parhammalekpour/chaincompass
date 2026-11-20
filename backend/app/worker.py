@@ -19,6 +19,8 @@ from sqlalchemy import func, select, text
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from app.analytics.repository import compute_and_store as compute_features_and_store
+from app.analytics.score_repository import compute_scores_and_store
 from app.db.models.ingestion import IngestionRun, Observation, SeriesCoverage
 from app.db.session import SessionFactory
 from app.ingest import run_updates_all
@@ -64,6 +66,7 @@ JOB_SPECS = (
     JobSpec("update_all", 0, 30),
     JobSpec("rpc_probe", 0, 0, interval_minutes=15),
     JobSpec("prune_rpc_probes", 0, 45),
+    JobSpec("scores", 1, 0),
 )
 
 
@@ -101,6 +104,26 @@ async def rpc_probe_job() -> JobOutcome:
 async def prune_rpc_probes_job() -> JobOutcome:
     deleted = await prune_probes()
     return JobOutcome(status="ok", details=f"deleted={deleted}")
+
+
+async def scores_job() -> JobOutcome:
+    feature_summary = await compute_features_and_store(mode="update")
+    score_summary = await compute_scores_and_store(
+        mode="update",
+        record_run=False,
+    )
+    chain_counts = ",".join(
+        f"{chain}:{counts.scores}/{counts.regimes}/{counts.risk_flags}"
+        for chain, counts in sorted(score_summary.rows_by_chain.items())
+    )
+    return JobOutcome(
+        status="ok",
+        rows_upserted=score_summary.rows_upserted,
+        details=(
+            f"feature_rows={feature_summary.rows_upserted} "
+            f"score/regime/flag_rows={chain_counts or '-'}"
+        ),
+    )
 
 
 async def coingecko_snapshot_job(
@@ -208,6 +231,7 @@ JOB_HANDLERS: dict[str, JobHandler] = {
     "update_all": update_all_job,
     "rpc_probe": rpc_probe_job,
     "prune_rpc_probes": prune_rpc_probes_job,
+    "scores": scores_job,
 }
 
 
