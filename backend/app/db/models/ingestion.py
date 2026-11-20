@@ -173,3 +173,21 @@ class RpcProbe(Base):
     block_height: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
     block_age_seconds: Mapped[int | None] = mapped_column(Integer, nullable=True)
     error_code: Mapped[str | None] = mapped_column(String(64), nullable=True)
+
+
+class ComputedFeature(Base):
+    __tablename__ = "features"
+    __table_args__ = (Index("ix_features_chain_as_of_date", "chain_id", "as_of_date"),)
+
+    chain_id: Mapped[str] = mapped_column(
+        String(16),
+        ForeignKey("chains.code", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    feature: Mapped[str] = mapped_column(Text, primary_key=True)
+    as_of_date: Mapped[date] = mapped_column(Date, primary_key=True)
+    value: Mapped[Decimal] = mapped_column(Numeric(38, 12), nullable=False)
+    n_obs: Mapped[int] = mapped_column(Integer, nullable=False)
+    window_days: Mapped[int] = mapped_column(Integer, nullable=False)
+    source_metric: Mapped[str] = mapped_column(Text, nullable=False)
+    source: Mapped[str] = mapped_column(Text, nullable=False)

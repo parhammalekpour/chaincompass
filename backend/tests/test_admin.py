@@ -11,6 +11,7 @@ from app.core.security import create_access_token
 from app.db.models.auth import User
 from app.db.models.ingestion import (
     Chain,
+    ComputedFeature,
     DataSource,
     IngestionRun,
     MetricDefinition,
@@ -34,6 +35,7 @@ async def clean_admin_reference_data(
         async with auth_session_factory() as session:
             for model in (
                 Observation,
+                ComputedFeature,
                 RpcProbe,
                 SeriesCoverage,
                 IngestionRun,

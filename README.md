@@ -40,6 +40,9 @@ See [Windows setup](docs/SETUP.md) to prepare the development environment.
 - 15-minute BTC/ETH/SOL/BNB RPC liveness probes with 30-day retention and
   read-only, role-protected admin data-freshness, pipeline, and RPC-health
   endpoints.
+- A point-in-time Decimal feature engine with an explicit score/context input
+  registry and backfill/update CLI; the Network Health Score itself remains
+  planned.
 - Explicitly confirmed purge for the discontinued legacy Coin Metrics BNB
   series; BTC USD fees are derived from Blockchain.info fee amounts and Binance
   BTC closes.
@@ -51,7 +54,7 @@ See [Windows setup](docs/SETUP.md) to prepare the development environment.
 - Production ingestion and on-chain analysis for BTC, ETH, SOL, and BNB,
   limited by the measured sources in [docs/DATA_AUDIT.md](docs/DATA_AUDIT.md).
 - Network Health Score and capital-flow analysis using only proven components.
-- Historical-distribution scenarios.
+- Regime labels, risk flags, scenarios, and walk-forward backtesting.
 - Risk alerts and watchlists.
 - Tool-grounded AI analyst.
 - Admin audit logs and additional management controls.

@@ -226,6 +226,25 @@ median latency. `python -m app.users set-role --email <email> --role admin`
 grants access without changing credentials. No admin write endpoints or
 audit-log feature are included.
 
+## Point-in-time feature layer
+
+The feature engine reads only the explicit chain/metric/source allow-list in
+`app.analytics.registry`. It computes daily trailing-window features using
+`Decimal`, stores them in `features`, and records each run as job `features`.
+Features are keyed by chain/name/as-of date and retain source metric/source
+metadata. Context-only inputs are feature-computable but are not score
+eligible; future score code must consult the registry rather than infer
+eligibility from names.
+
+Every as-of calculation is causal: exact return endpoints, daily log-return
+windows, medians, drawdowns, and moving averages use only rows dated at or
+before the as-of date. Gaps are omitted, coverage thresholds control whether a
+value exists, and no values are filled. A 30-day non-zero run confirms a
+series' effective start only on its 30th day; earlier features are not
+retroactively emitted. Values are rounded to 12 decimal places with Decimal
+arithmetic. See [FEATURES.md](FEATURES.md) for formulas, coverage rules, and
+registry roles.
+
 DefiLlama chain-level DEX volume for ETH, SOL, and BNB is only a low-weight
 Health Score candidate pending unit and methodology validation. BTC DEX volume
 is context-only because the measured breakdown is dominated by LN Exchange

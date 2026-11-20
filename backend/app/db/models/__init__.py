@@ -3,6 +3,7 @@
 from app.db.models.auth import EmailToken, OAuthAccount, RefreshToken, User
 from app.db.models.ingestion import (
     Chain,
+    ComputedFeature,
     DataSource,
     IngestionRun,
     MetricDefinition,
@@ -13,6 +14,7 @@ from app.db.models.ingestion import (
 
 __all__ = [
     "Chain",
+    "ComputedFeature",
     "DataSource",
     "EmailToken",
     "IngestionRun",

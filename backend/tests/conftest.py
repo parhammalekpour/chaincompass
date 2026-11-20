@@ -146,10 +146,18 @@ async def clean_auth_tables(
 async def clean_ingestion_tables(
     auth_session_factory: async_sessionmaker[AsyncSession],
 ) -> AsyncIterator[None]:
-    async with auth_session_factory() as session:
-        await session.execute(text("DELETE FROM rpc_probes"))
-        await session.execute(text("DELETE FROM observations"))
-        await session.execute(text("DELETE FROM series_coverage"))
-        await session.execute(text("DELETE FROM ingestion_runs"))
-        await session.commit()
+    async def clear() -> None:
+        async with auth_session_factory() as session:
+            await session.execute(text("DELETE FROM features"))
+            await session.execute(text("DELETE FROM rpc_probes"))
+            await session.execute(text("DELETE FROM observations"))
+            await session.execute(text("DELETE FROM series_coverage"))
+            await session.execute(text("DELETE FROM ingestion_runs"))
+            await session.execute(text("DELETE FROM metric_definitions"))
+            await session.execute(text("DELETE FROM data_sources"))
+            await session.execute(text("DELETE FROM chains"))
+            await session.commit()
+
+    await clear()
     yield
+    await clear()
