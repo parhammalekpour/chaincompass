@@ -10,10 +10,12 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     Index,
+    Integer,
     Numeric,
     String,
     Text,
     Uuid,
+    text,
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -140,3 +142,34 @@ class IngestionRun(Base):
     rows_rejected: Mapped[int] = mapped_column(BigInteger, nullable=False, default=0)
     error: Mapped[str | None] = mapped_column(String(300), nullable=True)
     details: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+
+class RpcProbe(Base):
+    __tablename__ = "rpc_probes"
+    __table_args__ = (
+        Index(
+            "ix_rpc_probes_chain_provider_checked_desc",
+            "chain_id",
+            "provider_label",
+            text("checked_at DESC"),
+        ),
+    )
+
+    id: Mapped[UUID] = mapped_column(
+        Uuid(as_uuid=True), primary_key=True, default=uuid4
+    )
+    chain_id: Mapped[str] = mapped_column(
+        String(16),
+        ForeignKey("chains.code", ondelete="CASCADE"),
+        nullable=False,
+    )
+    provider_label: Mapped[str] = mapped_column(String(64), nullable=False)
+    checked_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+    )
+    ok: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    latency_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    block_height: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    block_age_seconds: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    error_code: Mapped[str | None] = mapped_column(String(64), nullable=True)

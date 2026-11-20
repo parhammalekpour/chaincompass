@@ -26,6 +26,10 @@ class Settings(BaseSettings):
     trust_proxy: bool = False
     ingestion_discontinued_days: int = Field(default=30, gt=0)
     coingecko_api_key: str = ""
+    rpc_eth_url: str = "https://ethereum-rpc.publicnode.com"
+    rpc_sol_url: str = "https://api.mainnet-beta.solana.com"
+    rpc_bnb_url: str = "https://bsc-dataseed.binance.org/"
+    rpc_btc_tip_url: str = "https://mempool.space/api/blocks/tip/height"
 
     model_config = SettingsConfigDict(
         env_file=ROOT_ENV_FILE,

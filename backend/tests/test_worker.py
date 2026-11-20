@@ -7,13 +7,14 @@ import httpx
 import pytest
 from sqlalchemy import select
 
-from app.db.models.ingestion import IngestionRun, Observation, SeriesCoverage
+from app.db.models.ingestion import IngestionRun, Observation, RpcProbe, SeriesCoverage
 from app.ingestion.coingecko import (
     CoinGeckoClient,
     make_market_snapshot,
     parse_market_caps,
     previous_utc_date,
 )
+from app.ingestion.rpc import prune_probes
 from app.ingestion.seed import seed_reference_data
 from app.worker import (
     JOB_SPECS,
@@ -22,6 +23,7 @@ from app.worker import (
     build_scheduler,
     execute_job,
     format_job_list,
+    rpc_probe_job,
 )
 
 
@@ -266,18 +268,87 @@ async def test_failed_worker_job_is_recorded_and_next_job_runs(
     assert runs[0].error == "job raised RuntimeError"
 
 
+@pytest.mark.asyncio
+async def test_failed_rpc_probe_is_recorded_without_blocking_next_job(
+    auth_session_factory,
+    clean_ingestion_tables,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from app.ingestion.rpc import RpcProbeResult
+
+    checked_at = datetime.now(UTC)
+    results = [
+        RpcProbeResult(
+            chain_id=chain,
+            provider_label=chain,
+            checked_at=checked_at,
+            ok=chain != "btc",
+            latency_ms=10,
+            block_height=1,
+            block_age_seconds=None,
+            error_code=None if chain != "btc" else "http_429",
+        )
+        for chain in ("btc", "eth", "sol", "bnb")
+    ]
+
+    async def fake_rpc_run() -> list[RpcProbeResult]:
+        return results
+
+    monkeypatch.setattr("app.worker.run_rpc_probe_job", fake_rpc_run)
+    next_job_ran: list[bool] = []
+
+    async def next_job() -> JobOutcome:
+        next_job_ran.append(True)
+        return JobOutcome(status="ok")
+
+    assert (
+        await execute_job(
+            "rpc_probe",
+            handlers={"rpc_probe": rpc_probe_job},
+            session_factory=auth_session_factory,
+        )
+        == 0
+    )
+    assert (
+        await execute_job(
+            "after_rpc_probe",
+            handlers={"after_rpc_probe": next_job},
+            session_factory=auth_session_factory,
+        )
+        == 0
+    )
+    assert next_job_ran == [True]
+    async with auth_session_factory() as session:
+        runs = (
+            await session.scalars(select(IngestionRun).order_by(IngestionRun.job))
+        ).all()
+    assert [(run.job, run.status) for run in runs] == [
+        ("after_rpc_probe", "ok"),
+        ("rpc_probe", "partial"),
+    ]
+
+
 def test_worker_job_registry_and_schedules() -> None:
     assert [(job.name, job.hour, job.minute) for job in JOB_SPECS] == [
         ("coingecko_snapshot", 0, 5),
         ("update_all", 0, 30),
+        ("rpc_probe", 0, 0),
+        ("prune_rpc_probes", 0, 45),
     ]
     assert format_job_list().splitlines() == [
         "coingecko_snapshot: daily at 00:05 UTC",
         "update_all: daily at 00:30 UTC",
+        "rpc_probe: every 15 minutes",
+        "prune_rpc_probes: daily at 00:45 UTC",
     ]
     scheduler = build_scheduler()
     jobs = {job.id: job for job in scheduler.get_jobs()}
-    assert set(jobs) == {"coingecko_snapshot", "update_all"}
+    assert set(jobs) == {
+        "coingecko_snapshot",
+        "update_all",
+        "rpc_probe",
+        "prune_rpc_probes",
+    }
     assert all(job.max_instances == 1 and job.coalesce for job in jobs.values())
     assert all(job.misfire_grace_time == 3600 for job in jobs.values())
     assert all(job.trigger.jitter == 20 for job in jobs.values())
@@ -294,3 +365,36 @@ async def test_postgres_advisory_lock_is_non_blocking(
             auth_session_factory,
         ) as second:
             assert not second
+
+
+@pytest.mark.asyncio
+async def test_rpc_probe_retention_deletes_only_rows_older_than_threshold(
+    auth_session_factory,
+    clean_ingestion_tables,
+) -> None:
+    async with auth_session_factory() as session:
+        await seed_reference_data(session)
+        now = datetime.now(UTC)
+        session.add_all(
+            (
+                RpcProbe(
+                    chain_id="eth",
+                    provider_label="publicnode",
+                    checked_at=now - timedelta(days=31),
+                    ok=True,
+                ),
+                RpcProbe(
+                    chain_id="eth",
+                    provider_label="publicnode",
+                    checked_at=now - timedelta(days=29),
+                    ok=True,
+                ),
+            )
+        )
+        await session.commit()
+
+    deleted = await prune_probes(30, session_factory=auth_session_factory)
+    assert deleted == 1
+    async with auth_session_factory() as session:
+        rows = (await session.scalars(select(RpcProbe))).all()
+    assert len(rows) == 1

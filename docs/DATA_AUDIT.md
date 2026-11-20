@@ -49,6 +49,7 @@ metadata; it does not contain raw API payloads.
 | TVL | UNVERIFIED (DefiLlama BTC 404) | AVAILABLE — DefiLlama 3,341 points | AVAILABLE — DefiLlama 2,074 points | AVAILABLE — DefiLlama 2,212 points |
 | Stablecoin supply | UNVERIFIED (DefiLlama BTC route 404) | AVAILABLE — DefiLlama 3,278 points | AVAILABLE — DefiLlama 1,654 points, 243 missing days | AVAILABLE — DefiLlama 2,223 points, 51 missing days |
 | Hashrate/validators | AVAILABLE — mempool and Blockchain hash-rate | NOT APPLICABLE — PoS hashrate; validators UNVERIFIED | NOT APPLICABLE — PoS hashrate; validators UNVERIFIED | NOT APPLICABLE — PoS hashrate; validators UNVERIFIED |
+| RPC liveness | AVAILABLE — mempool.space tip | AVAILABLE — PublicNode | AVAILABLE — Solana mainnet-beta | AVAILABLE — BSC dataseed |
 
 `AVAILABLE` here describes a measured current series, not a claim that every
 value is independently verified. DefiLlama's raw overview response does not
@@ -402,3 +403,20 @@ purged, and the three corresponding coverage rows remain `discontinued` after
 the live update. SOL's requested Coin Metrics metrics returned HTTP 403 and
 are stored as unavailable. Coin Metrics Community data is non-commercial and
 requires attribution.
+
+### RPC liveness probes
+
+A live, sequential `rpc_probe` run completed on 2026-11-20. Each request used
+the configured 10-second timeout, one attempt, and a ChainCompass User-Agent.
+All four chain probes succeeded. This establishes only a point-in-time RPC
+liveness observation, not historical coverage or a guarantee of provider
+availability. BTC's tip-height endpoint does not supply a block timestamp, so
+its block age is not applicable. URLs and response bodies are intentionally
+not stored.
+
+| Chain | Provider label | Result | Latency (ms) | Height / slot | Block age (s) | Checked at (UTC) |
+|---|---|---:|---:|---:|---:|---|
+| BTC | mempool.space | ok | 3532 | 976726 | — | 2026-11-20 12:54:12 |
+| ETH | publicnode | ok | 581 | 26456435 | 2 | 2026-11-20 12:54:13 |
+| SOL | solana-mainnet-beta | ok | 1018 | 471744543 | 0 | 2026-11-20 12:54:15 |
+| BNB | bsc-dataseed | ok | 1878 | 134698690 | 0 | 2026-11-20 12:54:18 |

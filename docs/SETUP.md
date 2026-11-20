@@ -220,14 +220,33 @@ Set-Location backend
 & .\.venv\Scripts\python.exe -m app.worker
 ```
 
-The scheduler runs CoinGecko snapshots at 00:05 UTC and all configured
-ingestion updates at 00:30 UTC. It is an independent process and does not
-require Redis. For manual operations, use `--once coingecko_snapshot` or
-`--once update_all`; `--run-for-seconds 15` is a short startup/shutdown smoke
-test. Set `COINGECKO_API_KEY` in the ignored root `.env` only if you have an
+The scheduler runs CoinGecko snapshots at 00:05 UTC, all configured ingestion
+updates at 00:30 UTC, RPC liveness probes every 15 minutes, and probe cleanup
+at 00:45 UTC. It is an independent process and does not require Redis. For
+manual operations, use `--once coingecko_snapshot`, `--once update_all`, or
+`--once rpc_probe`;
+`--run-for-seconds 15` is a short startup/shutdown smoke test. Set
+`COINGECKO_API_KEY` in the ignored root `.env` only if you have an
 optional CoinGecko Demo key; the snapshot job works without one. The snapshot
 has no backfill: it records approximately the previous UTC day's market cap
 from the first run forward, and missed dates remain gaps.
+
+### Admin access and monitoring
+
+Only grant the existing admin role to an account you control. From the
+`backend` directory, run the role command using the account's exact email:
+
+```powershell
+& .\.venv\Scripts\python.exe -m app.users set-role --email you@example.com --role admin
+```
+
+The command refuses unknown email addresses and does not alter passwords.
+Admins can read `GET /api/v1/admin/data-freshness`,
+`GET /api/v1/admin/pipeline`, and `GET /api/v1/admin/rpc-health` with their
+normal access token. These endpoints are read-only; no token should be placed
+in logs or shared. RPC probes store provider labels, never endpoint URLs.
+Probe history is retained for 30 days; to prune it manually, run
+`& .\.venv\Scripts\python.exe -m app.ingest prune-probes --days 30`.
 
 ## CI
 

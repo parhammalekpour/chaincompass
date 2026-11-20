@@ -26,6 +26,7 @@ from app.ingestion.coinmetrics import CoinMetricsProvider
 from app.ingestion.defillama import DefiLlamaProvider
 from app.ingestion.http import ProviderStopped
 from app.ingestion.provider import ChainContext, Point
+from app.ingestion.rpc import prune_probes
 from app.ingestion.seed import seed_reference_data
 from app.ingestion.service import IngestionService
 
@@ -767,6 +768,8 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     purge.add_argument("--chains", required=True)
     purge.add_argument("--yes", action="store_true")
     sub.add_parser("status")
+    prune = sub.add_parser("prune-probes")
+    prune.add_argument("--days", type=int, default=30)
     check = sub.add_parser("check")
     check.add_argument(
         "--jump-threshold",
@@ -782,6 +785,14 @@ def main() -> None:
         code = asyncio.run(seed())
     elif args.command == "status":
         code = asyncio.run(status())
+    elif args.command == "prune-probes":
+        if args.days <= 0:
+            print("--days must be greater than zero", file=sys.stderr)
+            code = 2
+        else:
+            deleted = asyncio.run(prune_probes(args.days))
+            print(f"Deleted {deleted} RPC probes older than {args.days} days.")
+            code = 0
     elif args.command == "check":
         if args.jump_threshold < 0:
             print("--jump-threshold must be non-negative", file=sys.stderr)

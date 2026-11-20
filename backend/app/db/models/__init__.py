@@ -7,6 +7,7 @@ from app.db.models.ingestion import (
     IngestionRun,
     MetricDefinition,
     Observation,
+    RpcProbe,
     SeriesCoverage,
 )
 
@@ -18,6 +19,7 @@ __all__ = [
     "MetricDefinition",
     "OAuthAccount",
     "Observation",
+    "RpcProbe",
     "RefreshToken",
     "SeriesCoverage",
     "User",

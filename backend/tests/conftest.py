@@ -147,6 +147,7 @@ async def clean_ingestion_tables(
     auth_session_factory: async_sessionmaker[AsyncSession],
 ) -> AsyncIterator[None]:
     async with auth_session_factory() as session:
+        await session.execute(text("DELETE FROM rpc_probes"))
         await session.execute(text("DELETE FROM observations"))
         await session.execute(text("DELETE FROM series_coverage"))
         await session.execute(text("DELETE FROM ingestion_runs"))

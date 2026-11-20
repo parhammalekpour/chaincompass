@@ -37,6 +37,9 @@ See [Windows setup](docs/SETUP.md) to prepare the development environment.
 - Separate APScheduler worker with PostgreSQL advisory locks, daily scheduled
   ingestion, and an approximate end-of-day CoinGecko market-cap snapshot with
   no historical backfill.
+- 15-minute BTC/ETH/SOL/BNB RPC liveness probes with 30-day retention and
+  read-only, role-protected admin data-freshness, pipeline, and RPC-health
+  endpoints.
 - Explicitly confirmed purge for the discontinued legacy Coin Metrics BNB
   series; BTC USD fees are derived from Blockchain.info fee amounts and Binance
   BTC closes.
@@ -51,7 +54,7 @@ See [Windows setup](docs/SETUP.md) to prepare the development environment.
 - Historical-distribution scenarios.
 - Risk alerts and watchlists.
 - Tool-grounded AI analyst.
-- Administrative tools.
+- Admin audit logs and additional management controls.
 
 **Not verified:** Real SMTP delivery and a live Google OAuth login have not
 been exercised. The OAuth callback and password/email flows have automated

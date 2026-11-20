@@ -113,8 +113,8 @@ Real SMTP delivery and a live Google OAuth login have not been verified.
 ## Data layer
 
 The ingestion data model consists of `chains`, `data_sources`,
-`metric_definitions`, `observations`, `series_coverage`, and `ingestion_runs`.
-Observations use a composite primary key of chain, metric, source, and UTC
+`metric_definitions`, `observations`, `series_coverage`, `ingestion_runs`, and
+`rpc_probes`. Observations use a composite primary key of chain, metric, source, and UTC
 observation date. Values are PostgreSQL `NUMERIC(38,12)` values, never floating
 point.
 
@@ -182,7 +182,8 @@ series.
 Run the ingestion scheduler as a separate process with
 `python -m app.worker`; it does not share the API process and requires no
 Redis. APScheduler's `AsyncIOScheduler` runs `coingecko_snapshot` daily at
-00:05 UTC and `update_all` daily at 00:30 UTC. Jobs use one instance per
+00:05 UTC, `update_all` daily at 00:30 UTC, `rpc_probe` every 15 minutes, and
+`prune_rpc_probes` daily at 00:45 UTC. Jobs use one instance per
 scheduler, coalesce missed invocations, allow a one-hour misfire grace period,
 and include up to 20 seconds of jitter. `update_all` calls the existing
 `app.ingest update --all` path rather than duplicating provider logic.
@@ -203,6 +204,27 @@ the exact collection timestamp in run details. These are approximate end-of-day
 snapshots, collected forward from the first run; missed days remain gaps.
 Retries are bounded to three after the initial request, honor `Retry-After`,
 and end as `rate_limited` on HTTP 429 or `failed` for other exhausted errors.
+
+The `rpc_probe` job queries BTC, ETH, SOL, and BNB sequentially with one
+10-second request timeout and no retry. It records only the provider label,
+result, timing, block height/age when available, and a short sanitized error
+code; RPC URLs, response bodies, and credentials are not persisted or logged.
+BTC uses mempool.space's tip-height endpoint; ETH and BNB use
+`eth_getBlockByNumber`; SOL uses `getSlot` followed by `getBlockTime`. A SOL
+block-time failure retains the slot with a null age. Individual probe failures
+are recorded without aborting the other chains. Small negative block ages up
+to 60 seconds are clamped to zero as clock skew; larger negative ages are
+invalid. A daily `prune_rpc_probes` job removes rows older than 30 days; probes
+can also be pruned manually with `python -m app.ingest prune-probes --days 30`.
+
+The existing user `role` (`user` or `admin`) gates three read-only endpoints:
+`GET /api/v1/admin/data-freshness`, `/pipeline`, and `/rpc-health`. Freshness
+reports lag and a stale flag using the configured discontinued threshold;
+pipeline results include recent runs and per-job/provider last success; RPC
+health reports the latest provider result and per-chain 24-hour success and
+median latency. `python -m app.users set-role --email <email> --role admin`
+grants access without changing credentials. No admin write endpoints or
+audit-log feature are included.
 
 DefiLlama chain-level DEX volume for ETH, SOL, and BNB is only a low-weight
 Health Score candidate pending unit and methodology validation. BTC DEX volume

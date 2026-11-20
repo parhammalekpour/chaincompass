@@ -14,6 +14,7 @@ from uuid import UUID, uuid4
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
+from apscheduler.triggers.interval import IntervalTrigger
 from sqlalchemy import func, select, text
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
@@ -28,6 +29,7 @@ from app.ingestion.coingecko import (
     configured_api_key,
     make_market_snapshot,
 )
+from app.ingestion.rpc import prune_probes, run_rpc_probe_job
 
 logger = logging.getLogger("app.worker")
 RunStatus = Literal["ok", "partial", "failed", "rate_limited"]
@@ -48,15 +50,20 @@ class JobSpec:
     name: str
     hour: int
     minute: int
+    interval_minutes: int | None = None
 
     @property
     def schedule(self) -> str:
+        if self.interval_minutes is not None:
+            return f"every {self.interval_minutes} minutes"
         return f"daily at {self.hour:02}:{self.minute:02} UTC"
 
 
 JOB_SPECS = (
     JobSpec("coingecko_snapshot", 0, 5),
     JobSpec("update_all", 0, 30),
+    JobSpec("rpc_probe", 0, 0, interval_minutes=15),
+    JobSpec("prune_rpc_probes", 0, 45),
 )
 
 
@@ -72,6 +79,28 @@ async def update_all_job() -> JobOutcome:
         status="ok",
         details="provider run counts are recorded separately",
     )
+
+
+async def rpc_probe_job() -> JobOutcome:
+    results = await run_rpc_probe_job()
+    failed = sum(not result.ok for result in results)
+    if not results or failed == len(results):
+        return JobOutcome(
+            status="failed",
+            rows_upserted=len(results),
+            details=f"failed_probes={failed}",
+            error="all RPC probes failed" if results else "no RPC probe results",
+        )
+    return JobOutcome(
+        status="partial" if failed else "ok",
+        rows_upserted=len(results),
+        details=f"failed_probes={failed}",
+    )
+
+
+async def prune_rpc_probes_job() -> JobOutcome:
+    deleted = await prune_probes()
+    return JobOutcome(status="ok", details=f"deleted={deleted}")
 
 
 async def coingecko_snapshot_job(
@@ -177,6 +206,8 @@ async def coingecko_snapshot_job(
 JOB_HANDLERS: dict[str, JobHandler] = {
     "coingecko_snapshot": coingecko_snapshot_job,
     "update_all": update_all_job,
+    "rpc_probe": rpc_probe_job,
+    "prune_rpc_probes": prune_rpc_probes_job,
 }
 
 
@@ -302,14 +333,23 @@ async def execute_job(
 def build_scheduler() -> AsyncIOScheduler:
     scheduler = AsyncIOScheduler(timezone=UTC)
     for spec in JOB_SPECS:
-        scheduler.add_job(
-            execute_job,
-            trigger=CronTrigger(
+        trigger = (
+            IntervalTrigger(
+                minutes=spec.interval_minutes,
+                timezone=UTC,
+                jitter=20,
+            )
+            if spec.interval_minutes is not None
+            else CronTrigger(
                 hour=spec.hour,
                 minute=spec.minute,
                 timezone=UTC,
                 jitter=20,
-            ),
+            )
+        )
+        scheduler.add_job(
+            execute_job,
+            trigger=trigger,
             id=spec.name,
             kwargs={"job_name": spec.name},
             max_instances=1,
