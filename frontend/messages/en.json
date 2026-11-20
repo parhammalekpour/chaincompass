@@ -120,7 +120,8 @@
     "register": "Create account",
     "email": "Email address",
     "password": "Password",
-    "forgotPassword": "Forgot password?"
+    "forgotPassword": "Forgot password?",
+    "refreshError": "Your session could not be restored. Check your connection and retry."
   },
   "login": {
     "title": "Welcome back",

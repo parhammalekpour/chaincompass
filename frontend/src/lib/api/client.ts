@@ -112,37 +112,43 @@ async function decodeResponse<T>(response: Response): Promise<T> {
   return data as T;
 }
 
-async function refreshAccessToken(): Promise<AuthResponse> {
-  if (refreshInFlight) return refreshInFlight;
+async function performRefresh(signal?: AbortSignal): Promise<AuthResponse> {
   const csrf = csrfCookie();
   if (!csrf) {
     clearAccessToken();
     throw new ApiError("invalid_access_token", 401);
   }
 
-  refreshInFlight = (async () => {
-    let response: Response;
-    try {
-      response = await fetch("/api/v1/auth/refresh", {
-        method: "POST",
-        credentials: "same-origin",
-        headers: { "X-CSRF-Token": csrf },
-      });
-    } catch {
-      clearAccessToken();
-      throw new NetworkError();
-    }
+  let response: Response;
+  try {
+    response = await fetch("/api/v1/auth/refresh", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "X-CSRF-Token": csrf },
+      signal,
+    });
+  } catch {
+    clearAccessToken();
+    throw new NetworkError();
+  }
 
-    try {
-      const auth = await decodeResponse<AuthResponse>(response);
-      setAccessToken(auth.access_token);
-      return auth;
-    } catch (error) {
-      clearAccessToken();
-      throw error;
-    }
-  })();
+  try {
+    const auth = await decodeResponse<AuthResponse>(response);
+    setAccessToken(auth.access_token);
+    return auth;
+  } catch (error) {
+    clearAccessToken();
+    throw error;
+  }
+}
 
+async function refreshAccessToken(
+  signal?: AbortSignal,
+): Promise<AuthResponse> {
+  if (signal) return performRefresh(signal);
+  if (refreshInFlight) return refreshInFlight;
+
+  refreshInFlight = performRefresh();
   try {
     return await refreshInFlight;
   } finally {
@@ -150,12 +156,14 @@ async function refreshAccessToken(): Promise<AuthResponse> {
   }
 }
 
-export async function refreshSession(): Promise<AuthResponse | null> {
+export async function refreshSession(
+  signal?: AbortSignal,
+): Promise<AuthResponse | null> {
   if (!csrfCookie()) {
     clearAccessToken();
     return null;
   }
-  return refreshAccessToken();
+  return refreshAccessToken(signal);
 }
 
 export type ApiRequestOptions = {
@@ -163,13 +171,20 @@ export type ApiRequestOptions = {
   body?: unknown;
   headers?: HeadersInit;
   authRetry?: boolean;
+  signal?: AbortSignal;
 };
 
 export async function apiRequest<T>(
   path: string,
   options: ApiRequestOptions = {},
 ): Promise<T> {
-  const { method = "GET", body, headers, authRetry = true } = options;
+  const {
+    method = "GET",
+    body,
+    headers,
+    authRetry = true,
+    signal,
+  } = options;
   const makeRequest = async () => {
     const requestHeaders = new Headers(headers);
     const tokenUsed = accessToken;
@@ -184,6 +199,7 @@ export async function apiRequest<T>(
           credentials: "same-origin",
           headers: requestHeaders,
           body: body === undefined ? undefined : JSON.stringify(body),
+          signal,
         }),
         tokenUsed,
       };
@@ -194,7 +210,7 @@ export async function apiRequest<T>(
 
   let { response, tokenUsed } = await makeRequest();
   if (response.status === 401 && authRetry) {
-    if (accessToken === tokenUsed) await refreshAccessToken();
+    if (accessToken === tokenUsed) await refreshAccessToken(signal);
     ({ response, tokenUsed } = await makeRequest());
     if (response.status === 401) clearAccessToken();
   }

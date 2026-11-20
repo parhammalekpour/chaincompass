@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -22,7 +23,8 @@ import {
   type AuthUser,
 } from "@/lib/api/client";
 
-export type AuthStatus = "loading" | "authenticated" | "anonymous";
+export type AuthStatus = "loading" | "authenticated" | "anonymous" | "error";
+export const INITIAL_SESSION_REFRESH_TIMEOUT_MS = 10_000;
 
 type AuthContextValue = {
   status: AuthStatus;
@@ -34,6 +36,7 @@ type AuthContextValue = {
     locale: "en" | "fa",
   ) => Promise<void>;
   logout: () => Promise<void>;
+  retryInitialSession: () => Promise<void>;
   refreshCurrentUser: () => Promise<AuthUser>;
   restoreSession: () => Promise<AuthUser>;
 };
@@ -45,10 +48,14 @@ const LOGOUT_STORAGE_KEY = "chaincompass:logout-event";
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<AuthStatus>("loading");
   const [user, setUser] = useState<AuthUser | null>(null);
+  const bootstrapSequence = useRef(0);
 
-  const loadUser = useCallback(async (auth: AuthResponse) => {
+  const loadUser = useCallback(async (
+    auth: AuthResponse,
+    signal?: AbortSignal,
+  ) => {
     setAccessToken(auth.access_token);
-    return apiRequest<AuthUser>("/api/v1/auth/me");
+    return apiRequest<AuthUser>("/api/v1/auth/me", { signal });
   }, []);
 
   const becomeAnonymous = useCallback(() => {
@@ -78,6 +85,58 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [becomeAnonymous, loadUser]);
 
+  const retryInitialSession = useCallback(async () => {
+    const sequence = ++bootstrapSequence.current;
+    const controller = new AbortController();
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+    const timedOut = new Promise<never>((_, reject) => {
+      timeout = setTimeout(() => {
+        controller.abort();
+        reject(new Error("initial_session_timeout"));
+      }, INITIAL_SESSION_REFRESH_TIMEOUT_MS);
+    });
+    const isCurrentAttempt = () => sequence === bootstrapSequence.current;
+
+    setStatus("loading");
+    try {
+      const currentUser = await Promise.race([
+        (async () => {
+          const auth = await refreshSession(controller.signal);
+          if (!auth) return null;
+          if (controller.signal.aborted) {
+            throw new Error("initial_session_timeout");
+          }
+          const user = await loadUser(auth, controller.signal);
+          if (controller.signal.aborted) {
+            throw new Error("initial_session_timeout");
+          }
+          return user;
+        })(),
+        timedOut,
+      ]);
+
+      if (!isCurrentAttempt()) return;
+      if (currentUser) {
+        setUser(currentUser);
+        setStatus("authenticated");
+      } else {
+        setUser(null);
+        setStatus("anonymous");
+      }
+    } catch (error) {
+      if (!isCurrentAttempt()) return;
+      if (error instanceof ApiError && error.status === 401) {
+        becomeAnonymous();
+      } else {
+        clearAccessToken();
+        setUser(null);
+        setStatus("error");
+      }
+    } finally {
+      if (timeout !== undefined) clearTimeout(timeout);
+    }
+  }, [becomeAnonymous, loadUser]);
+
   useEffect(() => {
     let active = true;
     const unsubscribe = subscribeToSessionInvalidation(() => {
@@ -91,25 +150,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       window.location.pathname,
     );
     if (!isOAuthCallback) {
-      void refreshSession()
-        .then(async (auth) => {
-          if (!active) return;
-          if (auth) {
-            const currentUser = await loadUser(auth);
-            if (!active) return;
-            setUser(currentUser);
-            setStatus("authenticated");
-          } else {
-            setUser(null);
-            setStatus("anonymous");
-          }
-        })
-        .catch(() => {
-          if (active) {
-            setUser(null);
-            setStatus("anonymous");
-          }
-        });
+      void Promise.resolve().then(() => {
+        if (active) void retryInitialSession();
+      });
     }
 
     const onLogout = () => becomeAnonymous();
@@ -130,12 +173,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => {
       active = false;
+      bootstrapSequence.current += 1;
       unsubscribe();
       channel?.removeEventListener("message", onLogout);
       channel?.close();
       window.removeEventListener("storage", onStorage);
     };
-  }, [becomeAnonymous, loadUser]);
+  }, [becomeAnonymous, retryInitialSession]);
 
   const login = useCallback(async (email: string, password: string) => {
     const auth = await fetchAuthResponse("/api/v1/auth/login", {
@@ -191,10 +235,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       login,
       register,
       logout,
+      retryInitialSession,
       refreshCurrentUser,
       restoreSession,
     }),
-    [status, user, login, register, logout, refreshCurrentUser, restoreSession],
+    [
+      status,
+      user,
+      login,
+      register,
+      logout,
+      retryInitialSession,
+      refreshCurrentUser,
+      restoreSession,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
