@@ -53,6 +53,7 @@ See [Windows setup](docs/SETUP.md) to prepare the development environment.
 - Chains screener with URL-backed filters, sortable table rows, and responsive
   mobile cards.
 - Not implemented yet: chain detail, AI chat, watchlists, or alert delivery.
+  Those routes display a planned-state card rather than loading indefinitely.
 - Explicitly confirmed purge for the discontinued legacy Coin Metrics BNB
   series; BTC USD fees are derived from Blockchain.info fee amounts and Binance
   BTC closes.

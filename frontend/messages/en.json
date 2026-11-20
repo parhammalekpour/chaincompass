@@ -366,6 +366,11 @@
       "low": "Low"
     }
   },
+  "placeholder": {
+    "title": "Coming soon",
+    "description": "This section is being prepared.",
+    "backToDashboard": "Back to dashboard"
+  },
   "chainDetail": {
     "title": "{chain} network",
     "description": "Explore network indicators, historical context, and source freshness for {chain}."

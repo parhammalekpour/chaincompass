@@ -366,6 +366,11 @@
       "low": "پایین"
     }
   },
+  "placeholder": {
+    "title": "به‌زودی",
+    "description": "این بخش در حال آماده‌سازی است.",
+    "backToDashboard": "بازگشت به نمای کلی"
+  },
   "chainDetail": {
     "title": "شبکهٔ {chain}",
     "description": "شاخص‌های شبکه، زمینهٔ تاریخی و زمان به‌روزرسانی داده‌های {chain} را بررسی کنید."
