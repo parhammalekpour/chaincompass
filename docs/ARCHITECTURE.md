@@ -201,9 +201,6 @@ backfill history or overwrite Coin Metrics rows. The daily run is scheduled
 around 00:05 UTC, labels the observation with the previous UTC date, and records
 the exact collection timestamp in run details. These are approximate end-of-day
 snapshots, collected forward from the first run; missed days remain gaps.
-The snapshot is used only for cross-checks/context, never as a Health Score
-input. A manual invocation during the UTC day stores an intraday value under
-the previous UTC date, so the date label does not imply a true end-of-day price.
 Retries are bounded to three after the initial request, honor `Retry-After`,
 and end as `rate_limited` on HTTP 429 or `failed` for other exhausted errors.
 
@@ -215,6 +212,9 @@ enter the Health Score: they aggregate ecosystem protocol activity rather than
 base/network fees or chain usage. The 208 observed trailing-median alerts are
 informational; changes in listed protocol composition are a possible, not
 proven, explanation. Score inputs should use robust medians/quantiles.
+CoinGecko market-cap snapshots are used only for cross-checks/context, never as
+score inputs; a manual mid-day snapshot is intraday data labeled with the
+previous UTC date.
 
 ## Key decisions
 
