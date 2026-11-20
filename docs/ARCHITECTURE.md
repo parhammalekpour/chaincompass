@@ -54,8 +54,8 @@ scenario engine and public scenario endpoint.
 The Network Health Score, regimes, and risk flags are implemented in the
 backend scoring layer: database tables, analytics CLI, and worker job
 `scores`. The dashboard consumes these results through the public API. The
-chains screener, chain detail, chat, watchlist, alert delivery, and scenario
-visualizations remain planned.
+Chain detail, chat, watchlists, alert delivery, and scenario visualizations
+remain planned.
 
 Public data routes are GET-only and unauthenticated. They expose chain
 snapshots, score history, reported regimes, risk flags, methodology, and
@@ -81,13 +81,17 @@ missing calendar dates so gaps remain gaps. The chart legend can hide
 individual chains, and its caveat explains that scores use different inputs
 and are relative to each chain's own history.
 
+The chains screener reuses the same chain query and score presentation. Its
+sortable columns and filters operate on the API's Decimal strings, and
+allow-listed filter state is reflected in the URL.
+
 The scenario engine uses Binance close-to-close returns from exact calendar-day
 endpoints, with no gap filling or look-ahead. Its public results are historical
 quantiles, not forecasts; no scenario UI is implemented yet.
 
 Planned, not implemented: an LLM provider, AI agent and tool-calling, Telegram
-notifications, user-facing alert delivery, chains screener, chain detail,
-watchlists, chat, and walk-forward calibration evaluation.
+notifications, user-facing alert delivery, chain detail, watchlists, chat, and
+walk-forward calibration evaluation.
 
 ## Auth
 

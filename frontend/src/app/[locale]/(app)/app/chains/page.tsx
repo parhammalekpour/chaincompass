@@ -1,4 +1,4 @@
-import { PlaceholderPage } from "@/components/placeholder-page";
+import { ChainsScreenerPage } from "@/components/chains/chains-screener-page";
 import { createPageMetadata } from "@/lib/metadata";
 
 export async function generateMetadata({
@@ -11,5 +11,5 @@ export async function generateMetadata({
 }
 
 export default function Page() {
-  return <PlaceholderPage namespace="chains" />;
+  return <ChainsScreenerPage />;
 }

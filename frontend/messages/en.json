@@ -330,6 +330,42 @@
     "title": "Chains",
     "description": "Browse network health indicators for the chains covered by ChainCompass."
   },
+  "screener": {
+    "title": "Chains screener",
+    "description": "Compare network health, recent returns, and data freshness.",
+    "filters": "Chain filters",
+    "regimeFilter": "Regime",
+    "confidenceFilter": "Confidence",
+    "hasRiskFlags": "Has risk flags",
+    "sortBy": "Sort by",
+    "clearFilters": "Clear filters",
+    "emptyTitle": "No chain data available yet",
+    "emptyDescription": "Available chain information appears here.",
+    "noResultsTitle": "No chains match these filters",
+    "noResultsDescription": "Change or clear the filters to see available chains.",
+    "columns": {
+      "chain": "Chain",
+      "score": "Score",
+      "regime": "Regime",
+      "volatility": "Volatility",
+      "price": "Price",
+      "return": "30-day return",
+      "flags": "Active flags",
+      "freshness": "Data as of"
+    },
+    "regimes": {
+      "all": "All regimes",
+      "uptrend": "Uptrend",
+      "downtrend": "Downtrend",
+      "range": "Range"
+    },
+    "confidence": {
+      "all": "All confidence levels",
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    }
+  },
   "chainDetail": {
     "title": "{chain} network",
     "description": "Explore network indicators, historical context, and source freshness for {chain}."

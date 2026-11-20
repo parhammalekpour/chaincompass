@@ -2,7 +2,7 @@
 
 Bilingual foundation for an on-chain intelligence app for long-term crypto investors.
 
-## Status: early development (auth core and first data-ingestion providers implemented)
+## Status: Dashboard and chains screener implemented; additional analysis features are in progress
 
 **Disclaimer:** ChainCompass is for informational purposes only, is not financial advice, and does not provide buy or sell recommendations.
 
@@ -46,10 +46,13 @@ See [Windows setup](docs/SETUP.md) to prepare the development environment.
   risk flags (backend tables, analytics CLI, and worker job `scores`), plus a
   public read-only `/api/v1` data API for chains, score history, regimes, flags,
   methodology, registry-allow-listed raw series, and historical-return
-  scenarios. There is no dashboard UI for these outputs yet. See
+  scenarios. See
   [docs/API.md](docs/API.md) and [docs/HEALTH_SCORE.md](docs/HEALTH_SCORE.md).
-- Not implemented yet: an analytical dashboard, an AI agent, or alert delivery.
-  Existing dashboard, chat, and alert pages are placeholders.
+- Dashboard with localized chain cards, score confidence and partial-coverage
+  context, data freshness, and a lazy-loaded score-history chart.
+- Chains screener with URL-backed filters, sortable table rows, and responsive
+  mobile cards.
+- Not implemented yet: chain detail, AI chat, watchlists, or alert delivery.
 - Explicitly confirmed purge for the discontinued legacy Coin Metrics BNB
   series; BTC USD fees are derived from Blockchain.info fee amounts and Binance
   BTC closes.
@@ -60,9 +63,8 @@ See [Windows setup](docs/SETUP.md) to prepare the development environment.
   SOL, and BNB, limited by the measured sources in
   [docs/DATA_AUDIT.md](docs/DATA_AUDIT.md).
 - Capital-flow analysis beyond the implemented score components.
-- User-facing scenario and score visualizations, plus walk-forward calibration
-  evaluation.
-- User-facing risk-alert delivery and watchlists.
+- User-facing scenario visualizations and walk-forward calibration evaluation.
+- User-facing risk-alert delivery, chain detail, and watchlists.
 - Tool-grounded AI analyst.
 - Admin audit logs and additional management controls.
 
@@ -160,7 +162,7 @@ See the [Windows setup guide](docs/SETUP.md) for the full sequence and verificat
 | Phase | Scope | Status |
 |---|---|---|
 | Foundation | Repository, bilingual frontend foundation, landing page, backend health scaffold, database connectivity, and CI configuration | Done |
-| Phase 1 | Authentication and core chain analysis, watchlists, alerts, and chat agent | In progress; core product features are planned |
+| Phase 1 | Authentication and core chain analysis, watchlists, alerts, and chat agent | Dashboard and chains screener implemented; chain detail, watchlists, alerts, and chat remain planned |
 | Phase 2 | Level-2 protocol coverage, dedicated capital flows and risk center, comparison, plans/waitlist, and learning resources | Planned |
 
 ## Documentation
