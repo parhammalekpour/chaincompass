@@ -291,9 +291,7 @@ async def seeded_public_data(
                     points=0,
                     missing_days=0,
                     status="discontinued",
-                    last_error=(
-                        "legacy BNB asset series ended 2019-04-22; not BNB Chain"
-                    ),
+                    last_error="PRIVATE_INGESTION_ERROR_SENTINEL",
                 ),
             ]
         )
@@ -578,6 +576,66 @@ async def test_empty_chain_returns_nulls_and_empty_collections(
     assert legacy["derived"] is False
     assert "legacy bnb asset" in legacy["note"].lower()
     assert "last_error" not in str(bnb)
+
+
+async def test_public_routes_do_not_expose_internal_fields_or_provider_errors(
+    public_client: AsyncClient,
+    seeded_public_data: date,
+) -> None:
+    del seeded_public_data
+    responses = [
+        await public_client.get("/api/v1/chains"),
+        await public_client.get("/api/v1/chains/btc"),
+        await public_client.get("/api/v1/chains/bnb"),
+        await public_client.get("/api/v1/chains/btc/score-history"),
+        await public_client.get("/api/v1/chains/btc/regimes"),
+        await public_client.get(
+            "/api/v1/chains/btc/series",
+            params={"metric": "fees_usd"},
+        ),
+        await public_client.get(
+            "/api/v1/chains/bnb/series",
+            params={"metric": "active_addresses", "source": "coin_metrics"},
+        ),
+        await public_client.get("/api/v1/methodology"),
+    ]
+    assert [response.status_code for response in responses] == [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        404,
+        200,
+    ]
+
+    private_fields = {
+        "admin",
+        "ingestion_run",
+        "ingestion_runs",
+        "last_error",
+        "provider_error",
+        "rpc",
+        "rpc_probe",
+        "rpc_probes",
+        "run_id",
+        "runs",
+    }
+
+    def field_names(value: object) -> set[str]:
+        if isinstance(value, dict):
+            return {str(key).casefold() for key in value} | set().union(
+                *(field_names(item) for item in value.values())
+            )
+        if isinstance(value, list):
+            return set().union(*(field_names(item) for item in value))
+        return set()
+
+    for response in responses:
+        body = response.json()
+        assert not private_fields & field_names(body)
+        assert "PRIVATE_INGESTION_ERROR_SENTINEL" not in response.text
 
 
 async def test_public_cache_rate_limit_and_decimal_openapi_schema(
