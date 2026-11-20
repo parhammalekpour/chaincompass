@@ -213,7 +213,8 @@ above. The ingestion worker is optional; it can refresh stored chain data in a
 separate PowerShell window using the commands in [Ingestion worker](#ingestion-worker).
 Create an account or sign in, then open
 `http://localhost:3000/en/app`. The Chains page is available at
-`http://localhost:3000/en/app/chains`.
+`http://localhost:3000/en/app/chains`; open the Bitcoin detail page at
+`http://localhost:3000/en/app/chains/btc`.
 
 ## Ingestion worker
 

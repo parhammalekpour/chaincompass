@@ -49,13 +49,15 @@ Implemented: bilingual Next.js routes and auth UI, the dashboard, FastAPI
 health/auth/admin endpoints, the public read-only data API under `/api/v1`,
 ingestion providers, the separate APScheduler worker, RPC probes, and the
 point-in-time feature engine with its CLI, plus a pure historical-return
-scenario engine and public scenario endpoint.
+scenario engine and public scenario endpoint. The app also includes a localized
+chain detail page with independently loaded snapshot, history, regime, price,
+and scenario sections.
 
 The Network Health Score, regimes, and risk flags are implemented in the
 backend scoring layer: database tables, analytics CLI, and worker job
-`scores`. The dashboard consumes these results through the public API. The
-Chain detail, chat, watchlists, alert delivery, and scenario visualizations
-remain planned.
+`scores`. The dashboard and chain detail consume these results through the
+public API. Chat, watchlists, and alert delivery remain planned. Public SEO
+pages are deferred to Prompt 15.
 
 Public data routes are GET-only and unauthenticated. They expose chain
 snapshots, score history, reported regimes, risk flags, methodology, and
@@ -85,13 +87,27 @@ The chains screener reuses the same chain query and score presentation. Its
 sortable columns and filters operate on the API's Decimal strings, and
 allow-listed filter state is reflected in the URL.
 
+The chain detail route validates the slug before querying and uses separate
+TanStack Query keys for the snapshot, score history, regimes, price series,
+scenarios, and methodology. Each section owns its loading, empty, retryable
+error, and resolved states, so one failed endpoint does not hide the rest of the
+page. Pillar weights come from methodology; values unavailable for a chain are
+shown as unavailable rather than inferred. The score-history and price charts
+load Recharts through a client-side dynamic chunk, plot Decimal strings only
+after converting at the chart boundary, and keep missing dates as null gaps.
+The history range is UTC-based (1Y, 3Y, or up to 3650 days). The regime
+timeline keeps source periods ordered and merges only contiguous runs with the
+same label.
+
 The scenario engine uses Binance close-to-close returns from exact calendar-day
 endpoints, with no gap filling or look-ahead. Its public results are historical
-quantiles, not forecasts; no scenario UI is implemented yet.
+quantiles, not forecasts. The detail page shows the pessimistic, base, and
+optimistic quantiles with independent sample counts and low-sample context;
+scenario values use neutral styling rather than price-return colors.
 
 Planned, not implemented: an LLM provider, AI agent and tool-calling, Telegram
-notifications, user-facing alert delivery, chain detail, watchlists, chat, and
-walk-forward calibration evaluation.
+notifications, user-facing alert delivery, watchlists, chat, public SEO pages,
+and walk-forward calibration evaluation.
 
 ## Auth
 

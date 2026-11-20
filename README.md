@@ -2,7 +2,7 @@
 
 Bilingual foundation for an on-chain intelligence app for long-term crypto investors.
 
-## Status: Dashboard and chains screener implemented; additional analysis features are in progress
+## Status: Dashboard, chains screener, and chain detail implemented; additional analysis features are in progress
 
 **Disclaimer:** ChainCompass is for informational purposes only, is not financial advice, and does not provide buy or sell recommendations.
 
@@ -52,7 +52,9 @@ See [Windows setup](docs/SETUP.md) to prepare the development environment.
   context, data freshness, and a lazy-loaded score-history chart.
 - Chains screener with URL-backed filters, sortable table rows, and responsive
   mobile cards.
-- Not implemented yet: chain detail, AI chat, watchlists, or alert delivery.
+- Chain detail with localized snapshots, history and price charts, regime
+  timeline, score pillars, and historical-return scenario context.
+- Not implemented yet: AI chat, watchlists, or alert delivery.
   Those routes display a planned-state card rather than loading indefinitely.
 - Explicitly confirmed purge for the discontinued legacy Coin Metrics BNB
   series; BTC USD fees are derived from Blockchain.info fee amounts and Binance
@@ -64,9 +66,10 @@ See [Windows setup](docs/SETUP.md) to prepare the development environment.
   SOL, and BNB, limited by the measured sources in
   [docs/DATA_AUDIT.md](docs/DATA_AUDIT.md).
 - Capital-flow analysis beyond the implemented score components.
-- User-facing scenario visualizations and walk-forward calibration evaluation.
-- User-facing risk-alert delivery, chain detail, and watchlists.
+- Walk-forward calibration evaluation.
+- User-facing risk-alert delivery and watchlists.
 - Tool-grounded AI analyst.
+- Public SEO pages (deferred to Prompt 15).
 - Admin audit logs and additional management controls.
 
 **Not verified:** Real SMTP delivery and a live Google OAuth login have not
@@ -163,7 +166,7 @@ See the [Windows setup guide](docs/SETUP.md) for the full sequence and verificat
 | Phase | Scope | Status |
 |---|---|---|
 | Foundation | Repository, bilingual frontend foundation, landing page, backend health scaffold, database connectivity, and CI configuration | Done |
-| Phase 1 | Authentication and core chain analysis, watchlists, alerts, and chat agent | Dashboard and chains screener implemented; chain detail, watchlists, alerts, and chat remain planned |
+| Phase 1 | Authentication and core chain analysis, watchlists, alerts, and chat agent | Dashboard, chains screener, and chain detail implemented; watchlists, alerts, and chat remain planned |
 | Phase 2 | Level-2 protocol coverage, dedicated capital flows and risk center, comparison, plans/waitlist, and learning resources | Planned |
 
 ## Documentation
