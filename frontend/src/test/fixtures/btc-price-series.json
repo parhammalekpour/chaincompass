@@ -1,0 +1,21 @@
+{
+  "generated_at": "2026-11-20T17:52:51.107921Z",
+  "analysis_only": true,
+  "meta": {
+    "chain": "btc",
+    "metric": "price_close_usd",
+    "source": "binance",
+    "role": "score",
+    "derived": false,
+    "status": "ok",
+    "first_date": "2017-08-17",
+    "last_date": "2026-11-19",
+    "points": 3382,
+    "missing": 0,
+    "unit_note": "USD proxy; Binance spot prices are quoted in USDT."
+  },
+  "points": [
+    { "date": "2025-11-20", "value": "86637.230000000000" },
+    { "date": "2026-11-19", "value": "61986.730000000000" }
+  ]
+}

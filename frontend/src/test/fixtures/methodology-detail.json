@@ -1,0 +1,116 @@
+{
+  "generated_at": "2026-11-20T17:52:51.107921Z",
+  "analysis_only": true,
+  "version": "v1",
+  "pillars": [
+    {
+      "name": "adoption",
+      "weight": 30,
+      "components": [
+        {
+          "feature": "active_addresses_chg90",
+          "weight": 15,
+          "direction": "higher_is_better",
+          "chains": ["btc", "eth"],
+          "derived_label": null
+        },
+        {
+          "feature": "tx_count_chg90",
+          "weight": 15,
+          "direction": "higher_is_better",
+          "chains": ["btc", "eth"],
+          "derived_label": null
+        }
+      ]
+    },
+    {
+      "name": "capital",
+      "weight": 30,
+      "components": [
+        {
+          "feature": "tvl_usd_chg90",
+          "weight": 12,
+          "direction": "higher_is_better",
+          "chains": ["eth", "sol", "bnb"],
+          "derived_label": null
+        },
+        {
+          "feature": "stablecoin_supply_usd_chg90",
+          "weight": 12,
+          "direction": "higher_is_better",
+          "chains": ["eth", "sol", "bnb"],
+          "derived_label": null
+        },
+        {
+          "feature": "dex_volume_usd_chg90",
+          "weight": 6,
+          "direction": "higher_is_better",
+          "chains": ["eth", "sol", "bnb"],
+          "derived_label": null
+        }
+      ]
+    },
+    {
+      "name": "security_economics",
+      "weight": 10,
+      "components": [
+        {
+          "feature": "hashrate_chg90",
+          "weight": 7,
+          "direction": "higher_is_better",
+          "chains": ["btc"],
+          "derived_label": null
+        },
+        {
+          "feature": "fees_usd_chg90",
+          "weight": 3,
+          "direction": "higher_is_better",
+          "chains": ["btc"],
+          "derived_label": "Derived USD fees from Blockchain.info BTC fees and same-day Binance close"
+        }
+      ]
+    },
+    {
+      "name": "market_condition",
+      "weight": 30,
+      "components": [
+        {
+          "feature": "drawdown_365d",
+          "weight": 10,
+          "direction": "higher_is_better",
+          "chains": ["btc", "eth", "sol", "bnb"],
+          "derived_label": null
+        },
+        {
+          "feature": "realized_vol_90d",
+          "weight": 7,
+          "direction": "lower_is_better",
+          "chains": ["btc", "eth", "sol", "bnb"],
+          "derived_label": null
+        },
+        {
+          "feature": "volume_ratio_30_365",
+          "weight": 8,
+          "direction": "higher_is_better",
+          "chains": ["btc", "eth", "sol", "bnb"],
+          "derived_label": null
+        },
+        {
+          "feature": "price_vs_sma200",
+          "weight": 5,
+          "direction": "higher_is_better",
+          "chains": ["btc", "eth", "sol", "bnb"],
+          "derived_label": null
+        }
+      ]
+    }
+  ],
+  "sources": [
+    { "name": "Binance", "used_for": ["daily spot prices and quote-volume proxies"] },
+    { "name": "DefiLlama", "used_for": ["TVL, stablecoin supply, DEX volume, and context-only protocol fees"] },
+    { "name": "Coin Metrics Community", "used_for": ["BTC/ETH active addresses and transaction counts; context market cap"] },
+    { "name": "CoinGecko", "used_for": ["context-only market-cap snapshots"] },
+    { "name": "mempool.space", "used_for": ["BTC network-health and RPC diagnostics, not score inputs"] },
+    { "name": "Blockchain.info", "used_for": ["BTC hashrate and derived USD network fees"] }
+  ]
+}

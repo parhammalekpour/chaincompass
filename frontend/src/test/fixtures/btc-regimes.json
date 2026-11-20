@@ -1,0 +1,26 @@
+{
+  "generated_at": "2026-11-20T17:52:51.107921Z",
+  "analysis_only": true,
+  "chain": "btc",
+  "segments": [
+    {
+      "regime": "downtrend",
+      "start_date": "2025-11-20",
+      "end_date": "2026-05-07",
+      "days": 169
+    },
+    {
+      "regime": "range",
+      "start_date": "2026-05-08",
+      "end_date": "2026-06-14",
+      "days": 38
+    },
+    {
+      "regime": "range",
+      "start_date": "2026-11-16",
+      "end_date": "2026-11-19",
+      "days": 4
+    }
+  ],
+  "latest_vol_state": "normal"
+}

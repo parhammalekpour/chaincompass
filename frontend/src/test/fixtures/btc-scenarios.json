@@ -1,0 +1,109 @@
+{
+  "generated_at": "2026-11-20T17:52:51.107921Z",
+  "analysis_only": true,
+  "chain": "btc",
+  "version": "scenarios-v1",
+  "as_of_date": "2026-11-19",
+  "base_price": {
+    "close_usd": "61986.730000000000",
+    "date": "2026-11-19"
+  },
+  "horizons": [
+    {
+      "days": 30,
+      "available": true,
+      "reason": null,
+      "low_sample": false,
+      "n_windows": 3352,
+      "n_independent": 111,
+      "first_window_start": "2017-08-17",
+      "last_window_end": "2026-11-19",
+      "share_negative": "0.4579",
+      "scenarios": [
+        {
+          "name": "pessimistic",
+          "quantile": "p10",
+          "return": "-0.191290",
+          "illustrative_price_usd": "50129.288418300000000000"
+        },
+        {
+          "name": "base",
+          "quantile": "p50",
+          "return": "0.016074",
+          "illustrative_price_usd": "62983.104698020000000000"
+        },
+        {
+          "name": "optimistic",
+          "quantile": "p90",
+          "return": "0.324768",
+          "illustrative_price_usd": "82118.036328640000000000"
+        }
+      ]
+    },
+    {
+      "days": 90,
+      "available": true,
+      "reason": null,
+      "low_sample": false,
+      "n_windows": 3292,
+      "n_independent": 36,
+      "first_window_start": "2017-08-17",
+      "last_window_end": "2026-11-19",
+      "share_negative": "0.4520",
+      "scenarios": [
+        {
+          "name": "pessimistic",
+          "quantile": "p10",
+          "return": "-0.303303",
+          "illustrative_price_usd": "43185.968830810000000000"
+        },
+        {
+          "name": "base",
+          "quantile": "p50",
+          "return": "0.043166",
+          "illustrative_price_usd": "64662.449187180000000000"
+        },
+        {
+          "name": "optimistic",
+          "quantile": "p90",
+          "return": "0.716689",
+          "illustrative_price_usd": "106411.937536970000000000"
+        }
+      ]
+    },
+    {
+      "days": 365,
+      "available": true,
+      "reason": null,
+      "low_sample": true,
+      "n_windows": 3017,
+      "n_independent": 8,
+      "first_window_start": "2017-08-17",
+      "last_window_end": "2026-11-19",
+      "share_negative": "0.3669",
+      "scenarios": [
+        {
+          "name": "pessimistic",
+          "quantile": "p10",
+          "return": "-0.473706",
+          "illustrative_price_usd": "32623.244078620000000000"
+        },
+        {
+          "name": "base",
+          "quantile": "p50",
+          "return": "0.377713",
+          "illustrative_price_usd": "85399.923748490000000000"
+        },
+        {
+          "name": "optimistic",
+          "quantile": "p90",
+          "return": "2.543055",
+          "illustrative_price_usd": "219622.393660150000000000"
+        }
+      ]
+    }
+  ],
+  "not_a_forecast": true,
+  "method_note": "Historical realised calendar-day return quantiles applied to the latest close; descriptive statistics only, not a forecast.",
+  "disclaimer": "Scenarios summarise historical returns only; not a forecast and not financial advice."
+}

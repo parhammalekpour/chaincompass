@@ -73,7 +73,7 @@ function SeverityIcon({ severity }: { severity: string }) {
 
 type LastFullCoverage = ChainDetailResponse["last_full_coverage"];
 
-function PartialBadge({
+export function PartialBadge({
   chain,
   lastFullCoverage,
   isLoading,

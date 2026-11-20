@@ -4,6 +4,7 @@ import {
   buildScoreHistoryChartData,
   formatCompactUsd,
   formatCoverage,
+  formatPercentShare,
   formatScore,
   formatSignedPercent,
   getScoreHistoryDateRange,
@@ -75,6 +76,7 @@ describe("dashboard data helpers", () => {
     expect(formatCompactUsd("1250")).toContain("1.25K");
     expect(formatCompactUsd("1250")).toMatch(/\$/);
     expect(formatSignedPercent("-0.1234")).toBe("-12.34%");
+    expect(formatPercentShare("0.4579")).toBe("45.79%");
     expect(
       `${formatScore("41.570000")}${formatSignedPercent("-0.1234")}`,
     ).not.toMatch(/[\u0660-\u0669\u06f0-\u06f9]/);

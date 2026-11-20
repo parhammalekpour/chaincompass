@@ -374,7 +374,46 @@
   },
   "chainDetail": {
     "title": "{chain} network",
-    "description": "Explore network indicators, historical context, and source freshness for {chain}."
+    "description": "Explore network indicators, historical context, and source freshness for {chain}.",
+    "backToScreener": "Back to chains",
+    "snapshotTitle": "Network snapshot",
+    "pillarsTitle": "Score pillars",
+    "historyTitle": "Score history",
+    "timelineTitle": "Recent regime periods",
+    "priceHistoryTitle": "Price history",
+    "scenariosTitle": "Historical return scenarios",
+    "emptySnapshot": "No snapshot is available yet.",
+    "emptyHistory": "No score history is available for this range.",
+    "emptyTimeline": "No regime periods are available.",
+    "emptyPriceHistory": "No price history is available.",
+    "emptyScenarios": "No historical scenarios are available.",
+    "notFoundTitle": "Chain not found",
+    "notFoundDescription": "That chain is not available in the public data.",
+    "regimeLabel": "Regime",
+    "methodologyVersion": "Methodology {version}",
+    "pillarUnavailable": "Not available for this chain",
+    "pillarNominalWeight": "Nominal weight",
+    "pillarNames": {
+      "adoption": "Adoption",
+      "capital": "Capital",
+      "market_condition": "Market condition",
+      "security_economics": "Security and economics"
+    },
+    "timelineDays": "{days} days",
+    "priceSource": "Price history source: {source}.",
+    "sourceUnavailable": "Source information unavailable",
+    "scenarioNames": {
+      "pessimistic": "Pessimistic",
+      "base": "Base",
+      "optimistic": "Optimistic"
+    },
+    "horizonDays": "{days}-day horizon",
+    "independentWindows": "Independent windows",
+    "shareNegative": "Historical returns below zero",
+    "lowSample": "Low sample",
+    "insufficientHistory": "Not enough history for this horizon.",
+    "historicalQuantilesNote": "Historical return quantiles, not a forecast.",
+    "quantileExplanation": "p10 is the 10th percentile, p50 the median, and p90 the 90th percentile of historical returns."
   },
   "chat": {
     "title": "Chat analyst",
@@ -475,7 +514,7 @@
       "description": "Browse health indicators for supported blockchain networks."
     },
     "chainDetail": {
-      "title": "{chainName} network analysis",
+      "title": "{chainName} - ChainCompass",
       "description": "On-chain indicators and historical context for {chainName}."
     },
     "chat": {

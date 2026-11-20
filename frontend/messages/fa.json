@@ -374,7 +374,46 @@
   },
   "chainDetail": {
     "title": "شبکهٔ {chain}",
-    "description": "شاخص‌های شبکه، زمینهٔ تاریخی و زمان به‌روزرسانی داده‌های {chain} را بررسی کنید."
+    "description": "شاخص‌های شبکه، زمینهٔ تاریخی و زمان به‌روزرسانی داده‌های {chain} را بررسی کنید.",
+    "backToScreener": "بازگشت به فهرست شبکه‌ها",
+    "snapshotTitle": "نمای کلی شبکه",
+    "pillarsTitle": "ستون‌های امتیاز",
+    "historyTitle": "سابقهٔ امتیاز",
+    "timelineTitle": "دوره‌های اخیر روند",
+    "priceHistoryTitle": "سابقهٔ قیمت",
+    "scenariosTitle": "چندک‌های بازده تاریخی",
+    "emptySnapshot": "هنوز تصویری از شبکه در دسترس نیست.",
+    "emptyHistory": "برای این بازه سابقهٔ امتیاز در دسترس نیست.",
+    "emptyTimeline": "دوره‌ای برای روند در دسترس نیست.",
+    "emptyPriceHistory": "سابقهٔ قیمت در دسترس نیست.",
+    "emptyScenarios": "آمار بازده تاریخی در دسترس نیست.",
+    "notFoundTitle": "شبکه پیدا نشد",
+    "notFoundDescription": "داده‌ای برای این شبکه در دسترس نیست.",
+    "regimeLabel": "روند",
+    "methodologyVersion": "نسخهٔ روش‌شناسی: {version}",
+    "pillarUnavailable": "برای این شبکه در دسترس نیست",
+    "pillarNominalWeight": "وزن اسمی",
+    "pillarNames": {
+      "adoption": "پذیرش",
+      "capital": "سرمایه",
+      "market_condition": "وضعیت بازار",
+      "security_economics": "امنیت و اقتصاد"
+    },
+    "timelineDays": "{days} روز",
+    "priceSource": "منبع سابقهٔ قیمت: {source}.",
+    "sourceUnavailable": "اطلاعات منبع در دسترس نیست",
+    "scenarioNames": {
+      "pessimistic": "بدبینانه",
+      "base": "پایه",
+      "optimistic": "خوش‌بینانه"
+    },
+    "horizonDays": "بازهٔ {days} روزه",
+    "independentWindows": "پنجره‌های مستقل",
+    "shareNegative": "بازده‌های تاریخی کمتر از صفر",
+    "lowSample": "نمونهٔ کم",
+    "insufficientHistory": "برای این بازه سابقهٔ کافی وجود ندارد.",
+    "historicalQuantilesNote": "این‌ها چندک‌های بازده تاریخی‌اند و نتیجهٔ آینده را قطعی نمی‌کنند.",
+    "quantileExplanation": "p10 صدک ۱۰، p50 میانه و p90 صدک ۹۰ بازده‌های تاریخی را نشان می‌دهند."
   },
   "chat": {
     "title": "گفت‌وگو با تحلیلگر",
@@ -475,7 +514,7 @@
       "description": "شاخص‌های سلامت شبکه‌های پشتیبانی‌شده را بررسی کنید."
     },
     "chainDetail": {
-      "title": "تحلیل شبکهٔ {chainName}",
+      "title": "{chainName} - ChainCompass",
       "description": "شاخص‌های آن‌چین و زمینهٔ تاریخی شبکهٔ {chainName}."
     },
     "chat": {

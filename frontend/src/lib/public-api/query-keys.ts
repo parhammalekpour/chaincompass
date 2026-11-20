@@ -9,4 +9,9 @@ export const publicQueryKeys = {
     slug: ChainSlug,
     range: { from: string; to: string },
   ) => [...publicRoot, "score-history", slug, range.from, range.to] as const,
+  regimes: (slug: ChainSlug) => [...publicRoot, "regimes", slug] as const,
+  series: (slug: ChainSlug, metric: string, source: string) =>
+    [...publicRoot, "series", slug, metric, source] as const,
+  scenarios: (slug: ChainSlug) => [...publicRoot, "scenarios", slug] as const,
+  methodology: [...publicRoot, "methodology"] as const,
 };

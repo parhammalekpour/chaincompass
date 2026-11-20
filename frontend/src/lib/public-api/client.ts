@@ -2,12 +2,20 @@ import type { ZodType } from "zod";
 import {
   chainDetailResponseSchema,
   chainsResponseSchema,
+  methodologyResponseSchema,
   publicApiErrorSchema,
+  regimesResponseSchema,
   scoreHistoryResponseSchema,
+  scenariosResponseSchema,
+  seriesResponseSchema,
   type ChainDetailResponse,
   type ChainSlug,
   type ChainsResponse,
+  type MethodologyResponse,
+  type RegimesResponse,
   type ScoreHistoryResponse,
+  type ScenariosResponse,
+  type SeriesResponse,
 } from "./contracts";
 import {
   publicApiErrorCodes,
@@ -119,4 +127,34 @@ export function getScoreHistory(
     `/api/v1/chains/${encodeURIComponent(slug)}/score-history?${params}`,
     scoreHistoryResponseSchema,
   );
+}
+
+export function getRegimes(slug: ChainSlug): Promise<RegimesResponse> {
+  return fetchPublicData(
+    `/api/v1/chains/${encodeURIComponent(slug)}/regimes`,
+    regimesResponseSchema,
+  );
+}
+
+export function getSeries(
+  slug: ChainSlug,
+  metric: string,
+  source: string,
+): Promise<SeriesResponse> {
+  const params = new URLSearchParams({ metric, source });
+  return fetchPublicData(
+    `/api/v1/chains/${encodeURIComponent(slug)}/series?${params}`,
+    seriesResponseSchema,
+  );
+}
+
+export function getScenarios(slug: ChainSlug): Promise<ScenariosResponse> {
+  return fetchPublicData(
+    `/api/v1/chains/${encodeURIComponent(slug)}/scenarios`,
+    scenariosResponseSchema,
+  );
+}
+
+export function getMethodology(): Promise<MethodologyResponse> {
+  return fetchPublicData("/api/v1/methodology", methodologyResponseSchema);
 }

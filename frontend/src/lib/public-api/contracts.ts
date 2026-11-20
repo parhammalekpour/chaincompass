@@ -2,7 +2,7 @@ import { z } from "zod";
 
 const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const decimalStringSchema = z.string().regex(/^-?\d+(?:\.\d+)?$/);
-const chainSlugSchema = z.enum(["btc", "eth", "sol", "bnb"]);
+export const chainSlugSchema = z.enum(["btc", "eth", "sol", "bnb"]);
 const confidenceSchema = z.enum(["High", "Medium", "Low"]);
 
 export const flagSummarySchema = z
@@ -118,8 +118,27 @@ const dataCoverageSchema = z
   .strict();
 
 const scoreDetailSchema = scoreSummarySchema.extend({
-  pillars: z.record(z.string(), z.unknown()),
-  components: z.array(z.record(z.string(), z.unknown())),
+  pillars: z.record(
+    z.string(),
+    z
+      .object({
+        score: decimalStringSchema.nullable(),
+        available: z.boolean(),
+        weight_used: z.number().int().nonnegative(),
+      })
+      .strict(),
+  ),
+  components: z.array(
+    z
+      .object({
+        value: decimalStringSchema,
+        weight: z.number().int().nonnegative(),
+        feature: z.string(),
+        direction: z.enum(["higher_is_better", "lower_is_better"]),
+        percentile: decimalStringSchema,
+      })
+      .strict(),
+  ),
 });
 
 export const chainDetailResponseSchema = z
@@ -140,6 +159,137 @@ export const chainDetailResponseSchema = z
   })
   .strict();
 
+export const regimeSegmentSchema = z
+  .object({
+    regime: z.string(),
+    start_date: dateSchema,
+    end_date: dateSchema,
+    days: z.number().int().positive(),
+  })
+  .strict();
+
+export const regimesResponseSchema = z
+  .object({
+    generated_at: z.string().datetime({ offset: true }),
+    analysis_only: z.literal(true),
+    chain: chainSlugSchema,
+    segments: z.array(regimeSegmentSchema),
+    latest_vol_state: z.string().nullable(),
+  })
+  .strict();
+
+export const seriesPointSchema = z
+  .object({
+    date: dateSchema,
+    value: decimalStringSchema,
+  })
+  .strict();
+
+export const seriesMetaSchema = z
+  .object({
+    chain: chainSlugSchema,
+    metric: z.string(),
+    source: z.string(),
+    role: z.enum(["score", "context"]),
+    derived: z.boolean(),
+    status: z.string(),
+    first_date: dateSchema.nullable(),
+    last_date: dateSchema.nullable(),
+    points: z.number().int().nonnegative(),
+    missing: z.number().int().nonnegative(),
+    unit_note: z.string(),
+  })
+  .strict();
+
+export const seriesResponseSchema = z
+  .object({
+    generated_at: z.string().datetime({ offset: true }),
+    analysis_only: z.literal(true),
+    meta: seriesMetaSchema,
+    points: z.array(seriesPointSchema),
+  })
+  .strict();
+
+export const scenarioValueSchema = z
+  .object({
+    name: z.enum(["pessimistic", "base", "optimistic"]),
+    quantile: z.enum(["p10", "p50", "p90"]),
+    return: decimalStringSchema,
+    illustrative_price_usd: decimalStringSchema,
+  })
+  .strict();
+
+export const scenarioHorizonSchema = z
+  .object({
+    days: z.number().int().positive(),
+    available: z.boolean(),
+    reason: z.string().nullable(),
+    low_sample: z.boolean(),
+    n_windows: z.number().int().nonnegative(),
+    n_independent: z.number().int().nonnegative(),
+    first_window_start: dateSchema.nullable(),
+    last_window_end: dateSchema.nullable(),
+    share_negative: decimalStringSchema.nullable(),
+    scenarios: z.array(scenarioValueSchema),
+  })
+  .strict();
+
+export const scenariosResponseSchema = z
+  .object({
+    generated_at: z.string().datetime({ offset: true }),
+    analysis_only: z.literal(true),
+    chain: chainSlugSchema,
+    version: z.string(),
+    as_of_date: dateSchema,
+    base_price: z
+      .object({
+        close_usd: decimalStringSchema,
+        date: dateSchema,
+      })
+      .strict(),
+    horizons: z.array(scenarioHorizonSchema),
+    not_a_forecast: z.literal(true),
+    method_note: z.string(),
+    disclaimer: z.string(),
+  })
+  .strict();
+
+const methodologyComponentSchema = z
+  .object({
+    feature: z.string(),
+    weight: z.number().int().nonnegative(),
+    direction: z.string(),
+    chains: z.array(chainSlugSchema),
+    derived_label: z.string().nullable(),
+  })
+  .strict();
+
+const methodologyPillarSchema = z
+  .object({
+    name: z.string(),
+    weight: z.number().int().nonnegative(),
+    components: z.array(methodologyComponentSchema),
+  })
+  .strict();
+
+export const methodologyResponseSchema = z
+  .object({
+    generated_at: z.string().datetime({ offset: true }),
+    analysis_only: z.literal(true),
+    version: z.string(),
+    pillars: z.array(methodologyPillarSchema),
+    sources: z
+      .array(
+        z
+          .object({
+            name: z.string(),
+            used_for: z.array(z.string()),
+          })
+          .passthrough(),
+      ),
+  })
+  .passthrough();
+
 export const publicApiErrorSchema = z
   .object({
     error: z
@@ -157,3 +307,9 @@ export type ChainsResponse = z.infer<typeof chainsResponseSchema>;
 export type ChainDetailResponse = z.infer<typeof chainDetailResponseSchema>;
 export type ScoreHistoryResponse = z.infer<typeof scoreHistoryResponseSchema>;
 export type ScoreHistoryItem = z.infer<typeof scoreHistoryItemSchema>;
+export type RegimeSegment = z.infer<typeof regimeSegmentSchema>;
+export type RegimesResponse = z.infer<typeof regimesResponseSchema>;
+export type SeriesResponse = z.infer<typeof seriesResponseSchema>;
+export type ScenariosResponse = z.infer<typeof scenariosResponseSchema>;
+export type ScenarioHorizon = z.infer<typeof scenarioHorizonSchema>;
+export type MethodologyResponse = z.infer<typeof methodologyResponseSchema>;

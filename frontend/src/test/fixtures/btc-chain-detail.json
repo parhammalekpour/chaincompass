@@ -1,0 +1,90 @@
+{
+  "generated_at": "2026-11-20T17:52:51.107921Z",
+  "analysis_only": true,
+  "slug": "btc",
+  "name": "Bitcoin",
+  "symbol": "BTC",
+  "price": {
+    "close_usd": "61986.730000000000",
+    "as_of_date": "2026-11-19",
+    "ret_30d": "-0.253425133524"
+  },
+  "score": {
+    "value": "41.57",
+    "as_of_date": "2026-11-19",
+    "coverage": "0.6000",
+    "coverage_max": "0.7000",
+    "is_partial": true,
+    "confidence_label": "Medium",
+    "version": "v1",
+    "pillars": {
+      "capital": { "score": null, "available": false, "weight_used": 0 },
+      "adoption": { "score": "42.876712328768", "available": true, "weight_used": 30 },
+      "market_condition": {
+        "score": "40.258751902587",
+        "available": true,
+        "weight_used": 30
+      },
+      "security_economics": {
+        "score": null,
+        "available": false,
+        "weight_used": 0
+      }
+    },
+    "components": [
+      {
+        "value": "-0.008343887758",
+        "weight": 15,
+        "feature": "active_addresses_chg90",
+        "direction": "higher_is_better",
+        "percentile": "60.045662100457"
+      },
+      {
+        "value": "-0.082208406426",
+        "weight": 15,
+        "feature": "tx_count_chg90",
+        "direction": "higher_is_better",
+        "percentile": "25.707762557078"
+      },
+      {
+        "value": "-0.360643713813",
+        "weight": 10,
+        "feature": "drawdown_365d",
+        "direction": "higher_is_better",
+        "percentile": "19.771689497717"
+      },
+      {
+        "value": "0.386934469590",
+        "weight": 7,
+        "feature": "realized_vol_90d",
+        "direction": "lower_is_better",
+        "percentile": "74.474885844749"
+      },
+      {
+        "value": "0.978288215221",
+        "weight": 8,
+        "feature": "volume_ratio_30_365",
+        "direction": "higher_is_better",
+        "percentile": "51.187214611872"
+      },
+      {
+        "value": "-0.147289213870",
+        "weight": 5,
+        "feature": "price_vs_sma200",
+        "direction": "higher_is_better",
+        "percentile": "15.844748858447"
+      }
+    ]
+  },
+  "regime": { "label": "range", "days_in_regime": 4, "vol_state": "normal" },
+  "flags": [],
+  "freshness": { "price_last_date": "2026-11-19", "lag_days": 1, "stale": false },
+  "last_full_coverage": {
+    "value": "43.91",
+    "as_of_date": "2026-11-18",
+    "coverage": "0.7000",
+    "confidence_label": "Medium"
+  },
+  "data_coverage": [],
+  "methodology_version": "v1"
+}

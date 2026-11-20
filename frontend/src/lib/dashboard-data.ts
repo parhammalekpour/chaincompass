@@ -115,6 +115,15 @@ export function formatSignedPercent(value: string | null): string {
   }).format(parsed);
 }
 
+export function formatPercentShare(value: string | null): string {
+  const parsed = parseDisplayDecimal(value);
+  if (parsed === null) return "—";
+  return new Intl.NumberFormat("en-US", {
+    style: "percent",
+    maximumFractionDigits: 2,
+  }).format(parsed);
+}
+
 export function formatScore(value: string): string {
   const parsed = parseDisplayDecimal(value);
   if (parsed === null) return "—";
