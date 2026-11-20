@@ -85,7 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [becomeAnonymous, loadUser]);
 
-  const retryInitialSession = useCallback(async () => {
+  const bootstrapSession = useCallback(async () => {
     const sequence = ++bootstrapSequence.current;
     const controller = new AbortController();
     let timeout: ReturnType<typeof setTimeout> | undefined;
@@ -97,7 +97,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     const isCurrentAttempt = () => sequence === bootstrapSequence.current;
 
-    setStatus("loading");
     try {
       const currentUser = await Promise.race([
         (async () => {
@@ -137,6 +136,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [becomeAnonymous, loadUser]);
 
+  const retryInitialSession = useCallback(async () => {
+    setStatus("loading");
+    await bootstrapSession();
+  }, [bootstrapSession]);
+
   useEffect(() => {
     let active = true;
     const unsubscribe = subscribeToSessionInvalidation(() => {
@@ -150,9 +154,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       window.location.pathname,
     );
     if (!isOAuthCallback) {
-      void Promise.resolve().then(() => {
-        if (active) void retryInitialSession();
-      });
+      // Start async bootstrap; state updates come from its resolved request.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      void bootstrapSession();
     }
 
     const onLogout = () => becomeAnonymous();
@@ -179,7 +183,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       channel?.close();
       window.removeEventListener("storage", onStorage);
     };
-  }, [becomeAnonymous, retryInitialSession]);
+  }, [becomeAnonymous, bootstrapSession]);
 
   const login = useCallback(async (email: string, password: string) => {
     const auth = await fetchAuthResponse("/api/v1/auth/login", {
