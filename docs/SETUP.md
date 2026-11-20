@@ -206,6 +206,15 @@ npm run dev
 Open the app at `http://localhost:3000` so auth requests use the configured
 frontend Origin.
 
+## View the dashboard
+
+Start the backend on port `8010` and the frontend on port `3000` as described
+above. The ingestion worker is optional; it can refresh stored chain data in a
+separate PowerShell window using the commands in [Ingestion worker](#ingestion-worker).
+Create an account or sign in, then open
+`http://localhost:3000/en/app`. The Chains page is available at
+`http://localhost:3000/en/app/chains`.
+
 ## Ingestion worker
 
 Run the worker in its own PowerShell window, separate from the API and frontend.

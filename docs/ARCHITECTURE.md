@@ -45,16 +45,17 @@ or alert-delivery implementation yet.
 
 ## Implemented vs Planned
 
-Implemented: bilingual Next.js routes and auth UI, FastAPI health/auth/admin
-endpoints, the public read-only data API under `/api/v1`, ingestion providers,
-the separate APScheduler worker, RPC probes, and the point-in-time feature
-engine with its CLI, plus a pure historical-return scenario engine and public
-scenario endpoint.
+Implemented: bilingual Next.js routes and auth UI, the dashboard, FastAPI
+health/auth/admin endpoints, the public read-only data API under `/api/v1`,
+ingestion providers, the separate APScheduler worker, RPC probes, and the
+point-in-time feature engine with its CLI, plus a pure historical-return
+scenario engine and public scenario endpoint.
 
 The Network Health Score, regimes, and risk flags are implemented in the
 backend scoring layer: database tables, analytics CLI, and worker job
-`scores`. The read-only public API exposes their results, but no dashboard UI
-consumes them yet. The API is documented in [API.md](API.md).
+`scores`. The dashboard consumes these results through the public API. The
+chains screener, chain detail, chat, watchlist, alert delivery, and scenario
+visualizations remain planned.
 
 Public data routes are GET-only and unauthenticated. They expose chain
 snapshots, score history, reported regimes, risk flags, methodology, and
@@ -64,14 +65,29 @@ status/role metadata. Public responses are cached for five minutes and use an
 in-process per-IP rate limiter. No CORS settings were added for this API;
 development remains same-origin through the Next.js rewrite.
 
+### Frontend public data layer
+
+The browser uses the same-origin `/api/v1` client, strict Zod response
+contracts, and shared TanStack Query keys. Query data stays fresh for five
+minutes, does not refetch on window focus, and deduplicates requests for the
+same key. Public API errors are converted to localized messages, including a
+safe `Retry-After` duration for rate limits.
+
+API decimal values remain strings through contracts and query caching.
+Conversion to JavaScript numbers happens only when formatting a visible value
+or building chart coordinates. Score history ranges use UTC dates; the chart
+is dynamically loaded, uses a fixed 0–100 axis, and inserts null values for
+missing calendar dates so gaps remain gaps. The chart legend can hide
+individual chains, and its caveat explains that scores use different inputs
+and are relative to each chain's own history.
+
 The scenario engine uses Binance close-to-close returns from exact calendar-day
 endpoints, with no gap filling or look-ahead. Its public results are historical
 quantiles, not forecasts; no scenario UI is implemented yet.
 
 Planned, not implemented: an LLM provider, AI agent and tool-calling, Telegram
-notifications, user-facing alert delivery, and walk-forward calibration
-evaluation. Existing dashboard, chat, and alert routes are placeholders, not
-working analysis or notification features.
+notifications, user-facing alert delivery, chains screener, chain detail,
+watchlists, chat, and walk-forward calibration evaluation.
 
 ## Auth
 

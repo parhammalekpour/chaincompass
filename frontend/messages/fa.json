@@ -250,7 +250,81 @@
   },
   "dashboard": {
     "title": "نمای کلی",
-    "description": "نمایی روشن از وضعیت شبکه‌ها، تغییرات اخیر و تازگی داده‌ها."
+    "description": "نمایی روشن از وضعیت شبکه‌ها، تغییرات اخیر و تازگی داده‌ها.",
+    "dataAsOfPrefix": "داده‌ها تا",
+    "utc": "UTC",
+    "disclaimer": "فقط تحلیل داده‌هاست؛ توصیهٔ سرمایه‌گذاری نیست و دربارهٔ آینده قطعیت نمی‌دهد.",
+    "chainNames": {
+      "btc": "بیت‌کوین",
+      "eth": "اتریوم",
+      "sol": "سولانا",
+      "bnb": "زنجیرهٔ بی‌ان‌بی"
+    },
+    "confidence": {
+      "high": "بالا",
+      "medium": "متوسط",
+      "low": "پایین"
+    },
+    "partial": "ناقص",
+    "partialDetails": "جزئیات پوشش ناقص",
+    "partialTooltip": "داده‌های روز آخر با ورودی‌های کمتری محاسبه شده‌اند (پوشش <ltr>{coverage}</ltr> از حداکثر <ltr>{coverageMax}</ltr>).",
+    "lastFullCoverage": "آخرین امتیاز با پوشش کامل: <ltr>{value}</ltr> در تاریخ <ltr>{date}</ltr>.",
+    "lastFullLoading": "جزئیات آخرین پوشش کامل در حال بارگذاری است.",
+    "lastFullError": "بارگذاری جزئیات آخرین پوشش کامل انجام نشد.",
+    "lastFullUnavailable": "امتیازی با پوشش کامل در دسترس نیست.",
+    "coverage": "پوشش <ltr>{coverage}</ltr> از حداکثر <ltr>{coverageMax}</ltr>.",
+    "notEnoughHistory": "هنوز سابقهٔ کافی وجود ندارد",
+    "notAvailable": "در دسترس نیست",
+    "regimes": {
+      "uptrend": "روند صعودی",
+      "downtrend": "روند نزولی",
+      "range": "دامنه‌ای"
+    },
+    "unknownRegime": "وضعیت نامشخص",
+    "volatility": {
+      "low": "نوسان کم",
+      "normal": "نوسان عادی",
+      "high": "نوسان زیاد"
+    },
+    "unknownVolatility": "میزان نوسان نامشخص",
+    "daysCount": "روز",
+    "price": "قیمت",
+    "return30d": "بازده 30 روزه",
+    "activeFlags": "پرچم‌های فعال",
+    "noActiveFlags": "پرچم فعالی وجود ندارد",
+    "flagCount": "{count} پرچم فعال",
+    "more": "مورد دیگر",
+    "priceDataPrefix": "تاریخ دادهٔ قیمت:",
+    "staleWarning": "داده‌ها به‌روز نیستند",
+    "refreshError": "به‌روزرسانی اخیر انجام نشد؛ آخرین داده‌های در دسترس نمایش داده می‌شوند.",
+    "chartTitle": "سابقهٔ امتیاز",
+    "rangeLabel": "بازهٔ سابقهٔ امتیاز",
+    "ranges": {
+      "1y": "1Y",
+      "3y": "3Y",
+      "max": "حداکثر"
+    },
+    "chartTextAlternative": "خطوط امتیاز روزانهٔ بیت‌کوین، اتریوم، سولانا و زنجیرهٔ بی‌ان‌بی. تاریخ‌های بدون داده به‌صورت گسست نمایش داده می‌شوند.",
+    "chartAccessibleLabel": "امتیاز روزانهٔ سلامت شبکه از ۰ تا ۱۰۰",
+    "chartCaveat": "امتیاز هر شبکه نسبت به سابقهٔ سه‌سالهٔ خودش محاسبه شده و ورودی‌های شبکه‌ها یکسان نیست؛ مقایسهٔ بین شبکه‌ها را با احتیاط انجام دهید.",
+    "tooltipConfidence": "اطمینان",
+    "tooltipScore": "امتیاز",
+    "noHistory": "برای این بازه سابقهٔ امتیاز در دسترس نیست.",
+    "severity": {
+      "low": "شدت کم",
+      "medium": "شدت متوسط",
+      "high": "شدت زیاد",
+      "unknown": "شدت نامشخص"
+    },
+    "flags": {
+      "deep_drawdown": "افت عمیق",
+      "high_volatility": "نوسان زیاد",
+      "liquidity_drying": "کاهش نقدشوندگی",
+      "usage_decline": "کاهش استفاده",
+      "tvl_outflow": "خروج ارزش کل قفل‌شده",
+      "stablecoin_contraction": "کاهش عرضهٔ استیبل‌کوین"
+    },
+    "unknownFlag": "پرچم ریسک ناشناخته"
   },
   "chains": {
     "title": "شبکه‌ها",

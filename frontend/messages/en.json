@@ -250,7 +250,81 @@
   },
   "dashboard": {
     "title": "Dashboard",
-    "description": "A clear overview of network conditions, recent changes, and data freshness."
+    "description": "A clear overview of network conditions, recent changes, and data freshness.",
+    "dataAsOfPrefix": "Data as of",
+    "utc": "UTC",
+    "disclaimer": "Analysis only. Not investment advice or a forecast.",
+    "chainNames": {
+      "btc": "Bitcoin",
+      "eth": "Ethereum",
+      "sol": "Solana",
+      "bnb": "BNB Chain"
+    },
+    "confidence": {
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "partial": "Partial",
+    "partialDetails": "Partial coverage details",
+    "partialTooltip": "Latest day uses fewer inputs (coverage <ltr>{coverage}</ltr> of <ltr>{coverageMax}</ltr> max).",
+    "lastFullCoverage": "Last full-coverage score: <ltr>{value}</ltr> on <ltr>{date}</ltr>.",
+    "lastFullLoading": "Last full-coverage details are loading.",
+    "lastFullError": "Last full-coverage details could not be loaded.",
+    "lastFullUnavailable": "No full-coverage score is available.",
+    "coverage": "Coverage <ltr>{coverage}</ltr> of <ltr>{coverageMax}</ltr> max.",
+    "notEnoughHistory": "Not enough history yet",
+    "notAvailable": "Not available",
+    "regimes": {
+      "uptrend": "Uptrend",
+      "downtrend": "Downtrend",
+      "range": "Range"
+    },
+    "unknownRegime": "Unavailable regime",
+    "volatility": {
+      "low": "Low volatility",
+      "normal": "Normal volatility",
+      "high": "High volatility"
+    },
+    "unknownVolatility": "Unavailable volatility",
+    "daysCount": "days",
+    "price": "Price",
+    "return30d": "30-day return",
+    "activeFlags": "Active flags",
+    "noActiveFlags": "No active flags",
+    "flagCount": "{count} active flags",
+    "more": "more",
+    "priceDataPrefix": "Price data:",
+    "staleWarning": "Data is stale",
+    "refreshError": "The latest refresh failed. Showing the most recently available data.",
+    "chartTitle": "Score history",
+    "rangeLabel": "Score history range",
+    "ranges": {
+      "1y": "1Y",
+      "3y": "3Y",
+      "max": "Max"
+    },
+    "chartTextAlternative": "Daily score lines for Bitcoin, Ethereum, Solana, and BNB Chain. Missing dates appear as gaps.",
+    "chartAccessibleLabel": "Daily network health scores, from 0 to 100",
+    "chartCaveat": "Scores are relative to each chain's own 3-year history and use different input sets per chain; compare across chains with care.",
+    "tooltipConfidence": "Confidence",
+    "tooltipScore": "Score",
+    "noHistory": "No score history is available for this range.",
+    "severity": {
+      "low": "Low severity",
+      "medium": "Medium severity",
+      "high": "High severity",
+      "unknown": "Severity unavailable"
+    },
+    "flags": {
+      "deep_drawdown": "Deep drawdown",
+      "high_volatility": "High volatility",
+      "liquidity_drying": "Liquidity decline",
+      "usage_decline": "Usage decline",
+      "tvl_outflow": "TVL outflow",
+      "stablecoin_contraction": "Stablecoin contraction"
+    },
+    "unknownFlag": "Unlisted risk flag"
   },
   "chains": {
     "title": "Chains",

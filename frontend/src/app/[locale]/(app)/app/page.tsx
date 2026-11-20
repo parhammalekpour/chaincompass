@@ -1,4 +1,4 @@
-import { PlaceholderPage } from "@/components/placeholder-page";
+import { DashboardPage } from "@/components/dashboard/dashboard-page";
 import { createPageMetadata } from "@/lib/metadata";
 
 export async function generateMetadata({
@@ -11,5 +11,5 @@ export async function generateMetadata({
 }
 
 export default function Page() {
-  return <PlaceholderPage namespace="dashboard" />;
+  return <DashboardPage />;
 }
