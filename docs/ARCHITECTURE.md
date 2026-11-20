@@ -49,6 +49,10 @@ Implemented: bilingual Next.js routes and auth UI, FastAPI health/auth/admin
 endpoints, ingestion providers, the separate APScheduler worker, RPC probes,
 and the point-in-time feature engine with its CLI.
 
+The Network Health Score, regimes, and risk flags are implemented in the
+**backend only**: database tables, analytics CLI, and worker job `scores`.
+There is **no public API and no UI** for these outputs yet.
+
 Planned, not implemented: an LLM provider, AI agent and tool-calling, Telegram
 notifications, user-facing alert delivery, historical-distribution scenarios,
 and walk-forward backtesting. Existing dashboard, chat, and alert routes are

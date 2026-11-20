@@ -97,6 +97,74 @@ The volatility overlay ranks `realized_vol_90d` by the same trailing percentile
 rule. It is `high` at percentile `>= 80`, `low` at `<= 20`, otherwise `normal`;
 it is null until the percentile is available.
 
+## Known behaviours
+
+### Regime confirmation lag
+
+The reported regime waits for five consecutive daily raw labels before it
+changes. This intentionally delays regime changes after abrupt moves. In the
+stored March 2020 data, BTC and ETH both had raw `stress` from March 12 through
+March 16, while the reported regime remained `uptrend` through March 15 and
+changed to `stress` on March 16:
+
+| Date | Chain | Drawdown | Price vs SMA200 | 90-day return | Raw | Reported | Days | Active flags |
+|---|---|---:|---:|---:|---|---|---:|---|
+| 2020-03-12 | BTC | -0.633414287678 | -0.443179198066 | -0.338704522159 | stress | uptrend | 41 | deep_drawdown, high_volatility |
+| 2020-03-15 | BTC | -0.590546670943 | -0.372913329717 | -0.222066479776 | stress | uptrend | 44 | deep_drawdown, high_volatility |
+| 2020-03-16 | BTC | -0.615927385480 | -0.410242898874 | -0.240774960672 | stress | stress | 1 | deep_drawdown, high_volatility |
+| 2020-03-12 | ETH | -0.682312383983 | -0.398843685698 | -0.255386740331 | stress | uptrend | 33 | deep_drawdown, high_volatility |
+| 2020-03-15 | ETH | -0.635286838151 | -0.306599488941 | -0.067430121299 | stress | uptrend | 36 | deep_drawdown, high_volatility |
+| 2020-03-16 | ETH | -0.672883703114 | -0.377067650610 | -0.089104036757 | stress | stress | 1 | deep_drawdown, high_volatility |
+
+### BNB: 2022-11-10
+
+On November 10, drawdown was `-0.532882606023`, so the raw rule selected
+`stress` before evaluating trend; price versus SMA200 was `0.060073751842`,
+while the 90-day return was `-0.072888075633`. The verified
+`deep_drawdown` flag was medium severity with value `-0.532882606023` and
+threshold `-0.400000000000`.
+
+The reported regime was still `uptrend`: raw `uptrend` held for five
+consecutive days from November 3 through November 7, confirming that reported
+regime on November 7. Raw `range` appeared on November 8, then raw `stress`
+from November 9 through November 12. Neither subsequent raw label lasted five
+consecutive days in that interval, so hysteresis retained the reported
+`uptrend`. This is the rules working as designed, not a bug.
+
+| Date | Drawdown | Price vs SMA200 | 90-day return | Raw | Reported | Days |
+|---|---:|---:|---:|---|---|---:|
+| 2022-11-03 | -0.495791889824 | 0.137265730163 | 0.043051598607 | uptrend | stress | 175 |
+| 2022-11-07 | -0.484315225708 | 0.168874637328 | 0.038840937115 | uptrend | uptrend | 1 |
+| 2022-11-08 | -0.496926859250 | 0.137139195354 | -0.004257907543 | range | uptrend | 2 |
+| 2022-11-09 | -0.589274738783 | -0.069440358716 | -0.173980222497 | stress | uptrend | 3 |
+| 2022-11-10 | -0.532882606023 | 0.060073751842 | -0.072888075633 | stress | uptrend | 4 |
+| 2022-11-11 | -0.553779963122 | 0.014664416516 | -0.104532839963 | stress | uptrend | 5 |
+| 2022-11-12 | -0.565457897972 | -0.010107197550 | -0.109571788413 | stress | uptrend | 6 |
+
+### Latest-day coverage and provider dates
+
+On the UTC date 2026-11-20, BTC's latest score date was November 19. Coverage
+was `0.6000`, below its `0.7000` registry maximum, after being `0.7000` on each
+of the previous five score dates. The November 19 component rows for
+`hashrate_chg90` and `fees_usd_chg90` were absent; their trailing windows
+contained 1,094 feature rows, and both source series (`hashrate` and
+`fees_usd`, Blockchain.info) had `series_coverage.last_date = 2026-11-18`.
+This verifies a one-day data lag for those source series in this snapshot and
+coincides with the BTC coverage decrease. It does not establish a general
+publication schedule.
+
+For all registered score-input series, the same November 20 snapshot showed
+last observation date November 19 (one-day lag), except BTC Blockchain.info
+hashrate and fees, whose last date was November 18 (two-day lag). A typical or
+persistent provider-lag pattern beyond this snapshot is **UNVERIFIED**.
+
+### Interpretation guidance
+
+The score is relative to each chain's own trailing three-year history, not an
+absolute or cross-chain measure. Always show confidence beside the score. It
+describes historical conditions; it is not a prediction, financial advice, or
+a buy/sell call.
+
 ## Risk flags
 
 Only true flags are stored. Each stores the observed decimal value, fixed

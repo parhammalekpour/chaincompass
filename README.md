@@ -42,9 +42,10 @@ See [Windows setup](docs/SETUP.md) to prepare the development environment.
   endpoints.
 - A point-in-time Decimal features layer with an explicit score/context input
   registry and backfill/update CLI.
-- A point-in-time v1 Network Health Score with coverage/confidence, price-based
-  regimes, and deterministic risk flags. Methodology and limits are documented
-  in [docs/HEALTH_SCORE.md](docs/HEALTH_SCORE.md).
+- Backend-only point-in-time v1 Network Health Score with coverage/confidence,
+  price-based regimes, and deterministic risk flags (tables, analytics CLI, and
+  worker job `scores`). There is no public API or UI for these outputs yet.
+  Methodology and limits are documented in [docs/HEALTH_SCORE.md](docs/HEALTH_SCORE.md).
 - Not implemented yet: an analytical dashboard, an AI agent, or alert delivery.
   Existing dashboard, chat, and alert pages are placeholders.
 - Explicitly confirmed purge for the discontinued legacy Coin Metrics BNB
