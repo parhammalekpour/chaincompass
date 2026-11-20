@@ -1,5 +1,6 @@
 import { AppShell } from "@/components/app/app-shell";
 import { AppAuthGuard } from "@/components/auth/app-auth-guard";
+import { PublicQueryProvider } from "@/components/providers/public-query-provider";
 import { setRequestLocale } from "next-intl/server";
 
 export default async function AppLayout({
@@ -9,8 +10,10 @@ export default async function AppLayout({
   const { locale } = await params;
   setRequestLocale(locale);
   return (
-    <AppAuthGuard locale={locale}>
-      <AppShell>{children}</AppShell>
-    </AppAuthGuard>
+    <PublicQueryProvider>
+      <AppAuthGuard locale={locale}>
+        <AppShell>{children}</AppShell>
+      </AppAuthGuard>
+    </PublicQueryProvider>
   );
 }

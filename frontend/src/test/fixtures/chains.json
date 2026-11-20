@@ -1,0 +1,140 @@
+{
+    "generated_at":  "2026-11-20T17:52:51.107921Z",
+    "analysis_only":  true,
+    "chains":  [
+                   {
+                       "slug":  "btc",
+                       "name":  "Bitcoin",
+                       "symbol":  "BTC",
+                       "price":  {
+                                     "close_usd":  "61986.730000000000",
+                                     "as_of_date":  "2026-11-19",
+                                     "ret_30d":  "-0.253425133524"
+                                 },
+                       "score":  {
+                                     "value":  "41.57",
+                                     "as_of_date":  "2026-11-19",
+                                     "coverage":  "0.6000",
+                                     "coverage_max":  "0.7000",
+                                     "is_partial":  true,
+                                     "confidence_label":  "Medium",
+                                     "version":  "v1"
+                                 },
+                       "regime":  {
+                                      "label":  "range",
+                                      "days_in_regime":  4,
+                                      "vol_state":  "normal"
+                                  },
+                       "flags":  [
+
+                                 ],
+                       "freshness":  {
+                                         "price_last_date":  "2026-11-19",
+                                         "lag_days":  1,
+                                         "stale":  false
+                                     }
+                   },
+                   {
+                       "slug":  "eth",
+                       "name":  "Ethereum",
+                       "symbol":  "ETH",
+                       "price":  {
+                                     "close_usd":  "1757.320000000000",
+                                     "as_of_date":  "2026-11-19",
+                                     "ret_30d":  "-0.282492242365"
+                                 },
+                       "score":  {
+                                     "value":  "34.70",
+                                     "as_of_date":  "2026-11-19",
+                                     "coverage":  "0.9000",
+                                     "coverage_max":  "0.9000",
+                                     "is_partial":  false,
+                                     "confidence_label":  "High",
+                                     "version":  "v1"
+                                 },
+                       "regime":  {
+                                      "label":  "downtrend",
+                                      "days_in_regime":  2,
+                                      "vol_state":  "low"
+                                  },
+                       "flags":  [
+                                     {
+                                         "flag":  "deep_drawdown",
+                                         "severity":  "medium"
+                                     }
+                                 ],
+                       "freshness":  {
+                                         "price_last_date":  "2026-11-19",
+                                         "lag_days":  1,
+                                         "stale":  false
+                                     }
+                   },
+                   {
+                       "slug":  "sol",
+                       "name":  "Solana",
+                       "symbol":  "SOL",
+                       "price":  {
+                                     "close_usd":  "73.150000000000",
+                                     "as_of_date":  "2026-11-19",
+                                     "ret_30d":  "-0.313403416557"
+                                 },
+                       "score":  {
+                                     "value":  "35.10",
+                                     "as_of_date":  "2026-11-19",
+                                     "coverage":  "0.6000",
+                                     "coverage_max":  "0.6000",
+                                     "is_partial":  false,
+                                     "confidence_label":  "Medium",
+                                     "version":  "v1"
+                                 },
+                       "regime":  {
+                                      "label":  "range",
+                                      "days_in_regime":  8,
+                                      "vol_state":  "low"
+                                  },
+                       "flags":  [
+                                     {
+                                         "flag":  "deep_drawdown",
+                                         "severity":  "medium"
+                                     }
+                                 ],
+                       "freshness":  {
+                                         "price_last_date":  "2026-11-19",
+                                         "lag_days":  1,
+                                         "stale":  false
+                                     }
+                   },
+                   {
+                       "slug":  "bnb",
+                       "name":  "BNB Chain",
+                       "symbol":  "BNB",
+                       "price":  {
+                                     "close_usd":  "580.250000000000",
+                                     "as_of_date":  "2026-11-19",
+                                     "ret_30d":  "-0.217665062223"
+                                 },
+                       "score":  {
+                                     "value":  "36.05",
+                                     "as_of_date":  "2026-11-19",
+                                     "coverage":  "0.6000",
+                                     "coverage_max":  "0.6000",
+                                     "is_partial":  false,
+                                     "confidence_label":  "Medium",
+                                     "version":  "v1"
+                                 },
+                       "regime":  {
+                                      "label":  "downtrend",
+                                      "days_in_regime":  2,
+                                      "vol_state":  "normal"
+                                  },
+                       "flags":  [
+
+                                 ],
+                       "freshness":  {
+                                         "price_last_date":  "2026-11-19",
+                                         "lag_days":  1,
+                                         "stale":  false
+                                     }
+                   }
+               ]
+}

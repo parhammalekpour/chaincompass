@@ -1,0 +1,217 @@
+{
+    "generated_at":  "2026-11-20T17:52:51.158839Z",
+    "analysis_only":  true,
+    "chain":  "btc",
+    "items":  [
+                  {
+                      "as_of_date":  "2026-10-21",
+                      "score":  "62.42",
+                      "coverage":  "0.7000",
+                      "is_partial":  false,
+                      "confidence_label":  "Medium"
+                  },
+                  {
+                      "as_of_date":  "2026-10-22",
+                      "score":  "60.09",
+                      "coverage":  "0.7000",
+                      "is_partial":  false,
+                      "confidence_label":  "Medium"
+                  },
+                  {
+                      "as_of_date":  "2026-10-23",
+                      "score":  "61.55",
+                      "coverage":  "0.7000",
+                      "is_partial":  false,
+                      "confidence_label":  "Medium"
+                  },
+                  {
+                      "as_of_date":  "2026-10-24",
+                      "score":  "60.82",
+                      "coverage":  "0.7000",
+                      "is_partial":  false,
+                      "confidence_label":  "Medium"
+                  },
+                  {
+                      "as_of_date":  "2026-10-25",
+                      "score":  "60.87",
+                      "coverage":  "0.7000",
+                      "is_partial":  false,
+                      "confidence_label":  "Medium"
+                  },
+                  {
+                      "as_of_date":  "2026-10-26",
+                      "score":  "60.97",
+                      "coverage":  "0.7000",
+                      "is_partial":  false,
+                      "confidence_label":  "Medium"
+                  },
+                  {
+                      "as_of_date":  "2026-10-27",
+                      "score":  "60.44",
+                      "coverage":  "0.7000",
+                      "is_partial":  false,
+                      "confidence_label":  "Medium"
+                  },
+                  {
+                      "as_of_date":  "2026-10-28",
+                      "score":  "58.34",
+                      "coverage":  "0.7000",
+                      "is_partial":  false,
+                      "confidence_label":  "Medium"
+                  },
+                  {
+                      "as_of_date":  "2026-10-29",
+                      "score":  "56.20",
+                      "coverage":  "0.7000",
+                      "is_partial":  false,
+                      "confidence_label":  "Medium"
+                  },
+                  {
+                      "as_of_date":  "2026-10-30",
+                      "score":  "54.42",
+                      "coverage":  "0.7000",
+                      "is_partial":  false,
+                      "confidence_label":  "Medium"
+                  },
+                  {
+                      "as_of_date":  "2026-10-31",
+                      "score":  "54.29",
+                      "coverage":  "0.7000",
+                      "is_partial":  false,
+                      "confidence_label":  "Medium"
+                  },
+                  {
+                      "as_of_date":  "2026-11-01",
+                      "score":  "53.80",
+                      "coverage":  "0.7000",
+                      "is_partial":  false,
+                      "confidence_label":  "Medium"
+                  },
+                  {
+                      "as_of_date":  "2026-11-02",
+                      "score":  "53.62",
+                      "coverage":  "0.7000",
+                      "is_partial":  false,
+                      "confidence_label":  "Medium"
+                  },
+                  {
+                      "as_of_date":  "2026-11-03",
+                      "score":  "54.07",
+                      "coverage":  "0.7000",
+                      "is_partial":  false,
+                      "confidence_label":  "Medium"
+                  },
+                  {
+                      "as_of_date":  "2026-11-04",
+                      "score":  "53.79",
+                      "coverage":  "0.7000",
+                      "is_partial":  false,
+                      "confidence_label":  "Medium"
+                  },
+                  {
+                      "as_of_date":  "2026-11-05",
+                      "score":  "51.75",
+                      "coverage":  "0.7000",
+                      "is_partial":  false,
+                      "confidence_label":  "Medium"
+                  },
+                  {
+                      "as_of_date":  "2026-11-06",
+                      "score":  "51.51",
+                      "coverage":  "0.7000",
+                      "is_partial":  false,
+                      "confidence_label":  "Medium"
+                  },
+                  {
+                      "as_of_date":  "2026-11-07",
+                      "score":  "50.49",
+                      "coverage":  "0.7000",
+                      "is_partial":  false,
+                      "confidence_label":  "Medium"
+                  },
+                  {
+                      "as_of_date":  "2026-11-08",
+                      "score":  "49.11",
+                      "coverage":  "0.7000",
+                      "is_partial":  false,
+                      "confidence_label":  "Medium"
+                  },
+                  {
+                      "as_of_date":  "2026-11-09",
+                      "score":  "50.95",
+                      "coverage":  "0.7000",
+                      "is_partial":  false,
+                      "confidence_label":  "Medium"
+                  },
+                  {
+                      "as_of_date":  "2026-11-10",
+                      "score":  "51.83",
+                      "coverage":  "0.7000",
+                      "is_partial":  false,
+                      "confidence_label":  "Medium"
+                  },
+                  {
+                      "as_of_date":  "2026-11-11",
+                      "score":  "51.44",
+                      "coverage":  "0.7000",
+                      "is_partial":  false,
+                      "confidence_label":  "Medium"
+                  },
+                  {
+                      "as_of_date":  "2026-11-12",
+                      "score":  "48.07",
+                      "coverage":  "0.7000",
+                      "is_partial":  false,
+                      "confidence_label":  "Medium"
+                  },
+                  {
+                      "as_of_date":  "2026-11-13",
+                      "score":  "46.18",
+                      "coverage":  "0.7000",
+                      "is_partial":  false,
+                      "confidence_label":  "Medium"
+                  },
+                  {
+                      "as_of_date":  "2026-11-14",
+                      "score":  "42.70",
+                      "coverage":  "0.7000",
+                      "is_partial":  false,
+                      "confidence_label":  "Medium"
+                  },
+                  {
+                      "as_of_date":  "2026-11-15",
+                      "score":  "40.82",
+                      "coverage":  "0.7000",
+                      "is_partial":  false,
+                      "confidence_label":  "Medium"
+                  },
+                  {
+                      "as_of_date":  "2026-11-16",
+                      "score":  "42.56",
+                      "coverage":  "0.7000",
+                      "is_partial":  false,
+                      "confidence_label":  "Medium"
+                  },
+                  {
+                      "as_of_date":  "2026-11-17",
+                      "score":  "44.16",
+                      "coverage":  "0.7000",
+                      "is_partial":  false,
+                      "confidence_label":  "Medium"
+                  },
+                  {
+                      "as_of_date":  "2026-11-18",
+                      "score":  "43.91",
+                      "coverage":  "0.7000",
+                      "is_partial":  false,
+                      "confidence_label":  "Medium"
+                  },
+                  {
+                      "as_of_date":  "2026-11-19",
+                      "score":  "41.57",
+                      "coverage":  "0.6000",
+                      "is_partial":  true,
+                      "confidence_label":  "Medium"
+                  }
+              ]
+}

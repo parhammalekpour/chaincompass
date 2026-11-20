@@ -32,4 +32,15 @@ describe("message catalogs", () => {
       `Missing keys in messages/en.json: ${missingInEnglish.join(", ")}`,
     ).toEqual([]);
   });
+
+  it("avoids prohibited financial wording in both locales", () => {
+    const englishText = JSON.stringify(en);
+    const persianText = JSON.stringify(fa);
+    const prohibitedEnglish =
+      /\b(?:buy|buying|sell|selling|target|targets|predict|prediction|predictions|predictive|will|guarantee|guaranteed|guarantees)\b/i;
+    const prohibitedPersian = /خرید|فروش|هدف|پیش[\u200c ]?بینی|تضمین|خواه(?:د|ند|ید)/;
+
+    expect(englishText).not.toMatch(prohibitedEnglish);
+    expect(persianText).not.toMatch(prohibitedPersian);
+  });
 });

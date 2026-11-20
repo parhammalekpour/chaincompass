@@ -1,0 +1,26 @@
+{
+    "generated_at":  "2026-11-20T17:52:51.107921Z",
+    "analysis_only":  true,
+    "chains":  [
+                   {
+                       "slug":  "sol",
+                       "name":  "Solana",
+                       "symbol":  "SOL",
+                       "price":  {
+                                     "close_usd":  null,
+                                     "as_of_date":  null,
+                                     "ret_30d":  null
+                                 },
+                       "score":  null,
+                       "regime":  null,
+                       "flags":  [
+
+                                 ],
+                       "freshness":  {
+                                         "price_last_date":  null,
+                                         "lag_days":  null,
+                                         "stale":  false
+                                     }
+                   }
+               ]
+}

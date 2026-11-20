@@ -53,13 +53,13 @@
     "searchShortcut": "Ctrl K",
     "userMenu": "User menu",
     "guest": "Guest",
-    "accountSoon": "Account options will be available soon",
+    "accountSoon": "Account options are coming soon",
     "logout": "Log out",
     "logoutFailed": "Could not complete sign out with the server. Your local session was cleared.",
     "verifyEmailNotice": "Please verify your email address to access all account features.",
     "resendVerification": "Resend verification email",
     "resendPending": "Sending…",
-    "resendConfirmation": "If this address needs verification, an email will arrive shortly.",
+    "resendConfirmation": "If this address needs verification, an email should arrive shortly.",
     "resendCountdown": "Try again in {seconds}s"
   },
   "landing": {
@@ -69,7 +69,7 @@
     "title": "See the network behind the numbers.",
     "description": "Clear, evidence-based on-chain analysis for long-term investors. Understand what is happening across major networks, with context and uncertainty in view.",
     "scope": "Starting with Bitcoin, Ethereum, Solana, and BNB Chain.",
-    "disclaimer": "For information only. Not financial advice and never a buy or sell signal.",
+    "disclaimer": "For information only; no financial advice or transaction recommendations.",
     "sampleHeading": "A clearer view of network activity",
     "sampleNote": "Illustrative values show formatting only; they are not live market data."
   },
@@ -107,10 +107,10 @@
     "promiseTitle": "Our promise",
     "promiseDescription": "Useful analysis should be clear about what it can and cannot tell you.",
     "promise1": "Analysis and context, never financial advice.",
-    "promise2": "Historical scenarios communicate ranges, not price predictions.",
+    "promise2": "Historical scenarios show outcome ranges, not a forecast.",
     "promise3": "Methods, evidence, uncertainty, and data freshness stay visible.",
     "disclaimerTitle": "An important note",
-    "disclaimer": "ChainCompass is for informational purposes only. It is not financial, investment, or trading advice and does not recommend buying or selling any asset.",
+    "disclaimer": "ChainCompass is for informational purposes only. It provides no financial, investment, or trading advice and makes no transaction recommendations.",
     "finalTitle": "Start with better context.",
     "finalDescription": "Explore on-chain evidence at your own pace. No trading calls, no promised outcomes.",
     "reducedMotionLabel": "Decorative network activity preview"
@@ -157,7 +157,7 @@
   },
   "forgotPassword": {
     "title": "Reset your password",
-    "description": "Enter your email and we will send instructions if an account exists.",
+    "description": "Enter your email to receive instructions if an account exists.",
     "email": "Email address",
     "submit": "Send instructions",
     "submitting": "Sending…",
@@ -187,7 +187,7 @@
     "resend": "Send a new verification email",
     "resendPending": "Sending…",
     "resendCountdown": "Try again in {seconds}s",
-    "resendSuccess": "If this address needs verification, an email will arrive shortly.",
+    "resendSuccess": "If this address needs verification, an email should arrive shortly.",
     "login": "Sign in",
     "continueToApp": "Continue to the app"
   },
@@ -262,7 +262,7 @@
   },
   "chat": {
     "title": "Chat analyst",
-    "description": "Ask questions about sourced on-chain data. Numeric answers will come only from analysis tools."
+    "description": "Ask questions about sourced on-chain data. Numeric answers use values returned by analysis tools only."
   },
   "watchlist": {
     "title": "Watchlist",
@@ -279,7 +279,7 @@
   "states": {
     "loading": "Loading content",
     "emptyTitle": "Nothing to show yet",
-    "emptyDescription": "When information is available, it will appear here.",
+    "emptyDescription": "Available information appears here.",
     "errorTitle": "This page could not be loaded",
     "errorDescription": "Please try again. If the problem continues, come back later.",
     "retry": "Try again",
@@ -291,6 +291,20 @@
     "generic": "Something went wrong. Please try again.",
     "notFound": "This page could not be found.",
     "validation": "Check the highlighted fields and try again."
+  },
+  "publicErrors": {
+    "rateLimited": "Too many requests. Please try again.",
+    "rateLimitedRetry": "Too many requests. Try again in {retryAfter}.",
+    "network": "Could not connect to public data. Check your connection and retry.",
+    "contractMismatch": "Unexpected data format. Please try again later.",
+    "chainNotFound": "This chain is not available.",
+    "validation": "The requested data range is invalid.",
+    "noSnapshot": "No data exists for that date.",
+    "futureDate": "Future dates are not available.",
+    "range": "This date range is not available.",
+    "seriesUnavailable": "This data series is unavailable.",
+    "sourceRequired": "Choose a data source.",
+    "unknown": "Public data could not be loaded."
   },
   "metadata": {
     "brand": "ChainCompass",
