@@ -206,6 +206,11 @@ npm run dev
 Open the app at `http://localhost:3000` so auth requests use the configured
 frontend Origin.
 
+The public reference pages do not require an account. Open
+`http://localhost:3000/en/methodology` and `http://localhost:3000/en/legal`;
+Persian versions are available at
+`http://localhost:3000/fa/methodology` and `http://localhost:3000/fa/legal`.
+
 ## View the dashboard
 
 Start the backend on port `8010` and the frontend on port `3000` as described

@@ -56,8 +56,13 @@ and scenario sections.
 The Network Health Score, regimes, and risk flags are implemented in the
 backend scoring layer: database tables, analytics CLI, and worker job
 `scores`. The dashboard and chain detail consume these results through the
-public API. Chat, watchlists, and alert delivery remain planned. Public SEO
-pages are deferred to Prompt 15.
+public API. Methodology and Legal are statically generated for English and
+Persian, with all user-facing copy in `frontend/messages/en.json` and
+`frontend/messages/fa.json`. The Methodology page reads pillar weights from the
+public methodology endpoint and uses a documented static fallback; the shared
+data-attribution footer provides full public-site and compact app variants.
+Chat, watchlists, and alert delivery remain planned. Additional public SEO and
+learning pages are deferred to Prompt 15.
 
 Public data routes are GET-only and unauthenticated. They expose chain
 snapshots, score history, reported regimes, risk flags, methodology, and
@@ -104,11 +109,14 @@ The scenario engine uses Binance close-to-close returns from exact calendar-day
 endpoints, with no gap filling or look-ahead. Its public results are historical
 quantiles, not forecasts. The detail page shows the pessimistic, base, and
 optimistic quantiles with independent sample counts and low-sample context;
-scenario values use neutral styling rather than price-return colors.
+scenario values use neutral styling rather than price-return colors. The
+365-day card notes that calibration could not be assessed with too few
+independent windows. Dashboard, screener, and chain-detail score notes link to
+the Health Score methodology; the scenario note links to the scenario method.
 
 Planned, not implemented: an LLM provider, AI agent and tool-calling, Telegram
-notifications, user-facing alert delivery, watchlists, chat, public SEO pages,
-and walk-forward calibration evaluation.
+notifications, user-facing alert delivery, watchlists, chat, and additional
+public SEO and learning pages.
 
 ## Auth
 

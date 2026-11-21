@@ -2,7 +2,7 @@
 
 Bilingual foundation for an on-chain intelligence app for long-term crypto investors.
 
-## Status: Dashboard, chains screener, and chain detail implemented; additional analysis features are in progress
+## Status: Dashboard, chains screener, chain detail, Methodology, and Legal implemented; additional analysis features are in progress
 
 **Disclaimer:** ChainCompass is for informational purposes only, is not financial advice, and does not provide buy or sell recommendations.
 
@@ -54,10 +54,13 @@ See [Windows setup](docs/SETUP.md) to prepare the development environment.
   mobile cards.
 - Chain detail with localized snapshots, history and price charts, regime
   timeline, score pillars, and historical-return scenario context.
-- Read-only historical walk-forward research reports (no predictive claims);
-  see [docs/RESEARCH.md](docs/RESEARCH.md).
-- Not implemented yet: AI chat, watchlists, or alert delivery.
-  Those routes display a planned-state card rather than loading indefinitely.
+- Static English and Persian Methodology and Legal pages, with a shared
+  data-attribution footer in the public site and app shell.
+- Research status: read-only historical walk-forward reports are implemented;
+  no predictive claims. See [docs/RESEARCH.md](docs/RESEARCH.md).
+- Not implemented yet: AI chat, watchlists, user-facing alert delivery, an
+  admin interface, and Telegram notifications. Planned routes are identified as
+  unavailable rather than shown as loading indefinitely.
 - Explicitly confirmed purge for the discontinued legacy Coin Metrics BNB
   series; BTC USD fees are derived from Blockchain.info fee amounts and Binance
   BTC closes.
@@ -68,9 +71,9 @@ See [Windows setup](docs/SETUP.md) to prepare the development environment.
   SOL, and BNB, limited by the measured sources in
   [docs/DATA_AUDIT.md](docs/DATA_AUDIT.md).
 - Capital-flow analysis beyond the implemented score components.
-- User-facing risk-alert delivery and watchlists.
+- Chat, watchlists, user-facing alerts, an admin interface, and Telegram.
 - Tool-grounded AI analyst.
-- Public SEO pages (deferred to Prompt 15).
+- Additional public SEO and learning pages (deferred to Prompt 15).
 - Admin audit logs and additional management controls.
 
 **Not verified:** Real SMTP delivery and a live Google OAuth login have not
