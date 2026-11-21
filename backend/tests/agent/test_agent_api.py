@@ -322,6 +322,15 @@ async def test_agent_sse_order_persists_messages_and_usage_without_body_in_logs(
     assert agent_context.user_email not in request_text
     assert str(agent_context.user_id) not in request_text
     assert body in request_text
+    assert "admin" not in request_text.lower()
+    assert all(
+        message.get("role") in {"system", "user", "assistant", "tool"}
+        and "account_role" not in message
+        and "user_id" not in message
+        and "email" not in message
+        for messages, _ in provider.requests
+        for message in messages
+    )
 
     async with agent_context.session_factory() as session:
         messages = (
@@ -396,11 +405,13 @@ async def test_agent_streams_tool_events_before_provider_retry_and_verified_toke
             return value.splitlines()[0].removeprefix("event: ")
 
         assert event_name(await iterator.__anext__()) == "meta"  # type: ignore[attr-defined]
+        seen_events = ["meta"]
         tool_call = await asyncio.wait_for(
             iterator.__anext__(),  # type: ignore[attr-defined]
             timeout=1,
         )
         assert event_name(tool_call) == "tool_call"
+        seen_events.append("tool_call")
         assert '"name":"get_chain_snapshot"' in str(tool_call)
 
         tool_result = await asyncio.wait_for(
@@ -408,6 +419,7 @@ async def test_agent_streams_tool_events_before_provider_retry_and_verified_toke
             timeout=1,
         )
         assert event_name(tool_result) == "tool_result"
+        seen_events.append("tool_result")
 
         next_event = asyncio.create_task(iterator.__anext__())  # type: ignore[attr-defined]
         await asyncio.wait_for(second_call_started.wait(), timeout=1)
@@ -418,6 +430,7 @@ async def test_agent_streams_tool_events_before_provider_retry_and_verified_toke
         while True:
             chunk = await asyncio.wait_for(next_event, timeout=1)
             event_names.append(event_name(chunk))
+            seen_events.append(event_names[-1])
             if event_names[-1] == "done":
                 break
             next_event = asyncio.create_task(
@@ -427,6 +440,8 @@ async def test_agent_streams_tool_events_before_provider_retry_and_verified_toke
     assert event_names[0] == "token"
     assert event_names[-2:] == ["final", "done"]
     assert len(provider.requests) == 3
+    assert seen_events.count("tool_call") == 1
+    assert seen_events.count("tool_result") == 1
 
 
 @pytest.mark.asyncio

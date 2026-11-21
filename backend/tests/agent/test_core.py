@@ -37,6 +37,17 @@ def test_grounding_accepts_exact_rounded_percentage_and_structural_numbers() -> 
     assert normalize_digits("امتیاز ۸۵٫۳ و ١٢") == "امتیاز 85.3 و 12"
 
 
+def test_grounding_flags_bare_90_but_ignores_90_day_window() -> None:
+    findings = find_ungrounded_numbers("90 and 90 days", [])
+
+    assert [finding.value for finding in findings] == ["90"]
+
+
+def test_grounding_currently_accepts_half_up_rounding_from_34_70_to_35() -> None:
+    # This pins the documented comparison at the answer's displayed precision.
+    assert find_ungrounded_numbers("Score 35.", [{"score": "34.70"}]) == []
+
+
 def test_grounding_reports_unmatched_numbers_with_positions() -> None:
     findings = find_ungrounded_numbers(
         "Score 55.5 and 88.",
