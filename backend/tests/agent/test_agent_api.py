@@ -295,6 +295,7 @@ async def test_agent_sse_order_persists_messages_and_usage_without_body_in_logs(
 
     assert response.status_code == 200
     assert response.headers["content-type"].startswith("text/event-stream")
+    assert "content-encoding" not in response.headers
     assert response.headers["cache-control"] == "no-cache"
     assert response.headers["x-accel-buffering"] == "no"
     events = re.findall(r"^event: ([a-z_]+)$", response.text, flags=re.MULTILINE)
