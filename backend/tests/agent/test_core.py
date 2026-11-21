@@ -174,6 +174,34 @@ async def test_openai_compatible_provider_retries_timeout_once() -> None:
 
 
 @pytest.mark.asyncio
+async def test_openai_provider_does_not_log_key_or_message_body(caplog) -> None:
+    client = httpx.AsyncClient(
+        transport=httpx.MockTransport(
+            lambda _: httpx.Response(
+                200,
+                json={
+                    "choices": [{"message": {"content": "Done."}}],
+                },
+            )
+        )
+    )
+    provider = OpenAICompatibleProvider(
+        base_url="https://provider.test/v1",
+        api_key="private-test-key",
+        model="test-model",
+        client=client,
+    )
+    await provider.chat(
+        [{"role": "user", "content": "private prompt body"}],
+        [],
+        timeout=1,
+    )
+    assert "private-test-key" not in caplog.text
+    assert "private prompt body" not in caplog.text
+    await client.aclose()
+
+
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     ("name", "arguments"),
     [

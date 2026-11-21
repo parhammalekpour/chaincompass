@@ -14,6 +14,18 @@ from starlette.responses import Response
 request_id_context: ContextVar[str] = ContextVar("request_id", default="-")
 
 
+def _safe_request_path(path: str) -> str:
+    prefix = "/api/v1/agent/conversations/"
+    if not path.startswith(prefix):
+        return path
+    suffix = path[len(prefix) :]
+    identifier, separator, remaining = suffix.partition("/")
+    if not identifier:
+        return path
+    redacted = prefix + "{conversation_id}"
+    return redacted + (separator + remaining if separator else "")
+
+
 class JsonFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
         entry: dict[str, Any] = {
@@ -59,7 +71,7 @@ async def request_id_middleware(
             "request completed",
             extra={
                 "method": request.method,
-                "path": request.url.path,
+                "path": _safe_request_path(request.url.path),
                 "status_code": response.status_code,
                 "duration_ms": round((time.perf_counter() - start) * 1000, 2),
             },
