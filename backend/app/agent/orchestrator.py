@@ -447,9 +447,16 @@ def _score_line(
     slug_value: object,
     language: str,
 ) -> str | None:
-    if not isinstance(score_value, Mapping):
-        return None
     chain = _chain_label(slug_value)
+    if not isinstance(score_value, Mapping):
+        score = _number_text(score_value)
+        if score is None:
+            return None
+        return (
+            f"امتیاز {chain}: {score}."
+            if language == "fa"
+            else f"{chain} score: {score}."
+        )
     score = _number_text(score_value.get("value"))
     if score is None:
         score = _number_text(score_value.get("score"))
