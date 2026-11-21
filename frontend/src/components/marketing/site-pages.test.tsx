@@ -101,6 +101,9 @@ describe("public methodology and legal pages", () => {
           ? "Pooled non-overlapping 30-day p10-p90 hit rates"
           : "نرخ پوشش p10-p90",
       );
+      expect(container.textContent).toContain(
+        (locale === "en" ? en : fa).methodologyPage.sections.assistant.body,
+      );
     },
   );
 
@@ -128,6 +131,26 @@ describe("public methodology and legal pages", () => {
         ),
       ).toBe(true);
       expect(main?.querySelector(".animate-pulse")).toBeNull();
+    },
+  );
+
+  it.each([
+    ["en", en],
+    ["fa", fa],
+  ] as const)(
+    "discloses assistant data handling in the %s privacy page",
+    (locale, messages) => {
+      const { container } = renderLocalized(locale, <LegalPage />);
+      const text = container.textContent ?? "";
+
+      for (const statement of [
+        messages.legalPage.sections.privacy.conversations,
+        messages.legalPage.sections.privacy.usage,
+        messages.legalPage.sections.privacy.aiProvider,
+        messages.legalPage.sections.privacy.publicData,
+      ]) {
+        expect(text).toContain(statement);
+      }
     },
   );
 

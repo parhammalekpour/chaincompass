@@ -60,6 +60,7 @@
       "regimes": "Regimes and risk flags",
       "scenarios": "Historical scenarios",
       "research": "Research findings",
+      "assistant": "The assistant",
       "limitations": "Limitations"
     },
     "sections": {
@@ -179,6 +180,10 @@
         "history": "Price and score histories start on different dates, and the longest scenario horizon has very few independent origins.",
         "providers": "Free-source coverage, units, and endpoints can change or become unavailable. Source gaps remain visible and are not filled.",
         "scope": "These pages describe the current analysis only. They do not establish future accuracy or outcomes."
+      },
+      "assistant": {
+        "title": "The assistant",
+        "body": "The assistant calls read-only tools over the same data services as the public analysis API and cannot change them. Each number in an answer is checked against results returned by those tools. Refusals are deterministic. It can still make mistakes; this check does not rule out every error. No evaluation with a live model has been run yet."
       }
     }
   },
@@ -201,7 +206,7 @@
         "thirdParty": "Third-party data may be inaccurate, incomplete, delayed, or unavailable.",
         "acceptableUse": "Use the service lawfully. Do not attempt to disrupt it, bypass access controls, or misuse accounts or data.",
         "changes": "Features and these terms may change. The date below identifies the latest update shown on this page.",
-        "notAvailable": "Chat, watchlists, alert delivery, Telegram, Google sign-in, account deletion, and payment features are not available yet."
+        "notAvailable": "Watchlists, alert delivery, Telegram, Google sign-in, account deletion, and payment features are not available yet."
       },
       "privacy": {
         "title": "Privacy",
@@ -220,7 +225,11 @@
         "emailTokens": "SHA-256 hashes of email-verification and password-reset tokens, with purpose, expiry, creation time, and use time.",
         "emailTokensPurpose": "Support one-time, expiring email verification and password-reset flows.",
         "external": "Provider account ID and email fields are supported by the account schema for external identity flows. Google sign-in is not available yet in the current product scope.",
-        "externalPurpose": "Associate a configured external identity with an account."
+        "externalPurpose": "Associate a configured external identity with an account.",
+        "conversations": "Conversation records—including titles, your messages, tool results, and assistant answers—are stored in your account until you delete them. Deleting a conversation removes its messages and title.",
+        "usage": "The service logs usage metadata: provider, model, prompt and completion token counts when available, response latency, status, time, and account and conversation references. These usage records do not contain message content.",
+        "aiProvider": "When an AI provider is configured, the current message, recent conversation text, and tool results are sent to that provider to produce a response. The request does not include your email address, account ID, or account-level role. The configured provider's own terms and privacy practices apply.",
+        "publicData": "Public market and network data requests carry no account identifiers; those requests are separate from AI-provider requests."
       },
       "cookies": {
         "title": "Cookies and browser storage",
@@ -249,7 +258,7 @@
       },
       "sources": {
         "title": "Data sources and attribution",
-        "body": "Public market and network data are requested by the service without account identifiers. Coin Metrics Community data is for non-commercial use and requires attribution. Other providers are credited in the methodology and subject to their own terms.",
+        "body": "Public market and network data requests carry no account identifiers. This is separate from AI-provider requests described in the Privacy section. Coin Metrics Community data is for non-commercial use and requires attribution. Other data providers are credited in the methodology and subject to their own terms.",
         "emailProvider": "In development, account email is saved to a local development mailbox. In other deployments, the configured SMTP service receives the recipient address and verification or password-reset message.",
         "accountDeletion": "Account deletion controls are not available yet. Do not post passwords, account addresses, or authentication links in a public issue.",
         "contact": "For questions about these terms or this privacy notice, use the public repository issues page."

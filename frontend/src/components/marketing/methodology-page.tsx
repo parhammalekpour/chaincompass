@@ -47,6 +47,7 @@ const TOC_KEYS = [
   "regimes",
   "scenarios",
   "research",
+  "assistant",
   "limitations",
 ] as const;
 
@@ -328,6 +329,15 @@ export function MethodologyPage() {
           >
             {t("sections.research.reportLink")}
           </a>
+        </p>
+      </section>
+
+      <section id="assistant" className="scroll-mt-24 space-y-3">
+        <h2 className="text-2xl font-semibold">
+          {t("sections.assistant.title")}
+        </h2>
+        <p className="leading-7 text-muted">
+          {t("sections.assistant.body")}
         </p>
       </section>
 

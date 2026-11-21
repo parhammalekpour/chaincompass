@@ -87,6 +87,16 @@ export function LegalPage() {
             </tr>
           ))}
         </ContentTable>
+        <p className="leading-7 text-muted">
+          {t("sections.privacy.conversations")}
+        </p>
+        <p className="leading-7 text-muted">{t("sections.privacy.usage")}</p>
+        <p className="leading-7 text-muted">
+          {t("sections.privacy.aiProvider")}
+        </p>
+        <p className="leading-7 text-muted">
+          {t("sections.privacy.publicData")}
+        </p>
       </section>
 
       <section id="cookies" className="scroll-mt-24 space-y-4">
