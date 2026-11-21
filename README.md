@@ -58,6 +58,9 @@ See [Windows setup](docs/SETUP.md) to prepare the development environment.
   data-attribution footer in the public site and app shell.
 - Research status: read-only historical walk-forward reports are implemented;
   no predictive claims. See [docs/RESEARCH.md](docs/RESEARCH.md).
+- Authenticated agent backend API with allow-listed public-data tools,
+  response grounding checks, bilingual guardrails, and an offline evaluation
+  harness. The chat interface is not available yet; see [docs/AGENT.md](docs/AGENT.md).
 - Not implemented yet: AI chat, watchlists, user-facing alert delivery, an
   admin interface, and Telegram notifications. Planned routes are identified as
   unavailable rather than shown as loading indefinitely.
@@ -71,8 +74,8 @@ See [Windows setup](docs/SETUP.md) to prepare the development environment.
   SOL, and BNB, limited by the measured sources in
   [docs/DATA_AUDIT.md](docs/DATA_AUDIT.md).
 - Capital-flow analysis beyond the implemented score components.
-- Chat, watchlists, user-facing alerts, an admin interface, and Telegram.
-- Tool-grounded AI analyst.
+- Chat UI, watchlists, user-facing alerts, an admin interface, and Telegram.
+- Evaluation with a live language-model provider.
 - Additional public SEO and learning pages (deferred to Prompt 15).
 - Admin audit logs and additional management controls.
 
@@ -177,6 +180,7 @@ See the [Windows setup guide](docs/SETUP.md) for the full sequence and verificat
 
 - [Product requirements](docs/PRD.md)
 - [Architecture](docs/ARCHITECTURE.md)
+- [Agent backend](docs/AGENT.md)
 - [Setup guide](docs/SETUP.md)
 - [Data audit](docs/DATA_AUDIT.md)
 - [Learning log](docs/LEARNING_LOG.md)

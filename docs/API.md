@@ -172,3 +172,55 @@ All successful public API responses use
 an in-process per-IP sliding-window limit of 120 requests per minute. The
 limit is per API process (not distributed across multiple workers); 429
 responses include `Retry-After`.
+
+## Authenticated agent API
+
+Agent routes require an authenticated access token and scope every conversation
+to its owner. Unknown and non-owned conversation IDs both return 404.
+
+| Method | Path | Response |
+|---|---|---|
+| POST | `/api/v1/agent/conversations` | 201 and the created conversation |
+| GET | `/api/v1/agent/conversations` | The current user's conversations |
+| GET | `/api/v1/agent/conversations/{id}` | Conversation and messages |
+| DELETE | `/api/v1/agent/conversations/{id}` | 204 |
+| POST | `/api/v1/agent/conversations/{id}/messages` | `text/event-stream` |
+
+Non-refusal message requests return `503 llm_not_configured` when no provider is
+configured; restricted requests can receive a deterministic response without
+a provider. In-process per-user limits are 20 messages per hour and 100 per
+day; `429` responses include `Retry-After`. A user may create at most 50
+conversations, each with at most 200 messages. The daily token budget defaults
+to 200,000 and is checked when provider usage counts are available.
+
+Successful message streams include a `meta` event, optional `tool_call` and
+`tool_result` events, verified `token` chunks, a `final` event, and `done`.
+Tool-result events contain only a short status summary. Failures send `error`
+and `done`. Responses use `Cache-Control: no-cache` and
+`X-Accel-Buffering: no`.
+
+Synthetic event sequence:
+
+```text
+event: meta
+data: {"user_message_id":"00000000-0000-0000-0000-000000000001","assistant_message_id":"00000000-0000-0000-0000-000000000002","language":"en"}
+
+event: tool_call
+data: {"name":"get_chain_snapshot","args":{"slug":"btc"}}
+
+event: tool_result
+data: {"name":"get_chain_snapshot","ok":true,"summary":"data_returned"}
+
+event: token
+data: {"text":"The stored score is 55."}
+
+event: final
+data: {"grounding_status":"ok","refusal":false,"tool_names":["get_chain_snapshot"]}
+
+event: done
+data: {}
+```
+
+Conversation messages are stored and sent to the configured provider for
+processing. See [AGENT.md](AGENT.md) for tool schemas, verification rules,
+operational limits, and evaluation instructions.

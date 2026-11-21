@@ -18,8 +18,8 @@
                          +----+----------+----+
                               |          |
                    +----------v--+    +--v----------------------+
-                   | PostgreSQL  |    | Planned: LLM provider  |
-                   +-----^------+    | and AI agent           |
+                   | PostgreSQL  |    | LLM provider + agent  |
+                   +-----^------+    | API                    |
                          |           +------------------------+
                          |
               +----------+----------+
@@ -40,8 +40,9 @@ The browser and API share one development origin: Next.js forwards `/api` to
 FastAPI. FastAPI serves validated application requests and reads/writes
 PostgreSQL. A separate APScheduler worker collects and normalizes data from
 swappable external providers before storing them. Account emails are handled by
-the auth email sender. There is no LLM provider, AI agent, Telegram notifier,
-or alert-delivery implementation yet.
+the auth email sender. The backend includes a replaceable language-model
+provider interface and an authenticated agent API; the chat UI, Telegram
+notifier, and alert-delivery implementation are not available yet.
 
 ## Implemented vs Planned
 
@@ -61,8 +62,10 @@ Persian, with all user-facing copy in `frontend/messages/en.json` and
 `frontend/messages/fa.json`. The Methodology page reads pillar weights from the
 public methodology endpoint and uses a documented static fallback; the shared
 data-attribution footer provides full public-site and compact app variants.
-Chat, watchlists, and alert delivery remain planned. Additional public SEO and
-learning pages are deferred to Prompt 15.
+The backend agent API, provider interface, allow-listed read-only tools,
+grounding checks, bilingual guardrails, and offline evaluation harness are
+implemented. The user-facing chat UI, watchlists, and alert delivery remain
+planned. Additional public SEO and learning pages are deferred to Prompt 15.
 
 Public data routes are GET-only and unauthenticated. They expose chain
 snapshots, score history, reported regimes, risk flags, methodology, and
@@ -114,9 +117,11 @@ scenario values use neutral styling rather than price-return colors. The
 independent windows. Dashboard, screener, and chain-detail score notes link to
 the Health Score methodology; the scenario note links to the scenario method.
 
-Planned, not implemented: an LLM provider, AI agent and tool-calling, Telegram
-notifications, user-facing alert delivery, watchlists, chat, and additional
-public SEO and learning pages.
+Planned, not implemented: user-facing chat, Telegram notifications, alert
+delivery, watchlists, and additional public SEO and learning pages. The agent
+backend is authenticated and tool-limited; conversations are stored and sent
+to the configured provider. See [AGENT.md](AGENT.md) for its data flow,
+grounding checks, and operational limits.
 
 ## Auth
 
@@ -185,12 +190,31 @@ API must enforce authentication and roles on every protected endpoint.
 
 Real SMTP delivery and a live Google OAuth login have not been verified.
 
+## Agent API
+
+The authenticated agent API stores user-scoped conversations and serves
+messages with server-sent events. A provider interface supports a disabled
+default, a scripted fake, and an OpenAI-compatible implementation. Its
+allowlisted tools call the same read-only services as the public API; tools
+cannot access account data or write application records. Input classification
+can return a deterministic bilingual refusal without contacting a provider.
+
+The orchestrator treats prompts and tool results as untrusted, caps tool calls
+and total time, and verifies the completed response's numbers and wording
+before streaming any text. One revision is attempted after a failed check;
+otherwise a structured projection of retrieved data is returned with a
+failure status. Conversation messages and tool results are persisted, while
+usage rows contain provider/model and token/latency metadata only. Messages
+are sent to the configured provider; the user-facing chat UI is not available
+yet. See [AGENT.md](AGENT.md) for detailed behavior and the offline evaluator.
+
 ## Data layer
 
 The database contains `chains`, `data_sources`, `metric_definitions`,
 `observations`, `series_coverage`, `ingestion_runs`, `rpc_probes`, and
 `features`, `health_scores`, `regimes`, and `risk_flags`, in addition to the
-auth tables. Observations use a composite
+auth and agent tables. Agent storage includes conversations, messages, and
+metadata-only language-model usage. Observations use a composite
 primary key of chain, metric, source, and UTC observation date. Values are
 PostgreSQL `NUMERIC(38,12)` values, never floating point.
 

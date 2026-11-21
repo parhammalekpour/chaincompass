@@ -455,7 +455,7 @@ def _project_safe_data(value: object) -> object:
         return projected_list or None
     if isinstance(value, bool) or value is None:
         return value
-    if isinstance(value, (int, float, Decimal)):
+    if isinstance(value, (int, Decimal)):
         return value
     if isinstance(value, str):
         if value in _SAFE_ENUM_VALUES or _NUMBER_OR_DATE.fullmatch(value):
