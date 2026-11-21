@@ -1,0 +1,321 @@
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
+import { NextIntlClientProvider } from "next-intl";
+import type { AnchorHTMLAttributes, ReactNode } from "react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import en from "../../../messages/en.json";
+import fa from "../../../messages/fa.json";
+import { ApiError } from "@/lib/api/client";
+import type { AgentSseEvent } from "@/lib/agent/contracts";
+import { ChatPage, isConversationId } from "./chat-page";
+
+const mocks = vi.hoisted(() => {
+  const searchParams = {
+    get: (name: string) =>
+      name === "c" ? mocks.search : null,
+    toString: () => (mocks.search ? `c=${mocks.search}` : ""),
+  };
+  const router = { replace: vi.fn() };
+  const mocks = {
+    search: "",
+    searchParams,
+    router,
+    listConversations: vi.fn(),
+    createConversation: vi.fn(),
+    getConversation: vi.fn(),
+    deleteConversation: vi.fn(),
+    sendMessage: vi.fn(),
+    pathname: "/app/chat",
+  };
+  return mocks;
+});
+
+vi.mock("next/navigation", () => ({
+  useSearchParams: () => mocks.searchParams,
+}));
+
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({
+    href,
+    children,
+    ...props
+  }: AnchorHTMLAttributes<HTMLAnchorElement> & {
+    href: string;
+    children: ReactNode;
+  }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+  usePathname: () => mocks.pathname,
+  useRouter: () => mocks.router,
+}));
+
+vi.mock("@/lib/agent/client", () => ({
+  listConversations: mocks.listConversations,
+  createConversation: mocks.createConversation,
+  getConversation: mocks.getConversation,
+  deleteConversation: mocks.deleteConversation,
+  sendMessage: mocks.sendMessage,
+}));
+
+const conversationId = "a39b68f7-63a1-4f4f-9f7a-8bb1f83e38e1";
+const conversation = {
+  id: conversationId,
+  title: "Test conversation",
+  created_at: "2026-11-20T12:00:00Z",
+  updated_at: "2026-11-20T12:00:00Z",
+};
+
+function renderChat(locale: "en" | "fa" = "en", search = `c=${conversationId}`) {
+  mocks.search = new URLSearchParams(search).get("c") ?? "";
+  return render(
+    <NextIntlClientProvider
+      locale={locale}
+      messages={locale === "fa" ? fa : en}
+    >
+      <ChatPage />
+    </NextIntlClientProvider>,
+  );
+}
+
+function event(type: AgentSseEvent["type"], data: unknown): AgentSseEvent {
+  return { type, data } as AgentSseEvent;
+}
+
+function stream(events: AgentSseEvent[]) {
+  return async function* () {
+    for (const item of events) yield item;
+  };
+}
+
+function setupApi() {
+  mocks.listConversations.mockResolvedValue({ conversations: [conversation] });
+  mocks.getConversation.mockResolvedValue({ ...conversation, messages: [] });
+  mocks.createConversation.mockResolvedValue(conversation);
+  mocks.deleteConversation.mockResolvedValue(undefined);
+  mocks.sendMessage.mockImplementation(stream([]));
+}
+
+beforeEach(() => {
+  mocks.search = "";
+  mocks.router.replace.mockReset();
+  mocks.listConversations.mockReset();
+  mocks.createConversation.mockReset();
+  mocks.getConversation.mockReset();
+  mocks.deleteConversation.mockReset();
+  mocks.sendMessage.mockReset();
+  setupApi();
+  let id = 0;
+  vi.stubGlobal("crypto", {
+    randomUUID: () => `00000000-0000-4000-8000-${String(++id).padStart(12, "0")}`,
+  });
+});
+
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+});
+
+describe("ChatPage", () => {
+  it("accepts only UUID conversation query values", () => {
+    expect(isConversationId(conversationId)).toBe(true);
+    expect(isConversationId("not-a-uuid")).toBe(false);
+
+    renderChat("en", "c=not-a-uuid");
+
+    expect(mocks.router.replace).toHaveBeenCalledWith("/app/chat", {
+      scroll: false,
+    });
+  });
+
+  it("shows user text, tool activity, and the streamed answer as plain text", async () => {
+    mocks.sendMessage.mockImplementation(
+      stream([
+        event("tool_call", {
+          name: "get_chain_snapshot",
+          args: { slug: "btc" },
+        }),
+        event("tool_result", {
+          name: "get_chain_snapshot",
+          ok: true,
+          summary: "<img onerror=alert(1)>",
+        }),
+        event("token", {
+          text: '<img onerror="alert(1)"><a href="javascript:alert(1)">answer</a>',
+        }),
+        event("final", {
+          grounding_status: "ok",
+          refusal: false,
+          tool_names: ["get_chain_snapshot"],
+        }),
+        event("done", {}),
+      ]),
+    );
+    renderChat();
+    const composer = screen.getByRole("textbox", { name: "Your message" });
+    await screen.findByText("Test conversation");
+    expect(screen.queryByText("Loading conversations")).not.toBeInTheDocument();
+    fireEvent.change(composer, { target: { value: "Show the snapshot" } });
+    fireEvent.keyDown(composer, { key: "Enter" });
+
+    expect(await screen.findByText("Show the snapshot")).toBeVisible();
+    expect(await screen.findByText(/Looking up: chain snapshot/)).toBeVisible();
+    expect(
+      await screen.findByText(
+        '<img onerror="alert(1)"><a href="javascript:alert(1)">answer</a>',
+      ),
+    ).toBeVisible();
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "answer" })).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ["retried", "Answer was re-checked against the data."],
+    [
+      "failed",
+      "This answer could not be verified, so only retrieved data is shown.",
+    ],
+    ["refused", "Historical analysis only"],
+  ] as const)("shows the %s status notice", async (status, notice) => {
+    mocks.sendMessage.mockImplementation(
+      stream([
+        event("final", {
+          grounding_status: status,
+          refusal: status === "refused",
+          tool_names: [],
+        }),
+        event("done", {}),
+      ]),
+    );
+    renderChat();
+    const composer = screen.getByRole("textbox", { name: "Your message" });
+    await screen.findByText("Test conversation");
+    fireEvent.change(composer, { target: { value: "Explain the data" } });
+    fireEvent.keyDown(composer, { key: "Enter" });
+
+    expect(await screen.findByText(notice)).toBeVisible();
+  });
+
+  it("aborts a running request when Stop is pressed", async () => {
+    let activeSignal: AbortSignal | undefined;
+    mocks.sendMessage.mockImplementation(
+      async function* (_id: string, _content: string, signal: AbortSignal) {
+        activeSignal = signal;
+        yield event("tool_call", {
+          name: "get_chain_snapshot",
+          args: { slug: "btc" },
+        });
+        await new Promise<void>((resolve) =>
+          signal.addEventListener("abort", () => resolve(), { once: true }),
+        );
+      },
+    );
+    renderChat();
+    const composer = screen.getByRole("textbox", { name: "Your message" });
+    await screen.findByText("Test conversation");
+    fireEvent.change(composer, { target: { value: "Inspect BTC" } });
+    fireEvent.keyDown(composer, { key: "Enter" });
+    fireEvent.keyDown(composer, { key: "Enter" });
+
+    fireEvent.click(await screen.findByRole("button", { name: "Stop" }));
+    await waitFor(() => expect(activeSignal?.aborted).toBe(true));
+    expect(mocks.sendMessage).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows provider setup and rate-limit errors", async () => {
+    mocks.sendMessage.mockImplementationOnce(async function* () {
+      throw new ApiError("llm_not_configured", 503);
+    });
+    const first = renderChat();
+    await screen.findByText("Test conversation");
+    fireEvent.change(screen.getByRole("textbox", { name: "Your message" }), {
+      target: { value: "Explain the data" },
+    });
+    fireEvent.keyDown(screen.getByRole("textbox", { name: "Your message" }), {
+      key: "Enter",
+    });
+    expect(
+      await screen.findByText("The assistant is not configured on this server"),
+    ).toBeVisible();
+    first.unmount();
+
+    mocks.sendMessage.mockImplementationOnce(async function* () {
+      throw new ApiError("rate_limited", 429, 45);
+    });
+    renderChat();
+    await screen.findByText("Test conversation");
+    fireEvent.change(screen.getByRole("textbox", { name: "Your message" }), {
+      target: { value: "Explain the data" },
+    });
+    fireEvent.keyDown(screen.getByRole("textbox", { name: "Your message" }), {
+      key: "Enter",
+    });
+    expect(await screen.findByText("Too many requests. Try again in 45 seconds.")).toBeVisible();
+  });
+
+  it("caps composer input, skips empty sends, and renders Persian layout with Latin counts", async () => {
+    const { container } = renderChat("fa", "");
+    const composer = screen.getByRole("textbox", { name: "پیام شما" });
+    expect(container.querySelector("main")).toHaveAttribute("dir", "rtl");
+    expect(composer).toHaveAttribute("dir", "auto");
+    expect(screen.getByText("0 / 2,000")).toHaveAttribute("dir", "ltr");
+    expect(screen.getByRole("button", { name: "ارسال" })).toBeDisabled();
+    fireEvent.change(composer, { target: { value: "x".repeat(2001) } });
+    expect(composer).toHaveValue("x".repeat(2000));
+    expect(screen.getByText("2,000 / 2,000")).toBeVisible();
+    expect(mocks.sendMessage).not.toHaveBeenCalled();
+  });
+
+  it("places starter questions in the composer without sending them", async () => {
+    renderChat("en", "");
+    const composer = screen.getByRole("textbox", { name: "Your message" });
+    const starter =
+      "Summarise the current health score and confidence for each chain.";
+
+    fireEvent.click(await screen.findByRole("button", { name: starter }));
+
+    expect(composer).toHaveValue(starter);
+    expect(mocks.sendMessage).not.toHaveBeenCalled();
+  });
+
+  it("returns to the conversation list when the selected conversation is missing", async () => {
+    mocks.getConversation.mockRejectedValue(
+      new ApiError("conversation_not_found", 404),
+    );
+    renderChat();
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "This conversation is no longer available.",
+    );
+    expect(mocks.router.replace).toHaveBeenCalledWith("/app/chat", {
+      scroll: false,
+    });
+  });
+
+  it("aborts a pending request when unmounted", async () => {
+    let activeSignal: AbortSignal | undefined;
+    mocks.sendMessage.mockImplementation(
+      async function* (_id: string, _content: string, signal: AbortSignal) {
+        activeSignal = signal;
+        await new Promise<void>((resolve) =>
+          signal.addEventListener("abort", () => resolve(), { once: true }),
+        );
+      },
+    );
+    const view = renderChat();
+    const composer = screen.getByRole("textbox", { name: "Your message" });
+    await screen.findByText("Test conversation");
+    fireEvent.change(composer, { target: { value: "Inspect BTC" } });
+    fireEvent.keyDown(composer, { key: "Enter" });
+    await waitFor(() => expect(activeSignal).toBeDefined());
+
+    view.unmount();
+    expect(activeSignal?.aborted).toBe(true);
+  });
+});

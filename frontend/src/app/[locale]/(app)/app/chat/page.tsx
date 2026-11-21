@@ -1,4 +1,5 @@
-import { PlaceholderPage } from "@/components/placeholder-page";
+import { Suspense } from "react";
+import { ChatPage } from "@/components/app/chat-page";
 import { createPageMetadata } from "@/lib/metadata";
 
 export async function generateMetadata({
@@ -11,5 +12,9 @@ export async function generateMetadata({
 }
 
 export default function Page() {
-  return <PlaceholderPage namespace="chat" />;
+  return (
+    <Suspense fallback={null}>
+      <ChatPage />
+    </Suspense>
+  );
 }

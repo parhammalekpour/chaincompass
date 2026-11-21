@@ -33,12 +33,14 @@ export async function listConversations(): Promise<ConversationList> {
 
 export async function createConversation(
   title?: string,
+  signal?: AbortSignal,
 ): Promise<ConversationSummary> {
   return parseResponse(
     conversationSummarySchema,
     await apiRequest<unknown>(conversationsPath, {
       method: "POST",
       body: title === undefined ? {} : { title },
+      signal,
     }),
   );
 }
