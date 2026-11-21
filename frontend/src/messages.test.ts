@@ -3,7 +3,13 @@ import en from "../messages/en.json";
 import fa from "../messages/fa.json";
 
 function flattenKeys(value: unknown, prefix = ""): string[] {
-  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+  if (Array.isArray(value)) {
+    return value.flatMap((nestedValue, index) =>
+      flattenKeys(nestedValue, `${prefix}.${index}`),
+    );
+  }
+
+  if (typeof value !== "object" || value === null) {
     return prefix ? [prefix] : [];
   }
 

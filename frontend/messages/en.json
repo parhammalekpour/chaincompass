@@ -32,6 +32,236 @@
     "productLinks": "Product",
     "legal": "Legal"
   },
+  "siteFooter": {
+    "methodology": "Methodology",
+    "legal": "Legal",
+    "learn": "Learn",
+    "sources": "Data sources",
+    "productLinks": "Information",
+    "visitSource": "Visit {source} (opens in a new tab)",
+    "disclaimer": "For informational use only; not investment advice or trading recommendations.",
+    "sourceNames": {
+      "binance": "Binance",
+      "defillama": "DefiLlama",
+      "coinMetrics": "Coin Metrics Community",
+      "coingecko": "CoinGecko",
+      "mempool": "mempool.space",
+      "blockchain": "Blockchain.info"
+    }
+  },
+  "methodologyPage": {
+    "title": "Methodology",
+    "intro": "How ChainCompass gathers public network and market data and summarizes it for historical context.",
+    "tocLabel": "On this page",
+    "toc": {
+      "about": "What this service is",
+      "sources": "Data and sources",
+      "healthScore": "Network Health Score v1",
+      "regimes": "Regimes and risk flags",
+      "scenarios": "Historical scenarios",
+      "research": "Research findings",
+      "limitations": "Limitations"
+    },
+    "sections": {
+      "about": {
+        "title": "What ChainCompass is and is not",
+        "body": "ChainCompass presents historical network and market analysis for long-term context. It provides analysis only; it does not provide trading recommendations or forecasts and is not investment advice."
+      },
+      "sources": {
+        "title": "Data and sources",
+        "intro": "Daily analytics use complete UTC days and are typically one day behind the current date. Provider delays can extend that interval. Missing dates remain gaps; values are not forward-filled or interpolated.",
+        "tableCaption": "Sources and their use in ChainCompass",
+        "sourceHeading": "Source",
+        "useHeading": "What is used here",
+        "binance": "Daily spot prices and quote-volume proxies for BTC, ETH, SOL, and BNB. Binance USDT close is used as a USD proxy.",
+        "defillama": "TVL, stablecoin supply, and DEX volume for ETH, SOL, and BNB. DEX analytics units are unverified; protocol fees are context only, not network fees.",
+        "coinMetrics": "Coin Metrics Community active-address and transaction metrics for BTC and ETH. Those SOL metrics are not available on the free tier; current BNB Chain entries are absent from its free catalog.",
+        "coingecko": "Market-cap snapshots for context and limited market-data fallback. Market-cap snapshots are not Health Score inputs.",
+        "mempool": "BTC network and RPC diagnostics. Its recommended fee rate is not a daily network-fee total.",
+        "blockchain": "BTC hashrate and daily transaction-fee totals. BTC fees in USD are derived using the same-day Binance BTC close.",
+        "availabilityHeading": "Availability labels",
+        "available": "Available: a measured series is stored; this does not certify every value.",
+        "unverified": "Unverified: evidence is incomplete or a unit is not confirmed.",
+        "notAvailable": "Not available on free tiers: no suitable free series is confirmed.",
+        "discontinued": "Discontinued: the identified series ended and is not current chain coverage.",
+        "notApplicable": "Not applicable: the measure does not fit that network.",
+        "derivedNote": "Derived values and unverified units are labelled in the data views. BTC fees in USD are derived; DefiLlama DEX and protocol-fee units remain unverified.",
+        "coverageNote": "The free Coin Metrics tier does not provide current BNB Chain active-address or transaction metrics, or the requested SOL active-address, transaction, and fee metrics. BTC lacks available capital-pillar inputs; ETH lacks security-and-economics inputs; SOL and BNB lack adoption and security-and-economics inputs."
+      },
+      "healthScore": {
+        "title": "Network Health Score",
+        "intro": "The score combines point-in-time, chain-relative component percentiles. Within each pillar, available component weights are re-normalized; pillar weights are also re-normalized over available pillars. Missing values are not imputed.",
+        "weightCaption": "Pillars and nominal weights",
+        "pillarHeading": "Pillar",
+        "weightHeading": "Nominal weight",
+        "pillars": {
+          "adoption": "Adoption",
+          "capital": "Capital",
+          "security_economics": "Security and economics",
+          "market_condition": "Market condition"
+        },
+        "percentile": "Each component is ranked against its own trailing 1,095-day window, including the current date. At least 365 observations are required. The mid-rank percentile is used; lower-is-better components reverse the percentile.",
+        "confidenceCaption": "Coverage and confidence thresholds",
+        "coverageHeading": "Chain",
+        "maximumHeading": "Maximum coverage",
+        "chains": {
+          "btc": "BTC",
+          "eth": "ETH",
+          "sol": "SOL",
+          "bnb": "BNB"
+        },
+        "coverageMaximumIntro": "Coverage is available component weight divided by 100. Maximum coverage is chain-specific:",
+        "confidenceHigh": "High confidence: coverage at least {value}.",
+        "confidenceMedium": "Medium confidence: coverage at least {value} and below the High threshold.",
+        "confidenceLow": "Low confidence: coverage below the Medium threshold.",
+        "minimumCoverage": "No score row is created below {value} coverage. Only ETH can reach High confidence because its maximum coverage is 0.90; BTC, SOL, and BNB max out below 0.80.",
+        "partial": "The Partial badge means the current score has less than that chain's maximum registered coverage. This field identifies the most recent date with full chain-specific coverage; it is a reference date, not the current score or current data time.",
+        "partialField": "Field:",
+        "fallbackNote": "The methodology endpoint could not be reached. The table shows the documented v1 fallback values."
+      },
+      "regimes": {
+        "title": "Regimes and risk flags",
+        "intro": "Raw regime rules use fixed price-derived conditions in this priority order:",
+        "regimeCaption": "Raw regime definitions",
+        "regimeHeading": "Regime",
+        "conditionHeading": "Condition",
+        "stress": "drawdown_365d <= -0.50",
+        "uptrend": "price_vs_sma200 > 0 and ret_90d > 0",
+        "downtrend": "price_vs_sma200 < 0 and ret_90d < 0",
+        "range": "All other cases, including missing trend inputs",
+        "hysteresis": "The first raw label initializes immediately. Later changes require the new raw label on five consecutive calendar dates. This five-day hysteresis makes the reported label lag a raw condition by design; gaps reset the consecutive-day count.",
+        "volatility": "The <state>vol_state</state> overlay uses the percentile rank of <metric>realized_vol_90d</metric>: <high>high</high> at 80 or above, <low>low</low> at 20 or below, and <normal>normal</normal> between those thresholds. It is unavailable until its percentile can be calculated.",
+        "flagsCaption": "Risk flags and fixed thresholds",
+        "flagHeading": "Flag",
+        "ruleHeading": "Rule",
+        "flagNames": {
+          "deep_drawdown": "Deep drawdown",
+          "high_volatility": "High volatility",
+          "liquidity_drying": "Liquidity drying",
+          "usage_decline": "Usage decline",
+          "tvl_outflow": "TVL outflow",
+          "stablecoin_contraction": "Stablecoin contraction",
+          "hashrate_decline": "Hashrate decline",
+          "low_confidence": "Low confidence"
+        },
+        "flagRules": {
+          "deep_drawdown": "drawdown_365d <= -0.40; high severity at <= -0.60",
+          "high_volatility": "realized_vol_30d percentile >= 90",
+          "liquidity_drying": "volume_ratio_30_365 < 0.50",
+          "usage_decline": "active_addresses_chg90 <= -0.20 (BTC and ETH)",
+          "tvl_outflow": "tvl_usd_chg90 <= -0.25 (ETH, SOL, and BNB)",
+          "stablecoin_contraction": "stablecoin_supply_usd_chg90 <= -0.10 (ETH, SOL, and BNB)",
+          "hashrate_decline": "hashrate_chg90 <= -0.15 (BTC)",
+          "low_confidence": "coverage < 0.50"
+        }
+      },
+      "scenarios": {
+        "title": "Historical scenarios",
+        "intro": "Scenarios summarize historical realized returns over 30-, 90-, and 365-day horizons. The expanding sample uses <method>Hyndman-Fan type 7</method> quantiles: <quantiles>p10, p50, and p90</quantiles>.",
+        "sample": "The expanding history retains earlier market eras, including the 2017-2021 growth era; those periods can differ from current conditions.",
+        "independence": "<count>n_independent</count> is the number of exact-date return windows divided by the horizon in days. A horizon is available from five independent windows; <lowSample>low_sample</lowSample> marks 5-9, while 10 or more is the normal-sample range.",
+        "formula": "n_independent = n_windows // horizon_days",
+        "note": "Historical return quantiles, not a forecast."
+      },
+      "research": {
+        "title": "Research findings",
+        "intro": "The preregistered historical checks are descriptive, small-sample comparisons across a few market regimes.",
+        "shortHorizon": "Pooled non-overlapping 30-day <band>p10-p90</band> hit rates were about <rate>0.87-0.90</rate> across the four chains, above the nominal 0.80 rate.",
+        "longHorizon": "The 365-day horizons had 0-3 independent origins per chain, so calibration cannot be assessed reliably at that horizon.",
+        "scoreAssociation": "Across 8 tests, the Health Score showed no association with forward returns distinguishable from zero; samples were small. Score inputs include price-derived market-condition components, so any relationship may reflect mechanical momentum or mean reversion rather than on-chain information.",
+        "regimes": "Regime v2 was compared but not adopted; it produced more switching in the stored history.",
+        "commit": "Research commit: <id>{hash}</id>.",
+        "reportLink": "Read the research report"
+      },
+      "limitations": {
+        "title": "Limitations",
+        "coverage": "Some networks have no available free-tier on-chain inputs for particular pillars, and the score uses different component sets by chain.",
+        "history": "Price and score histories start on different dates, and the longest scenario horizon has very few independent origins.",
+        "providers": "Free-source coverage, units, and endpoints can change or become unavailable. Source gaps remain visible and are not filled.",
+        "scope": "These pages describe the current analysis only. They do not establish future accuracy or outcomes."
+      }
+    }
+  },
+  "legalPage": {
+    "title": "Legal and privacy",
+    "intro": "Terms of use, privacy information, and data-source attribution for ChainCompass.",
+    "tocLabel": "On this page",
+    "toc": {
+      "terms": "Terms of use",
+      "privacy": "Privacy",
+      "cookies": "Cookies and browser storage",
+      "sources": "Data sources and attribution",
+      "contact": "Contact"
+    },
+    "sections": {
+      "terms": {
+        "title": "Terms of use",
+        "asIs": "ChainCompass is provided as is, without warranty. The analysis is informational only, is not investment advice, and does not provide trading recommendations or forecasts.",
+        "responsibility": "You are responsible for your own use of the information and your own decisions.",
+        "thirdParty": "Third-party data may be inaccurate, incomplete, delayed, or unavailable.",
+        "acceptableUse": "Use the service lawfully. Do not attempt to disrupt it, bypass access controls, or misuse accounts or data.",
+        "changes": "Features and these terms may change. The date below identifies the latest update shown on this page.",
+        "notAvailable": "Chat, watchlists, alert delivery, Telegram, Google sign-in, account deletion, and payment features are not available yet."
+      },
+      "privacy": {
+        "title": "Privacy",
+        "intro": "The account service stores the following information for sign-in, account security, and essential account messages.",
+        "tableCaption": "Account information and its purpose",
+        "itemHeading": "Information",
+        "purposeHeading": "Purpose",
+        "email": "Account email, locale, email-verification state, account status, and account timestamps.",
+        "emailPurpose": "Identify the account, select the language for account messages, and record verification and account status.",
+        "password": "An Argon2id password hash for password-based accounts; the raw password is not stored. The hash can be empty for an account created through a configured external identity flow.",
+        "passwordPurpose": "Verify a password without keeping the original password.",
+        "role": "Account role, failed sign-in count, temporary lock time, and last sign-in time.",
+        "rolePurpose": "Apply access controls and protect sign-in from repeated failures.",
+        "refresh": "A SHA-256 hash of each refresh token, its family, expiry, revocation and replacement links, creation time, and the session user-agent and IP recorded by the server.",
+        "refreshPurpose": "Rotate sessions, detect token reuse, and revoke sessions.",
+        "emailTokens": "SHA-256 hashes of email-verification and password-reset tokens, with purpose, expiry, creation time, and use time.",
+        "emailTokensPurpose": "Support one-time, expiring email verification and password-reset flows.",
+        "external": "Provider account ID and email fields are supported by the account schema for external identity flows. Google sign-in is not available yet in the current product scope.",
+        "externalPurpose": "Associate a configured external identity with an account."
+      },
+      "cookies": {
+        "title": "Cookies and browser storage",
+        "intro": "These cookies and browser preferences support sign-in, language selection, or interface settings; they are essential to those functions.",
+        "cookieCaption": "Cookies",
+        "nameHeading": "Name",
+        "purposeHeading": "Purpose and setting",
+        "refreshCookie": "chaincompass_refresh",
+        "refreshPurpose": "Refreshes the short-lived in-memory access session. HttpOnly, SameSite=Lax, scoped to /api/v1/auth; Secure follows deployment configuration.",
+        "csrfCookie": "chaincompass_csrf",
+        "csrfPurpose": "Read by the client and echoed in a request header for CSRF checks. SameSite=Lax; not HttpOnly.",
+        "localeCookie": "NEXT_LOCALE",
+        "localePurpose": "Remembers the selected language. SameSite=Lax, with a one-year lifetime.",
+        "oauthCookie": "chaincompass_google_state",
+        "oauthPurpose": "Short-lived HttpOnly state for the Google callback when that flow is configured.",
+        "storageCaption": "Local storage",
+        "storageNameHeading": "Key",
+        "storagePurposeHeading": "Value stored",
+        "themeKey": "theme",
+        "themePurpose": "The selected light or dark appearance.",
+        "sidebarKey": "chaincompass.sidebar.collapsed",
+        "sidebarPurpose": "Whether the application sidebar is collapsed.",
+        "logoutKey": "chaincompass:logout-event",
+        "logoutPurpose": "A timestamp used only to notify another tab about sign-out when BroadcastChannel is unavailable.",
+        "accessToken": "The short-lived access token is held in JavaScript memory only; it is not written to local storage. No analytics or advertising scripts are configured in the frontend."
+      },
+      "sources": {
+        "title": "Data sources and attribution",
+        "body": "Public market and network data are requested by the service without account identifiers. Coin Metrics Community data is for non-commercial use and requires attribution. Other providers are credited in the methodology and subject to their own terms.",
+        "emailProvider": "In development, account email is saved to a local development mailbox. In other deployments, the configured SMTP service receives the recipient address and verification or password-reset message.",
+        "accountDeletion": "Account deletion controls are not available yet. Do not post passwords, account addresses, or authentication links in a public issue.",
+        "contact": "For questions about these terms or this privacy notice, use the public repository issues page."
+      },
+      "contact": {
+        "title": "Contact",
+        "linkLabel": "ChainCompass public issues",
+        "lastUpdated": "Last updated",
+        "date": "2026-11-21"
+      }
+    }
+  },
   "appNav": {
     "label": "Application navigation",
     "workspace": "Workspace",

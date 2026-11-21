@@ -8,6 +8,7 @@ import { SiteControls } from "@/components/site-controls";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ResendVerificationButton } from "@/components/auth/resend-verification-button";
 import { Sidebar } from "@/components/app/sidebar";
+import { SiteFooter } from "@/components/site-footer";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -121,6 +122,7 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
             <ResendVerificationButton email={user.email} />
           </div>
         )}
+        <SiteFooter variant="compact" />
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
-import { MarketingFooter } from "@/components/marketing/footer";
 import { MarketingHeader } from "@/components/marketing/header";
+import { SiteFooter } from "@/components/site-footer";
+import { PublicQueryProvider } from "@/components/providers/public-query-provider";
 import { setRequestLocale } from "next-intl/server";
 
 export default async function MarketingLayout({
@@ -11,9 +12,11 @@ export default async function MarketingLayout({
 
   return (
     <div className="min-h-svh">
-      <MarketingHeader />
-      {children}
-      <MarketingFooter locale={locale} />
+      <PublicQueryProvider>
+        <MarketingHeader />
+        {children}
+        <SiteFooter />
+      </PublicQueryProvider>
     </div>
   );
 }

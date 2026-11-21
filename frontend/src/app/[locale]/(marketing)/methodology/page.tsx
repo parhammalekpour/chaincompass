@@ -1,5 +1,10 @@
-import { PlaceholderPage } from "@/components/placeholder-page";
+import { MethodologyPage } from "@/components/marketing/methodology-page";
+import { routing } from "@/i18n/routing";
 import { createPageMetadata } from "@/lib/metadata";
+
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
 
 export async function generateMetadata({
   params,
@@ -11,5 +16,5 @@ export async function generateMetadata({
 }
 
 export default function Page() {
-  return <PlaceholderPage namespace="methodology" />;
+  return <MethodologyPage />;
 }
