@@ -1,10 +1,8 @@
 import asyncio
 import json
-import re
 import time
 from collections.abc import AsyncIterator, Mapping, Sequence
 from dataclasses import dataclass
-from decimal import Decimal
 from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -33,99 +31,6 @@ _SAFE_TOOL_NAMES = {
     "get_scenarios",
     "get_methodology_summary",
 }
-_SAFE_FIELDS = frozenset(
-    {
-        "slug",
-        "chain",
-        "as_of",
-        "as_of_date",
-        "score",
-        "coverage",
-        "coverage_max",
-        "confidence_label",
-        "version",
-        "is_partial",
-        "label",
-        "days_in_regime",
-        "vol_state",
-        "flag",
-        "severity",
-        "value",
-        "threshold",
-        "count",
-        "minimum",
-        "maximum",
-        "latest",
-        "changes",
-        "gap_days",
-        "items",
-        "segments",
-        "regime",
-        "days",
-        "available",
-        "low_sample",
-        "n_windows",
-        "n_independent",
-        "quantile",
-        "return",
-        "return_value",
-        "illustrative_price_usd",
-        "close_usd",
-        "price",
-        "horizons",
-        "scenarios",
-        "name",
-        "data",
-        "chains",
-        "symbol",
-        "pillars",
-        "weight",
-        "components",
-        "percentile_window_days",
-        "minimum_score_coverage",
-        "confidence_thresholds",
-        "regime_rules",
-        "hysteresis_days",
-        "horizons_days",
-        "minimum_independent_windows",
-        "low_sample_below_independent_windows",
-        "risk_flags",
-    }
-)
-_SAFE_ENUM_VALUES = frozenset(
-    {
-        "btc",
-        "eth",
-        "sol",
-        "bnb",
-        "High",
-        "Medium",
-        "Low",
-        "high",
-        "medium",
-        "low",
-        "stress",
-        "uptrend",
-        "downtrend",
-        "range",
-        "normal",
-        "pessimistic",
-        "base",
-        "optimistic",
-        "p10",
-        "p50",
-        "p90",
-        "deep_drawdown",
-        "high_volatility",
-        "liquidity_drying",
-        "usage_decline",
-        "tvl_outflow",
-        "stablecoin_contraction",
-        "hashrate_decline",
-        "low_confidence",
-    }
-)
-_NUMBER_OR_DATE = re.compile(r"(?:\d{4}-\d{2}-\d{2}|v\d+|[-+]?(?:\d+(?:\.\d*)?|\.\d+))")
 
 
 @dataclass(frozen=True)
@@ -476,45 +381,386 @@ def _safe_fallback(
     invocations: Sequence[ToolInvocation],
     language: str,
 ) -> str:
-    projected = [
-        {"tool": item.name, "data": _project_safe_data(item.result.get("data"))}
-        for item in invocations
-    ]
-    projected = [item for item in projected if item["data"]]
-    if not projected:
+    lines: list[str] = []
+    for invocation in invocations:
+        data = invocation.result.get("data")
+        if invocation.name not in _SAFE_TOOL_NAMES:
+            name = _safe_tool_label(invocation.name)
+            lines.append(
+                f"داده‌ها دریافت شد: {name}."
+                if language == "fa"
+                else f"Data retrieved: {name}."
+            )
+        elif isinstance(data, Mapping):
+            lines.extend(_format_tool_data(invocation.name, data, language))
+
+    if not lines:
         return (
             "داده‌ی ابزارِ تأییدشده در دسترس نیست."
             if language == "fa"
             else "No verified tool data is available."
         )
-    prefix = "داده‌های تأییدشده: " if language == "fa" else "Verified tool data: "
-    return prefix + json.dumps(projected, ensure_ascii=False, sort_keys=True)
+    header = (
+        "این رقم‌ها از ابزارها تأیید شده‌اند، چون متن دستیار قابل تأیید نبود."
+        if language == "fa"
+        else (
+            "These are verified figures from the tools because the assistant's "
+            "wording could not be verified."
+        )
+    )
+    return "\n".join([header, *lines[:11]])
 
 
-def _project_safe_data(value: object) -> object:
-    if isinstance(value, Mapping):
-        return {
-            key: projected
-            for key, item in value.items()
-            if isinstance(key, str)
-            and key in _SAFE_FIELDS
-            and (projected := _project_safe_data(item)) is not None
-        }
-    if isinstance(value, list):
-        projected_list = [
-            projected
-            for item in value
-            if (projected := _project_safe_data(item)) is not None
+def _format_tool_data(
+    name: str,
+    data: Mapping[str, object],
+    language: str,
+) -> list[str]:
+    if name == "list_chains":
+        chains = data.get("chains")
+        if not isinstance(chains, list):
+            return []
+        return [
+            line
+            for chain in chains[:10]
+            if isinstance(chain, Mapping)
+            and (line := _score_line(chain.get("score"), chain.get("slug"), language))
         ]
-        return projected_list or None
+    if name == "get_chain_snapshot":
+        line = _score_line(data.get("score"), data.get("slug"), language)
+        if line:
+            return [line]
+        return []
+    if name == "get_score_history_summary":
+        return _score_history_lines(data, language)
+    if name == "get_regime_history":
+        return _regime_lines(data, language)
+    if name == "get_scenarios":
+        return _scenario_lines(data, language)
+    if name == "get_methodology_summary":
+        return _methodology_lines(data, language)
+    return []
+
+
+def _score_line(
+    score_value: object,
+    slug_value: object,
+    language: str,
+) -> str | None:
+    if not isinstance(score_value, Mapping):
+        return None
+    chain = _chain_label(slug_value)
+    score = _number_text(score_value.get("value"))
+    if score is None:
+        score = _number_text(score_value.get("score"))
+    if score is None:
+        return None
+    confidence = _confidence(score_value.get("confidence_label"), language)
+    coverage = _number_text(score_value.get("coverage"))
+    coverage_max = _number_text(score_value.get("coverage_max"))
+    partial = score_value.get("is_partial")
+    as_of = _date_text(score_value.get("as_of_date"))
+    if language == "fa":
+        line = f"امتیاز {chain}: {score}"
+        if confidence:
+            line += f"؛ اطمینان {confidence}"
+        if coverage and coverage_max:
+            line += f"؛ پوشش {coverage} از {coverage_max}"
+        if partial is True:
+            line += "؛ ناقص"
+        if as_of:
+            line += f"؛ در تاریخ {as_of}"
+        return line + "."
+
+    line = f"{chain} score: {score}"
+    if confidence:
+        line += f"; confidence {confidence}"
+    if coverage and coverage_max:
+        line += f"; coverage {coverage} of {coverage_max}"
+    if partial is True:
+        line += "; partial"
+    if as_of:
+        line += f"; as of {as_of}"
+    return line + "."
+
+
+def _score_history_lines(data: Mapping[str, object], language: str) -> list[str]:
+    chain = _chain_label(data.get("chain"))
+    minimum = _number_text(data.get("minimum"))
+    maximum = _number_text(data.get("maximum"))
+    count = _number_text(data.get("count"))
+    days = _number_text(data.get("days"))
+    lines: list[str] = []
+    if language == "fa":
+        if minimum and maximum:
+            lines.append(f"بازهٔ امتیاز {chain}: {minimum} تا {maximum}.")
+        if count and days:
+            lines.append(f"تعداد داده‌ها در {days} روز: {count}.")
+    else:
+        if minimum and maximum:
+            lines.append(f"{chain} score range: {minimum} to {maximum}.")
+        if count and days:
+            lines.append(f"Records over {days} days: {count}.")
+
+    latest = data.get("latest")
+    if isinstance(latest, Mapping):
+        latest_line = _score_line(latest, data.get("chain"), language)
+        if latest_line:
+            lines.append(latest_line)
+    changes = data.get("changes")
+    if isinstance(changes, Mapping):
+        for period, change in changes.items():
+            period_text = _number_text(period)
+            if period_text is None or not isinstance(change, Mapping):
+                continue
+            value = _number_text(change.get("change"))
+            start = _date_text(change.get("from_date"))
+            end = _date_text(change.get("to_date"))
+            if value is None or start is None or end is None:
+                continue
+            if language == "fa":
+                lines.append(
+                    f"تغییر امتیاز {chain} در {period_text} روز: {value}؛ "
+                    f"از {start} تا {end}."
+                )
+            else:
+                lines.append(
+                    f"{chain} score change over {period_text} days: {value}; "
+                    f"from {start} to {end}."
+                )
+    return lines
+
+
+def _regime_lines(data: Mapping[str, object], language: str) -> list[str]:
+    chain = _chain_label(data.get("chain"))
+    segments = data.get("segments")
+    lines: list[str] = []
+    if isinstance(segments, list):
+        for segment in segments[:9]:
+            if not isinstance(segment, Mapping):
+                continue
+            regime = _regime_label(segment.get("regime"), language)
+            start = _date_text(segment.get("start_date"))
+            end = _date_text(segment.get("end_date"))
+            days = _number_text(segment.get("days"))
+            if not regime or not start or not end or not days:
+                continue
+            if language == "fa":
+                lines.append(
+                    f"وضعیت {chain}: {regime}؛ از {start} تا {end}؛ {days} روز."
+                )
+            else:
+                lines.append(f"{chain} regime {regime}: {start} to {end}; {days} days.")
+    volatility = _regime_label(data.get("latest_vol_state"), language)
+    if volatility:
+        lines.append(
+            f"وضعیت نوسان کنونی {chain}: {volatility}."
+            if language == "fa"
+            else f"Latest volatility state for {chain}: {volatility}."
+        )
+    return lines
+
+
+def _scenario_lines(data: Mapping[str, object], language: str) -> list[str]:
+    chain = _chain_label(data.get("chain"))
+    lines = [
+        (
+            "بازه‌های سناریوی تاریخی فقط داده‌های گذشته را توصیف می‌کنند "
+            "و آینده را بیان نمی‌کنند."
+        )
+        if language == "fa"
+        else "Historical scenario ranges, not a forecast."
+    ]
+    base_price = data.get("base_price")
+    if isinstance(base_price, Mapping):
+        price = _number_text(base_price.get("close_usd"))
+        date = _date_text(base_price.get("date"))
+        if price and date:
+            lines.append(
+                f"قیمت مبنا برای {chain}: {price} در {date}."
+                if language == "fa"
+                else f"{chain} base price: {price} on {date}."
+            )
+
+    horizons = data.get("horizons")
+    if isinstance(horizons, list):
+        for horizon in horizons[:4]:
+            if not isinstance(horizon, Mapping):
+                continue
+            days = _number_text(horizon.get("days"))
+            if days is None:
+                continue
+            scenarios = horizon.get("scenarios")
+            values: list[str] = []
+            if isinstance(scenarios, list):
+                for scenario in scenarios[:3]:
+                    if not isinstance(scenario, Mapping):
+                        continue
+                    quantile = _quantile(scenario.get("quantile"))
+                    returns = _number_text(scenario.get("return"))
+                    price = _number_text(scenario.get("illustrative_price_usd"))
+                    if quantile and returns and price:
+                        values.append(
+                            f"{quantile} {returns}, value {price}"
+                            if language != "fa"
+                            else f"{quantile} {returns}، مقدار {price}"
+                        )
+            independent = _number_text(horizon.get("n_independent"))
+            low_sample = horizon.get("low_sample")
+            if horizon.get("available") is False:
+                detail = (
+                    "داده‌های تاریخی در دسترس نیستند"
+                    if language == "fa"
+                    else "historical values unavailable"
+                )
+            elif values:
+                detail = "; ".join(values)
+            else:
+                detail = (
+                    "سناریوی تاریخی گزارش نشده"
+                    if language == "fa"
+                    else "no historical scenario values reported"
+                )
+            if independent:
+                detail += (
+                    f"؛ تعداد پنجره‌های مستقل {independent}"
+                    if language == "fa"
+                    else f"; independent windows {independent}"
+                )
+            if low_sample is True:
+                detail += "; low sample" if language != "fa" else "؛ نمونهٔ کم"
+            elif low_sample is False:
+                detail += "; sample adequate" if language != "fa" else "؛ نمونهٔ کافی"
+            if language == "fa":
+                lines.append(f"سناریوی تاریخی {chain} در {days} روز: {detail}.")
+            else:
+                lines.append(f"{chain} historical scenario at {days} days: {detail}.")
+    return lines
+
+
+def _methodology_lines(data: Mapping[str, object], language: str) -> list[str]:
+    window = _number_text(data.get("percentile_window_days"))
+    coverage = _number_text(data.get("minimum_score_coverage"))
+    lines: list[str] = []
+    if window:
+        lines.append(
+            f"پنجرهٔ صدک: {window} روز."
+            if language == "fa"
+            else f"Percentile window: {window} days."
+        )
+    if coverage:
+        lines.append(
+            f"حداقل پوشش امتیاز: {coverage}."
+            if language == "fa"
+            else f"Minimum score coverage: {coverage}."
+        )
+    scenarios = data.get("scenarios")
+    if isinstance(scenarios, Mapping):
+        horizons = scenarios.get("horizons_days")
+        if isinstance(horizons, list):
+            values = [
+                value
+                for item in horizons[:5]
+                if (value := _number_text(item)) is not None
+            ]
+            if values:
+                joined = ", ".join(values)
+                lines.append(
+                    f"افق‌های سناریو: {joined} روز."
+                    if language == "fa"
+                    else f"Scenario horizons: {joined} days."
+                )
+        minimum = _number_text(scenarios.get("minimum_independent_windows"))
+        low_sample = _number_text(scenarios.get("low_sample_below_independent_windows"))
+        if minimum:
+            lines.append(
+                f"حداقل پنجره‌های مستقل: {minimum}."
+                if language == "fa"
+                else f"Minimum independent windows: {minimum}."
+            )
+        if low_sample:
+            lines.append(
+                f"آستانهٔ نمونهٔ کم: کمتر از {low_sample} پنجرهٔ مستقل."
+                if language == "fa"
+                else f"Low-sample threshold: below {low_sample} independent windows."
+            )
+    return lines
+
+
+def _chain_label(value: object) -> str:
+    if isinstance(value, str) and value in {"btc", "eth", "sol", "bnb"}:
+        return value.upper()
+    return "chain"
+
+
+def _number_text(value: object) -> str | None:
     if isinstance(value, bool) or value is None:
+        return None
+    if isinstance(value, int):
+        return str(value)
+    if (
+        isinstance(value, str)
+        and value
+        and all(character in "0123456789.+-" for character in value)
+    ):
         return value
-    if isinstance(value, (int, Decimal)):
-        return value
-    if isinstance(value, str):
-        if value in _SAFE_ENUM_VALUES or _NUMBER_OR_DATE.fullmatch(value):
-            return value
     return None
+
+
+def _date_text(value: object) -> str | None:
+    if (
+        isinstance(value, str)
+        and len(value) == 10
+        and value[4] == "-"
+        and value[7] == "-"
+        and value[:4].isdigit()
+        and value[5:7].isdigit()
+        and value[8:].isdigit()
+    ):
+        return value
+    return None
+
+
+def _confidence(value: object, language: str) -> str | None:
+    if not isinstance(value, str):
+        return None
+    labels = {
+        "High": "زیاد",
+        "Medium": "متوسط",
+        "Low": "کم",
+    }
+    if value in labels:
+        return value if language != "fa" else labels[value]
+    return None
+
+
+def _regime_label(value: object, language: str) -> str | None:
+    if not isinstance(value, str):
+        return None
+    labels = {
+        "stress": "تنش",
+        "uptrend": "روند صعودی",
+        "downtrend": "روند نزولی",
+        "range": "دامنه‌ای",
+        "normal": "عادی",
+        "high": "زیاد",
+        "low": "کم",
+    }
+    if value in labels:
+        return value if language != "fa" else labels[value]
+    return None
+
+
+def _quantile(value: object) -> str | None:
+    if isinstance(value, str) and value in {"p10", "p50", "p90"}:
+        return value
+    return None
+
+
+def _safe_tool_label(value: str) -> str:
+    if len(value) <= 64 and value.isascii() and value.replace("_", "").isalnum():
+        return value
+    return "unknown_tool"
 
 
 def _add_optional(current: int | None, value: int | None) -> int | None:

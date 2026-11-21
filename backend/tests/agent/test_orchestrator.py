@@ -90,7 +90,19 @@ async def test_orchestrator_uses_verified_data_fallback_after_failed_retry(
     monkeypatch,
 ) -> None:
     async def execute(_: str, __: object, ___: object) -> dict[str, object]:
-        return {"ok": True, "data": {"score": "55.25", "slug": "btc"}}
+        return {
+            "ok": True,
+            "data": {
+                "slug": "btc",
+                "score": {
+                    "value": "55.25",
+                    "coverage": "0.6000",
+                    "coverage_max": "0.7000",
+                    "confidence_label": "Medium",
+                    "is_partial": True,
+                },
+            },
+        }
 
     monkeypatch.setattr(orchestrator_module, "execute_tool", execute)
     provider = FakeProvider(
