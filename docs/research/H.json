@@ -1,0 +1,274 @@
+{
+  "chains": [
+    {
+      "chain": "btc",
+      "horizons": [
+        {
+          "association_not_distinguishable_from_zero": true,
+          "fisher_z_approx_95": [
+            -0.10309598698249833,
+            0.29208672188243623
+          ],
+          "horizon_days": 30,
+          "n": 97,
+          "n_independent": 97,
+          "spearman_rho": 0.09837208079107931,
+          "tercile_excluded_insufficient_past_scores": 1,
+          "terciles": {
+            "high": {
+              "mean_forward_return": 0.0964370727584478,
+              "median_forward_return": 0.03224709525977935,
+              "n": 24
+            },
+            "low": {
+              "mean_forward_return": 0.020676627551684736,
+              "median_forward_return": 0.03323122678232367,
+              "n": 34
+            },
+            "middle": {
+              "mean_forward_return": 0.04854530636534215,
+              "median_forward_return": 0.018425423369362166,
+              "n": 38
+            }
+          }
+        },
+        {
+          "association_not_distinguishable_from_zero": true,
+          "fisher_z_approx_95": [
+            -0.3367234043226864,
+            0.3605518427597175
+          ],
+          "horizon_days": 90,
+          "n": 32,
+          "n_independent": 32,
+          "spearman_rho": 0.013563049853372434,
+          "tercile_excluded_insufficient_past_scores": 1,
+          "terciles": {
+            "high": {
+              "mean_forward_return": 0.14664243333983185,
+              "median_forward_return": 0.07494989547702202,
+              "n": 9
+            },
+            "low": {
+              "mean_forward_return": 0.14110718750905527,
+              "median_forward_return": -0.009859750815168735,
+              "n": 12
+            },
+            "middle": {
+              "mean_forward_return": 0.22884995053297966,
+              "median_forward_return": 0.14438522075063553,
+              "n": 10
+            }
+          }
+        }
+      ],
+      "score_first_date": "2018-11-14",
+      "score_last_date": "2026-11-19",
+      "tercile_minimum_past_scores": 30
+    },
+    {
+      "chain": "eth",
+      "horizons": [
+        {
+          "association_not_distinguishable_from_zero": true,
+          "fisher_z_approx_95": [
+            -0.1948677808520727,
+            0.21251566941285915
+          ],
+          "horizon_days": 30,
+          "n": 93,
+          "n_independent": 93,
+          "spearman_rho": 0.009205932380412401,
+          "tercile_excluded_insufficient_past_scores": 1,
+          "terciles": {
+            "high": {
+              "mean_forward_return": 0.07694497791795485,
+              "median_forward_return": -0.009184985610189211,
+              "n": 29
+            },
+            "low": {
+              "mean_forward_return": 0.025432813648916985,
+              "median_forward_return": -0.0036332410602961914,
+              "n": 40
+            },
+            "middle": {
+              "mean_forward_return": 0.09463794034080994,
+              "median_forward_return": 0.04445957199317938,
+              "n": 23
+            }
+          }
+        },
+        {
+          "association_not_distinguishable_from_zero": true,
+          "fisher_z_approx_95": [
+            -0.308732593970351,
+            0.39832198860526113
+          ],
+          "horizon_days": 90,
+          "n": 31,
+          "n_independent": 31,
+          "spearman_rho": 0.05120967741935484,
+          "tercile_excluded_insufficient_past_scores": 1,
+          "terciles": {
+            "high": {
+              "mean_forward_return": -0.023396507800847288,
+              "median_forward_return": -0.07421542464154877,
+              "n": 9
+            },
+            "low": {
+              "mean_forward_return": 4.1826998734342816e-05,
+              "median_forward_return": -0.0745889037728186,
+              "n": 10
+            },
+            "middle": {
+              "mean_forward_return": 0.48260020558495764,
+              "median_forward_return": 0.2209550886610406,
+              "n": 11
+            }
+          }
+        }
+      ],
+      "score_first_date": "2019-03-03",
+      "score_last_date": "2026-11-19",
+      "tercile_minimum_past_scores": 30
+    },
+    {
+      "chain": "sol",
+      "horizons": [
+        {
+          "association_not_distinguishable_from_zero": true,
+          "fisher_z_approx_95": [
+            -0.1426856981170402,
+            0.39382882291533594
+          ],
+          "horizon_days": 30,
+          "n": 52,
+          "n_independent": 52,
+          "spearman_rho": 0.13549048066251174,
+          "tercile_excluded_insufficient_past_scores": 1,
+          "terciles": {
+            "high": {
+              "mean_forward_return": 0.1015669180898091,
+              "median_forward_return": -0.006187018119974581,
+              "n": 22
+            },
+            "low": {
+              "mean_forward_return": 0.06235936692508417,
+              "median_forward_return": 0.009604069977946742,
+              "n": 16
+            },
+            "middle": {
+              "mean_forward_return": -0.03875696433809615,
+              "median_forward_return": 0.018004722550177096,
+              "n": 13
+            }
+          }
+        },
+        {
+          "association_not_distinguishable_from_zero": true,
+          "fisher_z_approx_95": [
+            -0.012996053105142536,
+            0.7757658120742167
+          ],
+          "horizon_days": 90,
+          "n": 17,
+          "n_independent": 17,
+          "spearman_rho": 0.47058823529411764,
+          "tercile_excluded_insufficient_past_scores": 1,
+          "terciles": {
+            "high": {
+              "mean_forward_return": 0.35494006417263385,
+              "median_forward_return": 0.3074463696369637,
+              "n": 7
+            },
+            "low": {
+              "mean_forward_return": 0.03517957519336776,
+              "median_forward_return": 0.054071435750977836,
+              "n": 4
+            },
+            "middle": {
+              "mean_forward_return": -0.021020305414636127,
+              "median_forward_return": -0.03253546584871556,
+              "n": 5
+            }
+          }
+        }
+      ],
+      "score_first_date": "2022-08-09",
+      "score_last_date": "2026-11-19",
+      "tercile_minimum_past_scores": 30
+    },
+    {
+      "chain": "bnb",
+      "horizons": [
+        {
+          "association_not_distinguishable_from_zero": true,
+          "fisher_z_approx_95": [
+            -0.12824833303821132,
+            0.38377240083662345
+          ],
+          "horizon_days": 30,
+          "n": 57,
+          "n_independent": 57,
+          "spearman_rho": 0.13689395903551985,
+          "tercile_excluded_insufficient_past_scores": 1,
+          "terciles": {
+            "high": {
+              "mean_forward_return": 0.03068369139293299,
+              "median_forward_return": 0.03115264797507788,
+              "n": 35
+            },
+            "low": {
+              "mean_forward_return": 0.030045250918276104,
+              "median_forward_return": 0.03749760398696569,
+              "n": 9
+            },
+            "middle": {
+              "mean_forward_return": -0.007195081420325589,
+              "median_forward_return": -0.01176080218335379,
+              "n": 12
+            }
+          }
+        },
+        {
+          "association_not_distinguishable_from_zero": true,
+          "fisher_z_approx_95": [
+            -0.15969903773184158,
+            0.6744729836596551
+          ],
+          "horizon_days": 90,
+          "n": 19,
+          "n_independent": 19,
+          "spearman_rho": 0.3175438596491228,
+          "tercile_excluded_insufficient_past_scores": 1,
+          "terciles": {
+            "high": {
+              "mean_forward_return": 0.11304848822641289,
+              "median_forward_return": 0.07498510377859552,
+              "n": 12
+            },
+            "low": {
+              "mean_forward_return": -0.026979251509225543,
+              "median_forward_return": -0.10123621784163048,
+              "n": 3
+            },
+            "middle": {
+              "mean_forward_return": 0.0807913666024924,
+              "median_forward_return": 0.009844134536505332,
+              "n": 3
+            }
+          }
+        }
+      ],
+      "score_first_date": "2022-02-15",
+      "score_last_date": "2026-11-19",
+      "tercile_minimum_past_scores": 30
+    }
+  ],
+  "protocol_commit": "b8979770191ec43c029b96a403ada25c8c39ae6a",
+  "source_dates": {
+    "first_score_date": "2018-11-14",
+    "last_score_date": "2026-11-19"
+  },
+  "study": "H"
+}

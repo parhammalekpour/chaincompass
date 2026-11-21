@@ -54,6 +54,8 @@ See [Windows setup](docs/SETUP.md) to prepare the development environment.
   mobile cards.
 - Chain detail with localized snapshots, history and price charts, regime
   timeline, score pillars, and historical-return scenario context.
+- Read-only historical walk-forward research reports (no predictive claims);
+  see [docs/RESEARCH.md](docs/RESEARCH.md).
 - Not implemented yet: AI chat, watchlists, or alert delivery.
   Those routes display a planned-state card rather than loading indefinitely.
 - Explicitly confirmed purge for the discontinued legacy Coin Metrics BNB
@@ -66,7 +68,6 @@ See [Windows setup](docs/SETUP.md) to prepare the development environment.
   SOL, and BNB, limited by the measured sources in
   [docs/DATA_AUDIT.md](docs/DATA_AUDIT.md).
 - Capital-flow analysis beyond the implemented score components.
-- Walk-forward calibration evaluation.
 - User-facing risk-alert delivery and watchlists.
 - Tool-grounded AI analyst.
 - Public SEO pages (deferred to Prompt 15).

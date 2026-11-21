@@ -1,0 +1,4511 @@
+{
+  "chains": [
+    {
+      "chain": "btc",
+      "stored_v1_comparison": {
+        "examples": [],
+        "matches": true,
+        "mismatch_count": 0
+      },
+      "versions": {
+        "v1": {
+          "episodes_under_10_days": 12,
+          "mean_regime_duration_days": 58.785714285714285,
+          "median_regime_duration_days": 27.5,
+          "raw_stress_episodes": [
+            {
+              "detection_lag_days": 4,
+              "detection_not_observed": false,
+              "exit_lag_days": 7,
+              "exit_right_censored": false,
+              "raw_stress_end": "2019-04-02",
+              "raw_stress_start": "2018-08-16"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2019-04-04",
+              "raw_stress_start": "2019-04-04"
+            },
+            {
+              "detection_lag_days": 4,
+              "detection_not_observed": false,
+              "exit_lag_days": 13,
+              "exit_right_censored": false,
+              "raw_stress_end": "2020-03-23",
+              "raw_stress_start": "2020-03-12"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2020-03-31",
+              "raw_stress_start": "2020-03-27"
+            },
+            {
+              "detection_lag_days": null,
+              "detection_not_observed": true,
+              "exit_lag_days": null,
+              "exit_right_censored": false,
+              "raw_stress_end": "2021-06-21",
+              "raw_stress_start": "2021-06-21"
+            },
+            {
+              "detection_lag_days": null,
+              "detection_not_observed": true,
+              "exit_lag_days": null,
+              "exit_right_censored": false,
+              "raw_stress_end": "2021-06-25",
+              "raw_stress_start": "2021-06-25"
+            },
+            {
+              "detection_lag_days": 4,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2021-07-20",
+              "raw_stress_start": "2021-07-16"
+            },
+            {
+              "detection_lag_days": 4,
+              "detection_not_observed": false,
+              "exit_lag_days": 24,
+              "exit_right_censored": false,
+              "raw_stress_end": "2023-01-28",
+              "raw_stress_start": "2022-05-09"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 21,
+              "exit_right_censored": false,
+              "raw_stress_end": "2023-01-31",
+              "raw_stress_start": "2023-01-30"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 7,
+              "exit_right_censored": false,
+              "raw_stress_end": "2023-02-14",
+              "raw_stress_start": "2023-02-02"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2023-02-16",
+              "raw_stress_start": "2023-02-16"
+            },
+            {
+              "detection_lag_days": 4,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2023-03-12",
+              "raw_stress_start": "2023-02-24"
+            },
+            {
+              "detection_lag_days": null,
+              "detection_not_observed": true,
+              "exit_lag_days": null,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-06-06",
+              "raw_stress_start": "2026-06-05"
+            },
+            {
+              "detection_lag_days": null,
+              "detection_not_observed": true,
+              "exit_lag_days": null,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-06-10",
+              "raw_stress_start": "2026-06-09"
+            },
+            {
+              "detection_lag_days": 4,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-07-02",
+              "raw_stress_start": "2026-06-24"
+            },
+            {
+              "detection_lag_days": null,
+              "detection_not_observed": true,
+              "exit_lag_days": null,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-07-08",
+              "raw_stress_start": "2026-07-08"
+            }
+          ],
+          "regime_durations": [
+            {
+              "censored": false,
+              "days": 123,
+              "end_date": "2018-03-17",
+              "regime": "range",
+              "start_date": "2017-11-15"
+            },
+            {
+              "censored": false,
+              "days": 49,
+              "end_date": "2018-05-05",
+              "regime": "downtrend",
+              "start_date": "2018-03-18"
+            },
+            {
+              "censored": false,
+              "days": 13,
+              "end_date": "2018-05-18",
+              "regime": "range",
+              "start_date": "2018-05-06"
+            },
+            {
+              "censored": false,
+              "days": 93,
+              "end_date": "2018-08-19",
+              "regime": "downtrend",
+              "start_date": "2018-05-19"
+            },
+            {
+              "censored": false,
+              "days": 232,
+              "end_date": "2019-04-08",
+              "regime": "stress",
+              "start_date": "2018-08-20"
+            },
+            {
+              "censored": false,
+              "days": 168,
+              "end_date": "2019-09-23",
+              "regime": "uptrend",
+              "start_date": "2019-04-09"
+            },
+            {
+              "censored": false,
+              "days": 6,
+              "end_date": "2019-09-29",
+              "regime": "range",
+              "start_date": "2019-09-24"
+            },
+            {
+              "censored": false,
+              "days": 32,
+              "end_date": "2019-10-31",
+              "regime": "downtrend",
+              "start_date": "2019-09-30"
+            },
+            {
+              "censored": false,
+              "days": 11,
+              "end_date": "2019-11-11",
+              "regime": "range",
+              "start_date": "2019-11-01"
+            },
+            {
+              "censored": false,
+              "days": 67,
+              "end_date": "2020-01-17",
+              "regime": "downtrend",
+              "start_date": "2019-11-12"
+            },
+            {
+              "censored": false,
+              "days": 9,
+              "end_date": "2020-01-26",
+              "regime": "range",
+              "start_date": "2020-01-18"
+            },
+            {
+              "censored": false,
+              "days": 5,
+              "end_date": "2020-01-31",
+              "regime": "downtrend",
+              "start_date": "2020-01-27"
+            },
+            {
+              "censored": false,
+              "days": 44,
+              "end_date": "2020-03-15",
+              "regime": "uptrend",
+              "start_date": "2020-02-01"
+            },
+            {
+              "censored": false,
+              "days": 20,
+              "end_date": "2020-04-04",
+              "regime": "stress",
+              "start_date": "2020-03-16"
+            },
+            {
+              "censored": false,
+              "days": 28,
+              "end_date": "2020-05-02",
+              "regime": "downtrend",
+              "start_date": "2020-04-05"
+            },
+            {
+              "censored": false,
+              "days": 27,
+              "end_date": "2020-05-29",
+              "regime": "range",
+              "start_date": "2020-05-03"
+            },
+            {
+              "censored": false,
+              "days": 360,
+              "end_date": "2021-05-24",
+              "regime": "uptrend",
+              "start_date": "2020-05-30"
+            },
+            {
+              "censored": false,
+              "days": 56,
+              "end_date": "2021-07-19",
+              "regime": "downtrend",
+              "start_date": "2021-05-25"
+            },
+            {
+              "censored": false,
+              "days": 5,
+              "end_date": "2021-07-24",
+              "regime": "stress",
+              "start_date": "2021-07-20"
+            },
+            {
+              "censored": false,
+              "days": 29,
+              "end_date": "2021-08-22",
+              "regime": "downtrend",
+              "start_date": "2021-07-25"
+            },
+            {
+              "censored": false,
+              "days": 32,
+              "end_date": "2021-09-23",
+              "regime": "uptrend",
+              "start_date": "2021-08-23"
+            },
+            {
+              "censored": false,
+              "days": 11,
+              "end_date": "2021-10-04",
+              "regime": "range",
+              "start_date": "2021-09-24"
+            },
+            {
+              "censored": false,
+              "days": 90,
+              "end_date": "2022-01-02",
+              "regime": "uptrend",
+              "start_date": "2021-10-05"
+            },
+            {
+              "censored": false,
+              "days": 95,
+              "end_date": "2022-04-07",
+              "regime": "downtrend",
+              "start_date": "2022-01-03"
+            },
+            {
+              "censored": false,
+              "days": 7,
+              "end_date": "2022-04-14",
+              "regime": "range",
+              "start_date": "2022-04-08"
+            },
+            {
+              "censored": false,
+              "days": 9,
+              "end_date": "2022-04-23",
+              "regime": "downtrend",
+              "start_date": "2022-04-15"
+            },
+            {
+              "censored": false,
+              "days": 19,
+              "end_date": "2022-05-12",
+              "regime": "range",
+              "start_date": "2022-04-24"
+            },
+            {
+              "censored": false,
+              "days": 284,
+              "end_date": "2023-02-20",
+              "regime": "stress",
+              "start_date": "2022-05-13"
+            },
+            {
+              "censored": false,
+              "days": 7,
+              "end_date": "2023-02-27",
+              "regime": "uptrend",
+              "start_date": "2023-02-21"
+            },
+            {
+              "censored": false,
+              "days": 17,
+              "end_date": "2023-03-16",
+              "regime": "stress",
+              "start_date": "2023-02-28"
+            },
+            {
+              "censored": false,
+              "days": 94,
+              "end_date": "2023-06-18",
+              "regime": "uptrend",
+              "start_date": "2023-03-17"
+            },
+            {
+              "censored": false,
+              "days": 5,
+              "end_date": "2023-06-23",
+              "regime": "range",
+              "start_date": "2023-06-19"
+            },
+            {
+              "censored": false,
+              "days": 58,
+              "end_date": "2023-08-20",
+              "regime": "uptrend",
+              "start_date": "2023-06-24"
+            },
+            {
+              "censored": false,
+              "days": 26,
+              "end_date": "2023-09-15",
+              "regime": "downtrend",
+              "start_date": "2023-08-21"
+            },
+            {
+              "censored": false,
+              "days": 5,
+              "end_date": "2023-09-20",
+              "regime": "range",
+              "start_date": "2023-09-16"
+            },
+            {
+              "censored": false,
+              "days": 29,
+              "end_date": "2023-10-19",
+              "regime": "downtrend",
+              "start_date": "2023-09-21"
+            },
+            {
+              "censored": false,
+              "days": 6,
+              "end_date": "2023-10-25",
+              "regime": "range",
+              "start_date": "2023-10-20"
+            },
+            {
+              "censored": false,
+              "days": 231,
+              "end_date": "2024-06-12",
+              "regime": "uptrend",
+              "start_date": "2023-10-26"
+            },
+            {
+              "censored": false,
+              "days": 25,
+              "end_date": "2024-07-07",
+              "regime": "range",
+              "start_date": "2024-06-13"
+            },
+            {
+              "censored": false,
+              "days": 11,
+              "end_date": "2024-07-18",
+              "regime": "downtrend",
+              "start_date": "2024-07-08"
+            },
+            {
+              "censored": false,
+              "days": 19,
+              "end_date": "2024-08-06",
+              "regime": "uptrend",
+              "start_date": "2024-07-19"
+            },
+            {
+              "censored": false,
+              "days": 58,
+              "end_date": "2024-10-03",
+              "regime": "downtrend",
+              "start_date": "2024-08-07"
+            },
+            {
+              "censored": false,
+              "days": 14,
+              "end_date": "2024-10-17",
+              "regime": "range",
+              "start_date": "2024-10-04"
+            },
+            {
+              "censored": false,
+              "days": 133,
+              "end_date": "2025-02-27",
+              "regime": "uptrend",
+              "start_date": "2024-10-18"
+            },
+            {
+              "censored": false,
+              "days": 32,
+              "end_date": "2025-03-31",
+              "regime": "range",
+              "start_date": "2025-02-28"
+            },
+            {
+              "censored": false,
+              "days": 25,
+              "end_date": "2025-04-25",
+              "regime": "downtrend",
+              "start_date": "2025-04-01"
+            },
+            {
+              "censored": false,
+              "days": 14,
+              "end_date": "2025-05-09",
+              "regime": "range",
+              "start_date": "2025-04-26"
+            },
+            {
+              "censored": false,
+              "days": 157,
+              "end_date": "2025-10-13",
+              "regime": "uptrend",
+              "start_date": "2025-05-10"
+            },
+            {
+              "censored": false,
+              "days": 24,
+              "end_date": "2025-11-06",
+              "regime": "range",
+              "start_date": "2025-10-14"
+            },
+            {
+              "censored": false,
+              "days": 182,
+              "end_date": "2026-05-07",
+              "regime": "downtrend",
+              "start_date": "2025-11-07"
+            },
+            {
+              "censored": false,
+              "days": 38,
+              "end_date": "2026-06-14",
+              "regime": "range",
+              "start_date": "2026-05-08"
+            },
+            {
+              "censored": false,
+              "days": 13,
+              "end_date": "2026-06-27",
+              "regime": "downtrend",
+              "start_date": "2026-06-15"
+            },
+            {
+              "censored": false,
+              "days": 9,
+              "end_date": "2026-07-06",
+              "regime": "stress",
+              "start_date": "2026-06-28"
+            },
+            {
+              "censored": false,
+              "days": 49,
+              "end_date": "2026-08-24",
+              "regime": "downtrend",
+              "start_date": "2026-07-07"
+            },
+            {
+              "censored": false,
+              "days": 83,
+              "end_date": "2026-11-15",
+              "regime": "uptrend",
+              "start_date": "2026-08-25"
+            },
+            {
+              "censored": true,
+              "days": 4,
+              "end_date": "2026-11-19",
+              "regime": "range",
+              "start_date": "2026-11-16"
+            }
+          ],
+          "regime_episode_count": 56,
+          "regime_switches": 55
+        },
+        "v2": {
+          "episodes_under_10_days": 15,
+          "mean_regime_duration_days": 53.967213114754095,
+          "median_regime_duration_days": 25,
+          "raw_stress_episodes": [
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 7,
+              "exit_right_censored": false,
+              "raw_stress_end": "2019-04-02",
+              "raw_stress_start": "2018-08-16"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2019-04-04",
+              "raw_stress_start": "2019-04-04"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 13,
+              "exit_right_censored": false,
+              "raw_stress_end": "2020-03-23",
+              "raw_stress_start": "2020-03-12"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2020-03-31",
+              "raw_stress_start": "2020-03-27"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 9,
+              "exit_right_censored": false,
+              "raw_stress_end": "2021-06-21",
+              "raw_stress_start": "2021-06-21"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2021-06-25",
+              "raw_stress_start": "2021-06-25"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2021-07-20",
+              "raw_stress_start": "2021-07-16"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 24,
+              "exit_right_censored": false,
+              "raw_stress_end": "2023-01-28",
+              "raw_stress_start": "2022-05-09"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 21,
+              "exit_right_censored": false,
+              "raw_stress_end": "2023-01-31",
+              "raw_stress_start": "2023-01-30"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 7,
+              "exit_right_censored": false,
+              "raw_stress_end": "2023-02-14",
+              "raw_stress_start": "2023-02-02"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2023-02-16",
+              "raw_stress_start": "2023-02-16"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2023-03-12",
+              "raw_stress_start": "2023-02-24"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 9,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-06-06",
+              "raw_stress_start": "2026-06-05"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-06-10",
+              "raw_stress_start": "2026-06-09"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-07-02",
+              "raw_stress_start": "2026-06-24"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-07-08",
+              "raw_stress_start": "2026-07-08"
+            }
+          ],
+          "regime_durations": [
+            {
+              "censored": false,
+              "days": 123,
+              "end_date": "2018-03-17",
+              "regime": "range",
+              "start_date": "2017-11-15"
+            },
+            {
+              "censored": false,
+              "days": 49,
+              "end_date": "2018-05-05",
+              "regime": "downtrend",
+              "start_date": "2018-03-18"
+            },
+            {
+              "censored": false,
+              "days": 13,
+              "end_date": "2018-05-18",
+              "regime": "range",
+              "start_date": "2018-05-06"
+            },
+            {
+              "censored": false,
+              "days": 89,
+              "end_date": "2018-08-15",
+              "regime": "downtrend",
+              "start_date": "2018-05-19"
+            },
+            {
+              "censored": false,
+              "days": 236,
+              "end_date": "2019-04-08",
+              "regime": "stress",
+              "start_date": "2018-08-16"
+            },
+            {
+              "censored": false,
+              "days": 168,
+              "end_date": "2019-09-23",
+              "regime": "uptrend",
+              "start_date": "2019-04-09"
+            },
+            {
+              "censored": false,
+              "days": 6,
+              "end_date": "2019-09-29",
+              "regime": "range",
+              "start_date": "2019-09-24"
+            },
+            {
+              "censored": false,
+              "days": 32,
+              "end_date": "2019-10-31",
+              "regime": "downtrend",
+              "start_date": "2019-09-30"
+            },
+            {
+              "censored": false,
+              "days": 11,
+              "end_date": "2019-11-11",
+              "regime": "range",
+              "start_date": "2019-11-01"
+            },
+            {
+              "censored": false,
+              "days": 67,
+              "end_date": "2020-01-17",
+              "regime": "downtrend",
+              "start_date": "2019-11-12"
+            },
+            {
+              "censored": false,
+              "days": 9,
+              "end_date": "2020-01-26",
+              "regime": "range",
+              "start_date": "2020-01-18"
+            },
+            {
+              "censored": false,
+              "days": 5,
+              "end_date": "2020-01-31",
+              "regime": "downtrend",
+              "start_date": "2020-01-27"
+            },
+            {
+              "censored": false,
+              "days": 40,
+              "end_date": "2020-03-11",
+              "regime": "uptrend",
+              "start_date": "2020-02-01"
+            },
+            {
+              "censored": false,
+              "days": 24,
+              "end_date": "2020-04-04",
+              "regime": "stress",
+              "start_date": "2020-03-12"
+            },
+            {
+              "censored": false,
+              "days": 28,
+              "end_date": "2020-05-02",
+              "regime": "downtrend",
+              "start_date": "2020-04-05"
+            },
+            {
+              "censored": false,
+              "days": 27,
+              "end_date": "2020-05-29",
+              "regime": "range",
+              "start_date": "2020-05-03"
+            },
+            {
+              "censored": false,
+              "days": 360,
+              "end_date": "2021-05-24",
+              "regime": "uptrend",
+              "start_date": "2020-05-30"
+            },
+            {
+              "censored": false,
+              "days": 27,
+              "end_date": "2021-06-20",
+              "regime": "downtrend",
+              "start_date": "2021-05-25"
+            },
+            {
+              "censored": false,
+              "days": 9,
+              "end_date": "2021-06-29",
+              "regime": "stress",
+              "start_date": "2021-06-21"
+            },
+            {
+              "censored": false,
+              "days": 16,
+              "end_date": "2021-07-15",
+              "regime": "downtrend",
+              "start_date": "2021-06-30"
+            },
+            {
+              "censored": false,
+              "days": 9,
+              "end_date": "2021-07-24",
+              "regime": "stress",
+              "start_date": "2021-07-16"
+            },
+            {
+              "censored": false,
+              "days": 29,
+              "end_date": "2021-08-22",
+              "regime": "downtrend",
+              "start_date": "2021-07-25"
+            },
+            {
+              "censored": false,
+              "days": 32,
+              "end_date": "2021-09-23",
+              "regime": "uptrend",
+              "start_date": "2021-08-23"
+            },
+            {
+              "censored": false,
+              "days": 11,
+              "end_date": "2021-10-04",
+              "regime": "range",
+              "start_date": "2021-09-24"
+            },
+            {
+              "censored": false,
+              "days": 90,
+              "end_date": "2022-01-02",
+              "regime": "uptrend",
+              "start_date": "2021-10-05"
+            },
+            {
+              "censored": false,
+              "days": 95,
+              "end_date": "2022-04-07",
+              "regime": "downtrend",
+              "start_date": "2022-01-03"
+            },
+            {
+              "censored": false,
+              "days": 7,
+              "end_date": "2022-04-14",
+              "regime": "range",
+              "start_date": "2022-04-08"
+            },
+            {
+              "censored": false,
+              "days": 9,
+              "end_date": "2022-04-23",
+              "regime": "downtrend",
+              "start_date": "2022-04-15"
+            },
+            {
+              "censored": false,
+              "days": 15,
+              "end_date": "2022-05-08",
+              "regime": "range",
+              "start_date": "2022-04-24"
+            },
+            {
+              "censored": false,
+              "days": 288,
+              "end_date": "2023-02-20",
+              "regime": "stress",
+              "start_date": "2022-05-09"
+            },
+            {
+              "censored": false,
+              "days": 3,
+              "end_date": "2023-02-23",
+              "regime": "uptrend",
+              "start_date": "2023-02-21"
+            },
+            {
+              "censored": false,
+              "days": 21,
+              "end_date": "2023-03-16",
+              "regime": "stress",
+              "start_date": "2023-02-24"
+            },
+            {
+              "censored": false,
+              "days": 94,
+              "end_date": "2023-06-18",
+              "regime": "uptrend",
+              "start_date": "2023-03-17"
+            },
+            {
+              "censored": false,
+              "days": 5,
+              "end_date": "2023-06-23",
+              "regime": "range",
+              "start_date": "2023-06-19"
+            },
+            {
+              "censored": false,
+              "days": 58,
+              "end_date": "2023-08-20",
+              "regime": "uptrend",
+              "start_date": "2023-06-24"
+            },
+            {
+              "censored": false,
+              "days": 26,
+              "end_date": "2023-09-15",
+              "regime": "downtrend",
+              "start_date": "2023-08-21"
+            },
+            {
+              "censored": false,
+              "days": 5,
+              "end_date": "2023-09-20",
+              "regime": "range",
+              "start_date": "2023-09-16"
+            },
+            {
+              "censored": false,
+              "days": 29,
+              "end_date": "2023-10-19",
+              "regime": "downtrend",
+              "start_date": "2023-09-21"
+            },
+            {
+              "censored": false,
+              "days": 6,
+              "end_date": "2023-10-25",
+              "regime": "range",
+              "start_date": "2023-10-20"
+            },
+            {
+              "censored": false,
+              "days": 231,
+              "end_date": "2024-06-12",
+              "regime": "uptrend",
+              "start_date": "2023-10-26"
+            },
+            {
+              "censored": false,
+              "days": 25,
+              "end_date": "2024-07-07",
+              "regime": "range",
+              "start_date": "2024-06-13"
+            },
+            {
+              "censored": false,
+              "days": 11,
+              "end_date": "2024-07-18",
+              "regime": "downtrend",
+              "start_date": "2024-07-08"
+            },
+            {
+              "censored": false,
+              "days": 19,
+              "end_date": "2024-08-06",
+              "regime": "uptrend",
+              "start_date": "2024-07-19"
+            },
+            {
+              "censored": false,
+              "days": 58,
+              "end_date": "2024-10-03",
+              "regime": "downtrend",
+              "start_date": "2024-08-07"
+            },
+            {
+              "censored": false,
+              "days": 14,
+              "end_date": "2024-10-17",
+              "regime": "range",
+              "start_date": "2024-10-04"
+            },
+            {
+              "censored": false,
+              "days": 133,
+              "end_date": "2025-02-27",
+              "regime": "uptrend",
+              "start_date": "2024-10-18"
+            },
+            {
+              "censored": false,
+              "days": 32,
+              "end_date": "2025-03-31",
+              "regime": "range",
+              "start_date": "2025-02-28"
+            },
+            {
+              "censored": false,
+              "days": 25,
+              "end_date": "2025-04-25",
+              "regime": "downtrend",
+              "start_date": "2025-04-01"
+            },
+            {
+              "censored": false,
+              "days": 14,
+              "end_date": "2025-05-09",
+              "regime": "range",
+              "start_date": "2025-04-26"
+            },
+            {
+              "censored": false,
+              "days": 157,
+              "end_date": "2025-10-13",
+              "regime": "uptrend",
+              "start_date": "2025-05-10"
+            },
+            {
+              "censored": false,
+              "days": 24,
+              "end_date": "2025-11-06",
+              "regime": "range",
+              "start_date": "2025-10-14"
+            },
+            {
+              "censored": false,
+              "days": 182,
+              "end_date": "2026-05-07",
+              "regime": "downtrend",
+              "start_date": "2025-11-07"
+            },
+            {
+              "censored": false,
+              "days": 28,
+              "end_date": "2026-06-04",
+              "regime": "range",
+              "start_date": "2026-05-08"
+            },
+            {
+              "censored": false,
+              "days": 10,
+              "end_date": "2026-06-14",
+              "regime": "stress",
+              "start_date": "2026-06-05"
+            },
+            {
+              "censored": false,
+              "days": 9,
+              "end_date": "2026-06-23",
+              "regime": "downtrend",
+              "start_date": "2026-06-15"
+            },
+            {
+              "censored": false,
+              "days": 13,
+              "end_date": "2026-07-06",
+              "regime": "stress",
+              "start_date": "2026-06-24"
+            },
+            {
+              "censored": false,
+              "days": 1,
+              "end_date": "2026-07-07",
+              "regime": "downtrend",
+              "start_date": "2026-07-07"
+            },
+            {
+              "censored": false,
+              "days": 5,
+              "end_date": "2026-07-12",
+              "regime": "stress",
+              "start_date": "2026-07-08"
+            },
+            {
+              "censored": false,
+              "days": 43,
+              "end_date": "2026-08-24",
+              "regime": "downtrend",
+              "start_date": "2026-07-13"
+            },
+            {
+              "censored": false,
+              "days": 83,
+              "end_date": "2026-11-15",
+              "regime": "uptrend",
+              "start_date": "2026-08-25"
+            },
+            {
+              "censored": true,
+              "days": 4,
+              "end_date": "2026-11-19",
+              "regime": "range",
+              "start_date": "2026-11-16"
+            }
+          ],
+          "regime_episode_count": 61,
+          "regime_switches": 60
+        }
+      }
+    },
+    {
+      "chain": "eth",
+      "stored_v1_comparison": {
+        "examples": [],
+        "matches": true,
+        "mismatch_count": 0
+      },
+      "versions": {
+        "v1": {
+          "episodes_under_10_days": 6,
+          "mean_regime_duration_days": 63.30769230769231,
+          "median_regime_duration_days": 31.0,
+          "raw_stress_episodes": [
+            {
+              "detection_lag_days": 4,
+              "detection_not_observed": false,
+              "exit_lag_days": 8,
+              "exit_right_censored": false,
+              "raw_stress_end": "2019-06-16",
+              "raw_stress_start": "2018-08-16"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2019-06-19",
+              "raw_stress_start": "2019-06-18"
+            },
+            {
+              "detection_lag_days": 4,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2019-07-30",
+              "raw_stress_start": "2019-07-14"
+            },
+            {
+              "detection_lag_days": null,
+              "detection_not_observed": true,
+              "exit_lag_days": null,
+              "exit_right_censored": false,
+              "raw_stress_end": "2019-08-30",
+              "raw_stress_start": "2019-08-29"
+            },
+            {
+              "detection_lag_days": null,
+              "detection_not_observed": true,
+              "exit_lag_days": null,
+              "exit_right_censored": false,
+              "raw_stress_end": "2019-09-06",
+              "raw_stress_start": "2019-09-06"
+            },
+            {
+              "detection_lag_days": null,
+              "detection_not_observed": true,
+              "exit_lag_days": null,
+              "exit_right_censored": false,
+              "raw_stress_end": "2019-09-24",
+              "raw_stress_start": "2019-09-24"
+            },
+            {
+              "detection_lag_days": null,
+              "detection_not_observed": true,
+              "exit_lag_days": null,
+              "exit_right_censored": false,
+              "raw_stress_end": "2019-09-26",
+              "raw_stress_start": "2019-09-26"
+            },
+            {
+              "detection_lag_days": null,
+              "detection_not_observed": true,
+              "exit_lag_days": null,
+              "exit_right_censored": false,
+              "raw_stress_end": "2019-09-29",
+              "raw_stress_start": "2019-09-29"
+            },
+            {
+              "detection_lag_days": null,
+              "detection_not_observed": true,
+              "exit_lag_days": null,
+              "exit_right_censored": false,
+              "raw_stress_end": "2019-10-24",
+              "raw_stress_start": "2019-10-23"
+            },
+            {
+              "detection_lag_days": 4,
+              "detection_not_observed": false,
+              "exit_lag_days": 24,
+              "exit_right_censored": false,
+              "raw_stress_end": "2020-01-16",
+              "raw_stress_start": "2019-11-21"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 14,
+              "exit_right_censored": false,
+              "raw_stress_end": "2020-01-26",
+              "raw_stress_start": "2020-01-19"
+            },
+            {
+              "detection_lag_days": 4,
+              "detection_not_observed": false,
+              "exit_lag_days": 21,
+              "exit_right_censored": false,
+              "raw_stress_end": "2020-04-05",
+              "raw_stress_start": "2020-03-12"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 19,
+              "exit_right_censored": false,
+              "raw_stress_end": "2020-04-07",
+              "raw_stress_start": "2020-04-07"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 11,
+              "exit_right_censored": false,
+              "raw_stress_end": "2020-04-15",
+              "raw_stress_start": "2020-04-09"
+            },
+            {
+              "detection_lag_days": 4,
+              "detection_not_observed": false,
+              "exit_lag_days": 8,
+              "exit_right_censored": false,
+              "raw_stress_end": "2021-06-28",
+              "raw_stress_start": "2021-06-21"
+            },
+            {
+              "detection_lag_days": 4,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2021-07-22",
+              "raw_stress_start": "2021-07-12"
+            },
+            {
+              "detection_lag_days": 4,
+              "detection_not_observed": false,
+              "exit_lag_days": 16,
+              "exit_right_censored": false,
+              "raw_stress_end": "2023-03-16",
+              "raw_stress_start": "2022-05-09"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 14,
+              "exit_right_censored": false,
+              "raw_stress_end": "2023-03-18",
+              "raw_stress_start": "2023-03-18"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 12,
+              "exit_right_censored": false,
+              "raw_stress_end": "2023-03-20",
+              "raw_stress_start": "2023-03-20"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 10,
+              "exit_right_censored": false,
+              "raw_stress_end": "2023-03-22",
+              "raw_stress_start": "2023-03-22"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 7,
+              "exit_right_censored": false,
+              "raw_stress_end": "2023-03-25",
+              "raw_stress_start": "2023-03-24"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2023-03-27",
+              "raw_stress_start": "2023-03-27"
+            },
+            {
+              "detection_lag_days": 4,
+              "detection_not_observed": false,
+              "exit_lag_days": 9,
+              "exit_right_censored": false,
+              "raw_stress_end": "2025-03-18",
+              "raw_stress_start": "2025-03-09"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2025-03-22",
+              "raw_stress_start": "2025-03-20"
+            },
+            {
+              "detection_lag_days": 4,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2025-05-07",
+              "raw_stress_start": "2025-03-28"
+            },
+            {
+              "detection_lag_days": 4,
+              "detection_not_observed": false,
+              "exit_lag_days": 131,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-04-16",
+              "raw_stress_start": "2026-02-01"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-08-20",
+              "raw_stress_start": "2026-04-18"
+            }
+          ],
+          "regime_durations": [
+            {
+              "censored": false,
+              "days": 113,
+              "end_date": "2018-03-07",
+              "regime": "range",
+              "start_date": "2017-11-15"
+            },
+            {
+              "censored": false,
+              "days": 13,
+              "end_date": "2018-03-20",
+              "regime": "uptrend",
+              "start_date": "2018-03-08"
+            },
+            {
+              "censored": false,
+              "days": 40,
+              "end_date": "2018-04-29",
+              "regime": "downtrend",
+              "start_date": "2018-03-21"
+            },
+            {
+              "censored": false,
+              "days": 26,
+              "end_date": "2018-05-25",
+              "regime": "range",
+              "start_date": "2018-04-30"
+            },
+            {
+              "censored": false,
+              "days": 36,
+              "end_date": "2018-06-30",
+              "regime": "downtrend",
+              "start_date": "2018-05-26"
+            },
+            {
+              "censored": false,
+              "days": 14,
+              "end_date": "2018-07-14",
+              "regime": "range",
+              "start_date": "2018-07-01"
+            },
+            {
+              "censored": false,
+              "days": 36,
+              "end_date": "2018-08-19",
+              "regime": "downtrend",
+              "start_date": "2018-07-15"
+            },
+            {
+              "censored": false,
+              "days": 308,
+              "end_date": "2019-06-23",
+              "regime": "stress",
+              "start_date": "2018-08-20"
+            },
+            {
+              "censored": false,
+              "days": 24,
+              "end_date": "2019-07-17",
+              "regime": "uptrend",
+              "start_date": "2019-06-24"
+            },
+            {
+              "censored": false,
+              "days": 17,
+              "end_date": "2019-08-03",
+              "regime": "stress",
+              "start_date": "2019-07-18"
+            },
+            {
+              "censored": false,
+              "days": 14,
+              "end_date": "2019-08-17",
+              "regime": "uptrend",
+              "start_date": "2019-08-04"
+            },
+            {
+              "censored": false,
+              "days": 34,
+              "end_date": "2019-09-20",
+              "regime": "downtrend",
+              "start_date": "2019-08-18"
+            },
+            {
+              "censored": false,
+              "days": 13,
+              "end_date": "2019-10-03",
+              "regime": "range",
+              "start_date": "2019-09-21"
+            },
+            {
+              "censored": false,
+              "days": 52,
+              "end_date": "2019-11-24",
+              "regime": "downtrend",
+              "start_date": "2019-10-04"
+            },
+            {
+              "censored": false,
+              "days": 76,
+              "end_date": "2020-02-08",
+              "regime": "stress",
+              "start_date": "2019-11-25"
+            },
+            {
+              "censored": false,
+              "days": 36,
+              "end_date": "2020-03-15",
+              "regime": "uptrend",
+              "start_date": "2020-02-09"
+            },
+            {
+              "censored": false,
+              "days": 41,
+              "end_date": "2020-04-25",
+              "regime": "stress",
+              "start_date": "2020-03-16"
+            },
+            {
+              "censored": false,
+              "days": 14,
+              "end_date": "2020-05-09",
+              "regime": "uptrend",
+              "start_date": "2020-04-26"
+            },
+            {
+              "censored": false,
+              "days": 30,
+              "end_date": "2020-06-08",
+              "regime": "range",
+              "start_date": "2020-05-10"
+            },
+            {
+              "censored": false,
+              "days": 381,
+              "end_date": "2021-06-24",
+              "regime": "uptrend",
+              "start_date": "2020-06-09"
+            },
+            {
+              "censored": false,
+              "days": 11,
+              "end_date": "2021-07-05",
+              "regime": "stress",
+              "start_date": "2021-06-25"
+            },
+            {
+              "censored": false,
+              "days": 10,
+              "end_date": "2021-07-15",
+              "regime": "uptrend",
+              "start_date": "2021-07-06"
+            },
+            {
+              "censored": false,
+              "days": 11,
+              "end_date": "2021-07-26",
+              "regime": "stress",
+              "start_date": "2021-07-16"
+            },
+            {
+              "censored": false,
+              "days": 25,
+              "end_date": "2021-08-20",
+              "regime": "range",
+              "start_date": "2021-07-27"
+            },
+            {
+              "censored": false,
+              "days": 143,
+              "end_date": "2022-01-10",
+              "regime": "uptrend",
+              "start_date": "2021-08-21"
+            },
+            {
+              "censored": false,
+              "days": 102,
+              "end_date": "2022-04-22",
+              "regime": "downtrend",
+              "start_date": "2022-01-11"
+            },
+            {
+              "censored": false,
+              "days": 20,
+              "end_date": "2022-05-12",
+              "regime": "range",
+              "start_date": "2022-04-23"
+            },
+            {
+              "censored": false,
+              "days": 323,
+              "end_date": "2023-03-31",
+              "regime": "stress",
+              "start_date": "2022-05-13"
+            },
+            {
+              "censored": false,
+              "days": 78,
+              "end_date": "2023-06-17",
+              "regime": "uptrend",
+              "start_date": "2023-04-01"
+            },
+            {
+              "censored": false,
+              "days": 6,
+              "end_date": "2023-06-23",
+              "regime": "range",
+              "start_date": "2023-06-18"
+            },
+            {
+              "censored": false,
+              "days": 19,
+              "end_date": "2023-07-12",
+              "regime": "uptrend",
+              "start_date": "2023-06-24"
+            },
+            {
+              "censored": false,
+              "days": 30,
+              "end_date": "2023-08-11",
+              "regime": "range",
+              "start_date": "2023-07-13"
+            },
+            {
+              "censored": false,
+              "days": 9,
+              "end_date": "2023-08-20",
+              "regime": "uptrend",
+              "start_date": "2023-08-12"
+            },
+            {
+              "censored": false,
+              "days": 79,
+              "end_date": "2023-11-07",
+              "regime": "downtrend",
+              "start_date": "2023-08-21"
+            },
+            {
+              "censored": false,
+              "days": 213,
+              "end_date": "2024-06-07",
+              "regime": "uptrend",
+              "start_date": "2023-11-08"
+            },
+            {
+              "censored": false,
+              "days": 30,
+              "end_date": "2024-07-07",
+              "regime": "range",
+              "start_date": "2024-06-08"
+            },
+            {
+              "censored": false,
+              "days": 8,
+              "end_date": "2024-07-15",
+              "regime": "downtrend",
+              "start_date": "2024-07-08"
+            },
+            {
+              "censored": false,
+              "days": 21,
+              "end_date": "2024-08-05",
+              "regime": "uptrend",
+              "start_date": "2024-07-16"
+            },
+            {
+              "censored": false,
+              "days": 98,
+              "end_date": "2024-11-11",
+              "regime": "downtrend",
+              "start_date": "2024-08-06"
+            },
+            {
+              "censored": false,
+              "days": 89,
+              "end_date": "2025-02-08",
+              "regime": "uptrend",
+              "start_date": "2024-11-12"
+            },
+            {
+              "censored": false,
+              "days": 32,
+              "end_date": "2025-03-12",
+              "regime": "downtrend",
+              "start_date": "2025-02-09"
+            },
+            {
+              "censored": false,
+              "days": 14,
+              "end_date": "2025-03-26",
+              "regime": "stress",
+              "start_date": "2025-03-13"
+            },
+            {
+              "censored": false,
+              "days": 5,
+              "end_date": "2025-03-31",
+              "regime": "downtrend",
+              "start_date": "2025-03-27"
+            },
+            {
+              "censored": false,
+              "days": 41,
+              "end_date": "2025-05-11",
+              "regime": "stress",
+              "start_date": "2025-04-01"
+            },
+            {
+              "censored": false,
+              "days": 17,
+              "end_date": "2025-05-28",
+              "regime": "downtrend",
+              "start_date": "2025-05-12"
+            },
+            {
+              "censored": false,
+              "days": 41,
+              "end_date": "2025-07-08",
+              "regime": "range",
+              "start_date": "2025-05-29"
+            },
+            {
+              "censored": false,
+              "days": 129,
+              "end_date": "2025-11-14",
+              "regime": "uptrend",
+              "start_date": "2025-07-09"
+            },
+            {
+              "censored": false,
+              "days": 82,
+              "end_date": "2026-02-04",
+              "regime": "downtrend",
+              "start_date": "2025-11-15"
+            },
+            {
+              "censored": false,
+              "days": 201,
+              "end_date": "2026-08-24",
+              "regime": "stress",
+              "start_date": "2026-02-05"
+            },
+            {
+              "censored": false,
+              "days": 79,
+              "end_date": "2026-11-11",
+              "regime": "uptrend",
+              "start_date": "2026-08-25"
+            },
+            {
+              "censored": false,
+              "days": 6,
+              "end_date": "2026-11-17",
+              "regime": "range",
+              "start_date": "2026-11-12"
+            },
+            {
+              "censored": true,
+              "days": 2,
+              "end_date": "2026-11-19",
+              "regime": "downtrend",
+              "start_date": "2026-11-18"
+            }
+          ],
+          "regime_episode_count": 52,
+          "regime_switches": 51
+        },
+        "v2": {
+          "episodes_under_10_days": 12,
+          "mean_regime_duration_days": 55.79661016949152,
+          "median_regime_duration_days": 23,
+          "raw_stress_episodes": [
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 8,
+              "exit_right_censored": false,
+              "raw_stress_end": "2019-06-16",
+              "raw_stress_start": "2018-08-16"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2019-06-19",
+              "raw_stress_start": "2019-06-18"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2019-07-30",
+              "raw_stress_start": "2019-07-14"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2019-08-30",
+              "raw_stress_start": "2019-08-29"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2019-09-06",
+              "raw_stress_start": "2019-09-06"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 10,
+              "exit_right_censored": false,
+              "raw_stress_end": "2019-09-24",
+              "raw_stress_start": "2019-09-24"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 8,
+              "exit_right_censored": false,
+              "raw_stress_end": "2019-09-26",
+              "raw_stress_start": "2019-09-26"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2019-09-29",
+              "raw_stress_start": "2019-09-29"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2019-10-24",
+              "raw_stress_start": "2019-10-23"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 24,
+              "exit_right_censored": false,
+              "raw_stress_end": "2020-01-16",
+              "raw_stress_start": "2019-11-21"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 14,
+              "exit_right_censored": false,
+              "raw_stress_end": "2020-01-26",
+              "raw_stress_start": "2020-01-19"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 21,
+              "exit_right_censored": false,
+              "raw_stress_end": "2020-04-05",
+              "raw_stress_start": "2020-03-12"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 19,
+              "exit_right_censored": false,
+              "raw_stress_end": "2020-04-07",
+              "raw_stress_start": "2020-04-07"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 11,
+              "exit_right_censored": false,
+              "raw_stress_end": "2020-04-15",
+              "raw_stress_start": "2020-04-09"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 8,
+              "exit_right_censored": false,
+              "raw_stress_end": "2021-06-28",
+              "raw_stress_start": "2021-06-21"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2021-07-22",
+              "raw_stress_start": "2021-07-12"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 16,
+              "exit_right_censored": false,
+              "raw_stress_end": "2023-03-16",
+              "raw_stress_start": "2022-05-09"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 14,
+              "exit_right_censored": false,
+              "raw_stress_end": "2023-03-18",
+              "raw_stress_start": "2023-03-18"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 12,
+              "exit_right_censored": false,
+              "raw_stress_end": "2023-03-20",
+              "raw_stress_start": "2023-03-20"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 10,
+              "exit_right_censored": false,
+              "raw_stress_end": "2023-03-22",
+              "raw_stress_start": "2023-03-22"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 7,
+              "exit_right_censored": false,
+              "raw_stress_end": "2023-03-25",
+              "raw_stress_start": "2023-03-24"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2023-03-27",
+              "raw_stress_start": "2023-03-27"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 9,
+              "exit_right_censored": false,
+              "raw_stress_end": "2025-03-18",
+              "raw_stress_start": "2025-03-09"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2025-03-22",
+              "raw_stress_start": "2025-03-20"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2025-05-07",
+              "raw_stress_start": "2025-03-28"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 131,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-04-16",
+              "raw_stress_start": "2026-02-01"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-08-20",
+              "raw_stress_start": "2026-04-18"
+            }
+          ],
+          "regime_durations": [
+            {
+              "censored": false,
+              "days": 113,
+              "end_date": "2018-03-07",
+              "regime": "range",
+              "start_date": "2017-11-15"
+            },
+            {
+              "censored": false,
+              "days": 13,
+              "end_date": "2018-03-20",
+              "regime": "uptrend",
+              "start_date": "2018-03-08"
+            },
+            {
+              "censored": false,
+              "days": 40,
+              "end_date": "2018-04-29",
+              "regime": "downtrend",
+              "start_date": "2018-03-21"
+            },
+            {
+              "censored": false,
+              "days": 26,
+              "end_date": "2018-05-25",
+              "regime": "range",
+              "start_date": "2018-04-30"
+            },
+            {
+              "censored": false,
+              "days": 36,
+              "end_date": "2018-06-30",
+              "regime": "downtrend",
+              "start_date": "2018-05-26"
+            },
+            {
+              "censored": false,
+              "days": 14,
+              "end_date": "2018-07-14",
+              "regime": "range",
+              "start_date": "2018-07-01"
+            },
+            {
+              "censored": false,
+              "days": 32,
+              "end_date": "2018-08-15",
+              "regime": "downtrend",
+              "start_date": "2018-07-15"
+            },
+            {
+              "censored": false,
+              "days": 312,
+              "end_date": "2019-06-23",
+              "regime": "stress",
+              "start_date": "2018-08-16"
+            },
+            {
+              "censored": false,
+              "days": 20,
+              "end_date": "2019-07-13",
+              "regime": "uptrend",
+              "start_date": "2019-06-24"
+            },
+            {
+              "censored": false,
+              "days": 21,
+              "end_date": "2019-08-03",
+              "regime": "stress",
+              "start_date": "2019-07-14"
+            },
+            {
+              "censored": false,
+              "days": 14,
+              "end_date": "2019-08-17",
+              "regime": "uptrend",
+              "start_date": "2019-08-04"
+            },
+            {
+              "censored": false,
+              "days": 11,
+              "end_date": "2019-08-28",
+              "regime": "downtrend",
+              "start_date": "2019-08-18"
+            },
+            {
+              "censored": false,
+              "days": 6,
+              "end_date": "2019-09-03",
+              "regime": "stress",
+              "start_date": "2019-08-29"
+            },
+            {
+              "censored": false,
+              "days": 2,
+              "end_date": "2019-09-05",
+              "regime": "downtrend",
+              "start_date": "2019-09-04"
+            },
+            {
+              "censored": false,
+              "days": 5,
+              "end_date": "2019-09-10",
+              "regime": "stress",
+              "start_date": "2019-09-06"
+            },
+            {
+              "censored": false,
+              "days": 10,
+              "end_date": "2019-09-20",
+              "regime": "downtrend",
+              "start_date": "2019-09-11"
+            },
+            {
+              "censored": false,
+              "days": 3,
+              "end_date": "2019-09-23",
+              "regime": "range",
+              "start_date": "2019-09-21"
+            },
+            {
+              "censored": false,
+              "days": 10,
+              "end_date": "2019-10-03",
+              "regime": "stress",
+              "start_date": "2019-09-24"
+            },
+            {
+              "censored": false,
+              "days": 19,
+              "end_date": "2019-10-22",
+              "regime": "downtrend",
+              "start_date": "2019-10-04"
+            },
+            {
+              "censored": false,
+              "days": 6,
+              "end_date": "2019-10-28",
+              "regime": "stress",
+              "start_date": "2019-10-23"
+            },
+            {
+              "censored": false,
+              "days": 23,
+              "end_date": "2019-11-20",
+              "regime": "downtrend",
+              "start_date": "2019-10-29"
+            },
+            {
+              "censored": false,
+              "days": 80,
+              "end_date": "2020-02-08",
+              "regime": "stress",
+              "start_date": "2019-11-21"
+            },
+            {
+              "censored": false,
+              "days": 32,
+              "end_date": "2020-03-11",
+              "regime": "uptrend",
+              "start_date": "2020-02-09"
+            },
+            {
+              "censored": false,
+              "days": 45,
+              "end_date": "2020-04-25",
+              "regime": "stress",
+              "start_date": "2020-03-12"
+            },
+            {
+              "censored": false,
+              "days": 14,
+              "end_date": "2020-05-09",
+              "regime": "uptrend",
+              "start_date": "2020-04-26"
+            },
+            {
+              "censored": false,
+              "days": 30,
+              "end_date": "2020-06-08",
+              "regime": "range",
+              "start_date": "2020-05-10"
+            },
+            {
+              "censored": false,
+              "days": 377,
+              "end_date": "2021-06-20",
+              "regime": "uptrend",
+              "start_date": "2020-06-09"
+            },
+            {
+              "censored": false,
+              "days": 15,
+              "end_date": "2021-07-05",
+              "regime": "stress",
+              "start_date": "2021-06-21"
+            },
+            {
+              "censored": false,
+              "days": 6,
+              "end_date": "2021-07-11",
+              "regime": "uptrend",
+              "start_date": "2021-07-06"
+            },
+            {
+              "censored": false,
+              "days": 15,
+              "end_date": "2021-07-26",
+              "regime": "stress",
+              "start_date": "2021-07-12"
+            },
+            {
+              "censored": false,
+              "days": 25,
+              "end_date": "2021-08-20",
+              "regime": "range",
+              "start_date": "2021-07-27"
+            },
+            {
+              "censored": false,
+              "days": 143,
+              "end_date": "2022-01-10",
+              "regime": "uptrend",
+              "start_date": "2021-08-21"
+            },
+            {
+              "censored": false,
+              "days": 102,
+              "end_date": "2022-04-22",
+              "regime": "downtrend",
+              "start_date": "2022-01-11"
+            },
+            {
+              "censored": false,
+              "days": 16,
+              "end_date": "2022-05-08",
+              "regime": "range",
+              "start_date": "2022-04-23"
+            },
+            {
+              "censored": false,
+              "days": 327,
+              "end_date": "2023-03-31",
+              "regime": "stress",
+              "start_date": "2022-05-09"
+            },
+            {
+              "censored": false,
+              "days": 78,
+              "end_date": "2023-06-17",
+              "regime": "uptrend",
+              "start_date": "2023-04-01"
+            },
+            {
+              "censored": false,
+              "days": 6,
+              "end_date": "2023-06-23",
+              "regime": "range",
+              "start_date": "2023-06-18"
+            },
+            {
+              "censored": false,
+              "days": 19,
+              "end_date": "2023-07-12",
+              "regime": "uptrend",
+              "start_date": "2023-06-24"
+            },
+            {
+              "censored": false,
+              "days": 30,
+              "end_date": "2023-08-11",
+              "regime": "range",
+              "start_date": "2023-07-13"
+            },
+            {
+              "censored": false,
+              "days": 9,
+              "end_date": "2023-08-20",
+              "regime": "uptrend",
+              "start_date": "2023-08-12"
+            },
+            {
+              "censored": false,
+              "days": 79,
+              "end_date": "2023-11-07",
+              "regime": "downtrend",
+              "start_date": "2023-08-21"
+            },
+            {
+              "censored": false,
+              "days": 213,
+              "end_date": "2024-06-07",
+              "regime": "uptrend",
+              "start_date": "2023-11-08"
+            },
+            {
+              "censored": false,
+              "days": 30,
+              "end_date": "2024-07-07",
+              "regime": "range",
+              "start_date": "2024-06-08"
+            },
+            {
+              "censored": false,
+              "days": 8,
+              "end_date": "2024-07-15",
+              "regime": "downtrend",
+              "start_date": "2024-07-08"
+            },
+            {
+              "censored": false,
+              "days": 21,
+              "end_date": "2024-08-05",
+              "regime": "uptrend",
+              "start_date": "2024-07-16"
+            },
+            {
+              "censored": false,
+              "days": 98,
+              "end_date": "2024-11-11",
+              "regime": "downtrend",
+              "start_date": "2024-08-06"
+            },
+            {
+              "censored": false,
+              "days": 89,
+              "end_date": "2025-02-08",
+              "regime": "uptrend",
+              "start_date": "2024-11-12"
+            },
+            {
+              "censored": false,
+              "days": 28,
+              "end_date": "2025-03-08",
+              "regime": "downtrend",
+              "start_date": "2025-02-09"
+            },
+            {
+              "censored": false,
+              "days": 18,
+              "end_date": "2025-03-26",
+              "regime": "stress",
+              "start_date": "2025-03-09"
+            },
+            {
+              "censored": false,
+              "days": 1,
+              "end_date": "2025-03-27",
+              "regime": "downtrend",
+              "start_date": "2025-03-27"
+            },
+            {
+              "censored": false,
+              "days": 45,
+              "end_date": "2025-05-11",
+              "regime": "stress",
+              "start_date": "2025-03-28"
+            },
+            {
+              "censored": false,
+              "days": 17,
+              "end_date": "2025-05-28",
+              "regime": "downtrend",
+              "start_date": "2025-05-12"
+            },
+            {
+              "censored": false,
+              "days": 41,
+              "end_date": "2025-07-08",
+              "regime": "range",
+              "start_date": "2025-05-29"
+            },
+            {
+              "censored": false,
+              "days": 129,
+              "end_date": "2025-11-14",
+              "regime": "uptrend",
+              "start_date": "2025-07-09"
+            },
+            {
+              "censored": false,
+              "days": 78,
+              "end_date": "2026-01-31",
+              "regime": "downtrend",
+              "start_date": "2025-11-15"
+            },
+            {
+              "censored": false,
+              "days": 205,
+              "end_date": "2026-08-24",
+              "regime": "stress",
+              "start_date": "2026-02-01"
+            },
+            {
+              "censored": false,
+              "days": 79,
+              "end_date": "2026-11-11",
+              "regime": "uptrend",
+              "start_date": "2026-08-25"
+            },
+            {
+              "censored": false,
+              "days": 6,
+              "end_date": "2026-11-17",
+              "regime": "range",
+              "start_date": "2026-11-12"
+            },
+            {
+              "censored": true,
+              "days": 2,
+              "end_date": "2026-11-19",
+              "regime": "downtrend",
+              "start_date": "2026-11-18"
+            }
+          ],
+          "regime_episode_count": 59,
+          "regime_switches": 58
+        }
+      }
+    },
+    {
+      "chain": "sol",
+      "stored_v1_comparison": {
+        "examples": [],
+        "matches": true,
+        "mismatch_count": 0
+      },
+      "versions": {
+        "v1": {
+          "episodes_under_10_days": 5,
+          "mean_regime_duration_days": 66.72727272727273,
+          "median_regime_duration_days": 29,
+          "raw_stress_episodes": [
+            {
+              "detection_lag_days": 4,
+              "detection_not_observed": false,
+              "exit_lag_days": 473,
+              "exit_right_censored": false,
+              "raw_stress_end": "2022-03-31",
+              "raw_stress_start": "2022-01-20"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2023-07-12",
+              "raw_stress_start": "2022-04-05"
+            },
+            {
+              "detection_lag_days": null,
+              "detection_not_observed": true,
+              "exit_lag_days": null,
+              "exit_right_censored": false,
+              "raw_stress_end": "2023-07-25",
+              "raw_stress_start": "2023-07-25"
+            },
+            {
+              "detection_lag_days": 4,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2023-08-07",
+              "raw_stress_start": "2023-08-02"
+            },
+            {
+              "detection_lag_days": null,
+              "detection_not_observed": true,
+              "exit_lag_days": null,
+              "exit_right_censored": false,
+              "raw_stress_end": "2023-09-13",
+              "raw_stress_start": "2023-09-10"
+            },
+            {
+              "detection_lag_days": 4,
+              "detection_not_observed": false,
+              "exit_lag_days": 14,
+              "exit_right_censored": false,
+              "raw_stress_end": "2025-03-13",
+              "raw_stress_start": "2025-03-09"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 9,
+              "exit_right_censored": false,
+              "raw_stress_end": "2025-03-18",
+              "raw_stress_start": "2025-03-16"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2025-03-22",
+              "raw_stress_start": "2025-03-20"
+            },
+            {
+              "detection_lag_days": 4,
+              "detection_not_observed": false,
+              "exit_lag_days": 9,
+              "exit_right_censored": false,
+              "raw_stress_end": "2025-04-11",
+              "raw_stress_start": "2025-03-28"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2025-04-15",
+              "raw_stress_start": "2025-04-13"
+            },
+            {
+              "detection_lag_days": null,
+              "detection_not_observed": true,
+              "exit_lag_days": null,
+              "exit_right_censored": false,
+              "raw_stress_end": "2025-11-23",
+              "raw_stress_start": "2025-11-21"
+            },
+            {
+              "detection_lag_days": null,
+              "detection_not_observed": true,
+              "exit_lag_days": null,
+              "exit_right_censored": false,
+              "raw_stress_end": "2025-12-01",
+              "raw_stress_start": "2025-12-01"
+            },
+            {
+              "detection_lag_days": 4,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-01-01",
+              "raw_stress_start": "2025-12-14"
+            },
+            {
+              "detection_lag_days": null,
+              "detection_not_observed": true,
+              "exit_lag_days": null,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-01-20",
+              "raw_stress_start": "2026-01-20"
+            },
+            {
+              "detection_lag_days": null,
+              "detection_not_observed": true,
+              "exit_lag_days": null,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-01-25",
+              "raw_stress_start": "2026-01-23"
+            },
+            {
+              "detection_lag_days": 4,
+              "detection_not_observed": false,
+              "exit_lag_days": 9,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-09-20",
+              "raw_stress_start": "2026-01-29"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-09-24",
+              "raw_stress_start": "2026-09-23"
+            },
+            {
+              "detection_lag_days": null,
+              "detection_not_observed": true,
+              "exit_lag_days": null,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-10-08",
+              "raw_stress_start": "2026-10-08"
+            },
+            {
+              "detection_lag_days": null,
+              "detection_not_observed": true,
+              "exit_lag_days": null,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-11-16",
+              "raw_stress_start": "2026-11-14"
+            },
+            {
+              "detection_lag_days": null,
+              "detection_not_observed": true,
+              "exit_lag_days": null,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-11-19",
+              "raw_stress_start": "2026-11-19"
+            }
+          ],
+          "regime_durations": [
+            {
+              "censored": false,
+              "days": 113,
+              "end_date": "2021-03-01",
+              "regime": "range",
+              "start_date": "2020-11-09"
+            },
+            {
+              "censored": false,
+              "days": 141,
+              "end_date": "2021-07-20",
+              "regime": "uptrend",
+              "start_date": "2021-03-02"
+            },
+            {
+              "censored": false,
+              "days": 29,
+              "end_date": "2021-08-18",
+              "regime": "range",
+              "start_date": "2021-07-21"
+            },
+            {
+              "censored": false,
+              "days": 144,
+              "end_date": "2022-01-09",
+              "regime": "uptrend",
+              "start_date": "2021-08-19"
+            },
+            {
+              "censored": false,
+              "days": 14,
+              "end_date": "2022-01-23",
+              "regime": "range",
+              "start_date": "2022-01-10"
+            },
+            {
+              "censored": false,
+              "days": 539,
+              "end_date": "2023-07-16",
+              "regime": "stress",
+              "start_date": "2022-01-24"
+            },
+            {
+              "censored": false,
+              "days": 20,
+              "end_date": "2023-08-05",
+              "regime": "uptrend",
+              "start_date": "2023-07-17"
+            },
+            {
+              "censored": false,
+              "days": 6,
+              "end_date": "2023-08-11",
+              "regime": "stress",
+              "start_date": "2023-08-06"
+            },
+            {
+              "censored": false,
+              "days": 23,
+              "end_date": "2023-09-03",
+              "regime": "uptrend",
+              "start_date": "2023-08-12"
+            },
+            {
+              "censored": false,
+              "days": 5,
+              "end_date": "2023-09-08",
+              "regime": "downtrend",
+              "start_date": "2023-09-04"
+            },
+            {
+              "censored": false,
+              "days": 25,
+              "end_date": "2023-10-03",
+              "regime": "range",
+              "start_date": "2023-09-09"
+            },
+            {
+              "censored": false,
+              "days": 11,
+              "end_date": "2023-10-14",
+              "regime": "uptrend",
+              "start_date": "2023-10-04"
+            },
+            {
+              "censored": false,
+              "days": 9,
+              "end_date": "2023-10-23",
+              "regime": "range",
+              "start_date": "2023-10-15"
+            },
+            {
+              "censored": false,
+              "days": 235,
+              "end_date": "2024-06-14",
+              "regime": "uptrend",
+              "start_date": "2023-10-24"
+            },
+            {
+              "censored": false,
+              "days": 33,
+              "end_date": "2024-07-17",
+              "regime": "range",
+              "start_date": "2024-06-15"
+            },
+            {
+              "censored": false,
+              "days": 30,
+              "end_date": "2024-08-16",
+              "regime": "uptrend",
+              "start_date": "2024-07-18"
+            },
+            {
+              "censored": false,
+              "days": 36,
+              "end_date": "2024-09-21",
+              "regime": "downtrend",
+              "start_date": "2024-08-17"
+            },
+            {
+              "censored": false,
+              "days": 41,
+              "end_date": "2024-11-01",
+              "regime": "range",
+              "start_date": "2024-09-22"
+            },
+            {
+              "censored": false,
+              "days": 99,
+              "end_date": "2025-02-08",
+              "regime": "uptrend",
+              "start_date": "2024-11-02"
+            },
+            {
+              "censored": false,
+              "days": 12,
+              "end_date": "2025-02-20",
+              "regime": "range",
+              "start_date": "2025-02-09"
+            },
+            {
+              "censored": false,
+              "days": 20,
+              "end_date": "2025-03-12",
+              "regime": "downtrend",
+              "start_date": "2025-02-21"
+            },
+            {
+              "censored": false,
+              "days": 14,
+              "end_date": "2025-03-26",
+              "regime": "stress",
+              "start_date": "2025-03-13"
+            },
+            {
+              "censored": false,
+              "days": 5,
+              "end_date": "2025-03-31",
+              "regime": "downtrend",
+              "start_date": "2025-03-27"
+            },
+            {
+              "censored": false,
+              "days": 19,
+              "end_date": "2025-04-19",
+              "regime": "stress",
+              "start_date": "2025-04-01"
+            },
+            {
+              "censored": false,
+              "days": 36,
+              "end_date": "2025-05-25",
+              "regime": "downtrend",
+              "start_date": "2025-04-20"
+            },
+            {
+              "censored": false,
+              "days": 54,
+              "end_date": "2025-07-18",
+              "regime": "range",
+              "start_date": "2025-05-26"
+            },
+            {
+              "censored": false,
+              "days": 112,
+              "end_date": "2025-11-07",
+              "regime": "uptrend",
+              "start_date": "2025-07-19"
+            },
+            {
+              "censored": false,
+              "days": 40,
+              "end_date": "2025-12-17",
+              "regime": "downtrend",
+              "start_date": "2025-11-08"
+            },
+            {
+              "censored": false,
+              "days": 19,
+              "end_date": "2026-01-05",
+              "regime": "stress",
+              "start_date": "2025-12-18"
+            },
+            {
+              "censored": false,
+              "days": 27,
+              "end_date": "2026-02-01",
+              "regime": "downtrend",
+              "start_date": "2026-01-06"
+            },
+            {
+              "censored": false,
+              "days": 239,
+              "end_date": "2026-09-28",
+              "regime": "stress",
+              "start_date": "2026-02-02"
+            },
+            {
+              "censored": false,
+              "days": 44,
+              "end_date": "2026-11-11",
+              "regime": "uptrend",
+              "start_date": "2026-09-29"
+            },
+            {
+              "censored": true,
+              "days": 8,
+              "end_date": "2026-11-19",
+              "regime": "range",
+              "start_date": "2026-11-12"
+            }
+          ],
+          "regime_episode_count": 33,
+          "regime_switches": 32
+        },
+        "v2": {
+          "episodes_under_10_days": 16,
+          "mean_regime_duration_days": 50.04545454545455,
+          "median_regime_duration_days": 15.0,
+          "raw_stress_episodes": [
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 473,
+              "exit_right_censored": false,
+              "raw_stress_end": "2022-03-31",
+              "raw_stress_start": "2022-01-20"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2023-07-12",
+              "raw_stress_start": "2022-04-05"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2023-07-25",
+              "raw_stress_start": "2023-07-25"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2023-08-07",
+              "raw_stress_start": "2023-08-02"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2023-09-13",
+              "raw_stress_start": "2023-09-10"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 14,
+              "exit_right_censored": false,
+              "raw_stress_end": "2025-03-13",
+              "raw_stress_start": "2025-03-09"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 9,
+              "exit_right_censored": false,
+              "raw_stress_end": "2025-03-18",
+              "raw_stress_start": "2025-03-16"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2025-03-22",
+              "raw_stress_start": "2025-03-20"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 9,
+              "exit_right_censored": false,
+              "raw_stress_end": "2025-04-11",
+              "raw_stress_start": "2025-03-28"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2025-04-15",
+              "raw_stress_start": "2025-04-13"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2025-11-23",
+              "raw_stress_start": "2025-11-21"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2025-12-01",
+              "raw_stress_start": "2025-12-01"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-01-01",
+              "raw_stress_start": "2025-12-14"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 252,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-01-20",
+              "raw_stress_start": "2026-01-20"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 247,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-01-25",
+              "raw_stress_start": "2026-01-23"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 9,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-09-20",
+              "raw_stress_start": "2026-01-29"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-09-24",
+              "raw_stress_start": "2026-09-23"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-10-08",
+              "raw_stress_start": "2026-10-08"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": null,
+              "exit_right_censored": true,
+              "raw_stress_end": "2026-11-16",
+              "raw_stress_start": "2026-11-14"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": null,
+              "exit_right_censored": true,
+              "raw_stress_end": "2026-11-19",
+              "raw_stress_start": "2026-11-19"
+            }
+          ],
+          "regime_durations": [
+            {
+              "censored": false,
+              "days": 113,
+              "end_date": "2021-03-01",
+              "regime": "range",
+              "start_date": "2020-11-09"
+            },
+            {
+              "censored": false,
+              "days": 141,
+              "end_date": "2021-07-20",
+              "regime": "uptrend",
+              "start_date": "2021-03-02"
+            },
+            {
+              "censored": false,
+              "days": 29,
+              "end_date": "2021-08-18",
+              "regime": "range",
+              "start_date": "2021-07-21"
+            },
+            {
+              "censored": false,
+              "days": 144,
+              "end_date": "2022-01-09",
+              "regime": "uptrend",
+              "start_date": "2021-08-19"
+            },
+            {
+              "censored": false,
+              "days": 10,
+              "end_date": "2022-01-19",
+              "regime": "range",
+              "start_date": "2022-01-10"
+            },
+            {
+              "censored": false,
+              "days": 543,
+              "end_date": "2023-07-16",
+              "regime": "stress",
+              "start_date": "2022-01-20"
+            },
+            {
+              "censored": false,
+              "days": 8,
+              "end_date": "2023-07-24",
+              "regime": "uptrend",
+              "start_date": "2023-07-17"
+            },
+            {
+              "censored": false,
+              "days": 5,
+              "end_date": "2023-07-29",
+              "regime": "stress",
+              "start_date": "2023-07-25"
+            },
+            {
+              "censored": false,
+              "days": 3,
+              "end_date": "2023-08-01",
+              "regime": "uptrend",
+              "start_date": "2023-07-30"
+            },
+            {
+              "censored": false,
+              "days": 10,
+              "end_date": "2023-08-11",
+              "regime": "stress",
+              "start_date": "2023-08-02"
+            },
+            {
+              "censored": false,
+              "days": 23,
+              "end_date": "2023-09-03",
+              "regime": "uptrend",
+              "start_date": "2023-08-12"
+            },
+            {
+              "censored": false,
+              "days": 5,
+              "end_date": "2023-09-08",
+              "regime": "downtrend",
+              "start_date": "2023-09-04"
+            },
+            {
+              "censored": false,
+              "days": 1,
+              "end_date": "2023-09-09",
+              "regime": "range",
+              "start_date": "2023-09-09"
+            },
+            {
+              "censored": false,
+              "days": 8,
+              "end_date": "2023-09-17",
+              "regime": "stress",
+              "start_date": "2023-09-10"
+            },
+            {
+              "censored": false,
+              "days": 16,
+              "end_date": "2023-10-03",
+              "regime": "range",
+              "start_date": "2023-09-18"
+            },
+            {
+              "censored": false,
+              "days": 11,
+              "end_date": "2023-10-14",
+              "regime": "uptrend",
+              "start_date": "2023-10-04"
+            },
+            {
+              "censored": false,
+              "days": 9,
+              "end_date": "2023-10-23",
+              "regime": "range",
+              "start_date": "2023-10-15"
+            },
+            {
+              "censored": false,
+              "days": 235,
+              "end_date": "2024-06-14",
+              "regime": "uptrend",
+              "start_date": "2023-10-24"
+            },
+            {
+              "censored": false,
+              "days": 33,
+              "end_date": "2024-07-17",
+              "regime": "range",
+              "start_date": "2024-06-15"
+            },
+            {
+              "censored": false,
+              "days": 30,
+              "end_date": "2024-08-16",
+              "regime": "uptrend",
+              "start_date": "2024-07-18"
+            },
+            {
+              "censored": false,
+              "days": 36,
+              "end_date": "2024-09-21",
+              "regime": "downtrend",
+              "start_date": "2024-08-17"
+            },
+            {
+              "censored": false,
+              "days": 41,
+              "end_date": "2024-11-01",
+              "regime": "range",
+              "start_date": "2024-09-22"
+            },
+            {
+              "censored": false,
+              "days": 99,
+              "end_date": "2025-02-08",
+              "regime": "uptrend",
+              "start_date": "2024-11-02"
+            },
+            {
+              "censored": false,
+              "days": 12,
+              "end_date": "2025-02-20",
+              "regime": "range",
+              "start_date": "2025-02-09"
+            },
+            {
+              "censored": false,
+              "days": 16,
+              "end_date": "2025-03-08",
+              "regime": "downtrend",
+              "start_date": "2025-02-21"
+            },
+            {
+              "censored": false,
+              "days": 18,
+              "end_date": "2025-03-26",
+              "regime": "stress",
+              "start_date": "2025-03-09"
+            },
+            {
+              "censored": false,
+              "days": 1,
+              "end_date": "2025-03-27",
+              "regime": "downtrend",
+              "start_date": "2025-03-27"
+            },
+            {
+              "censored": false,
+              "days": 23,
+              "end_date": "2025-04-19",
+              "regime": "stress",
+              "start_date": "2025-03-28"
+            },
+            {
+              "censored": false,
+              "days": 36,
+              "end_date": "2025-05-25",
+              "regime": "downtrend",
+              "start_date": "2025-04-20"
+            },
+            {
+              "censored": false,
+              "days": 54,
+              "end_date": "2025-07-18",
+              "regime": "range",
+              "start_date": "2025-05-26"
+            },
+            {
+              "censored": false,
+              "days": 112,
+              "end_date": "2025-11-07",
+              "regime": "uptrend",
+              "start_date": "2025-07-19"
+            },
+            {
+              "censored": false,
+              "days": 13,
+              "end_date": "2025-11-20",
+              "regime": "downtrend",
+              "start_date": "2025-11-08"
+            },
+            {
+              "censored": false,
+              "days": 7,
+              "end_date": "2025-11-27",
+              "regime": "stress",
+              "start_date": "2025-11-21"
+            },
+            {
+              "censored": false,
+              "days": 3,
+              "end_date": "2025-11-30",
+              "regime": "downtrend",
+              "start_date": "2025-11-28"
+            },
+            {
+              "censored": false,
+              "days": 5,
+              "end_date": "2025-12-05",
+              "regime": "stress",
+              "start_date": "2025-12-01"
+            },
+            {
+              "censored": false,
+              "days": 8,
+              "end_date": "2025-12-13",
+              "regime": "downtrend",
+              "start_date": "2025-12-06"
+            },
+            {
+              "censored": false,
+              "days": 23,
+              "end_date": "2026-01-05",
+              "regime": "stress",
+              "start_date": "2025-12-14"
+            },
+            {
+              "censored": false,
+              "days": 14,
+              "end_date": "2026-01-19",
+              "regime": "downtrend",
+              "start_date": "2026-01-06"
+            },
+            {
+              "censored": false,
+              "days": 252,
+              "end_date": "2026-09-28",
+              "regime": "stress",
+              "start_date": "2026-01-20"
+            },
+            {
+              "censored": false,
+              "days": 9,
+              "end_date": "2026-10-07",
+              "regime": "uptrend",
+              "start_date": "2026-09-29"
+            },
+            {
+              "censored": false,
+              "days": 5,
+              "end_date": "2026-10-12",
+              "regime": "stress",
+              "start_date": "2026-10-08"
+            },
+            {
+              "censored": false,
+              "days": 30,
+              "end_date": "2026-11-11",
+              "regime": "uptrend",
+              "start_date": "2026-10-13"
+            },
+            {
+              "censored": false,
+              "days": 2,
+              "end_date": "2026-11-13",
+              "regime": "range",
+              "start_date": "2026-11-12"
+            },
+            {
+              "censored": true,
+              "days": 6,
+              "end_date": "2026-11-19",
+              "regime": "stress",
+              "start_date": "2026-11-14"
+            }
+          ],
+          "regime_episode_count": 44,
+          "regime_switches": 43
+        }
+      }
+    },
+    {
+      "chain": "bnb",
+      "stored_v1_comparison": {
+        "examples": [],
+        "matches": true,
+        "mismatch_count": 0
+      },
+      "versions": {
+        "v1": {
+          "episodes_under_10_days": 10,
+          "mean_regime_duration_days": 55.36206896551724,
+          "median_regime_duration_days": 23.0,
+          "raw_stress_episodes": [
+            {
+              "detection_lag_days": 4,
+              "detection_not_observed": false,
+              "exit_lag_days": 7,
+              "exit_right_censored": false,
+              "raw_stress_end": "2019-02-08",
+              "raw_stress_start": "2018-11-05"
+            },
+            {
+              "detection_lag_days": 4,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2019-10-27",
+              "raw_stress_start": "2019-09-23"
+            },
+            {
+              "detection_lag_days": 4,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2020-02-05",
+              "raw_stress_start": "2019-11-18"
+            },
+            {
+              "detection_lag_days": 4,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2020-03-01",
+              "raw_stress_start": "2020-02-26"
+            },
+            {
+              "detection_lag_days": 4,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2020-07-06",
+              "raw_stress_start": "2020-03-08"
+            },
+            {
+              "detection_lag_days": null,
+              "detection_not_observed": true,
+              "exit_lag_days": null,
+              "exit_right_censored": false,
+              "raw_stress_end": "2021-05-19",
+              "raw_stress_start": "2021-05-19"
+            },
+            {
+              "detection_lag_days": null,
+              "detection_not_observed": true,
+              "exit_lag_days": null,
+              "exit_right_censored": false,
+              "raw_stress_end": "2021-05-23",
+              "raw_stress_start": "2021-05-21"
+            },
+            {
+              "detection_lag_days": null,
+              "detection_not_observed": true,
+              "exit_lag_days": null,
+              "exit_right_censored": false,
+              "raw_stress_end": "2021-05-30",
+              "raw_stress_start": "2021-05-28"
+            },
+            {
+              "detection_lag_days": null,
+              "detection_not_observed": true,
+              "exit_lag_days": null,
+              "exit_right_censored": false,
+              "raw_stress_end": "2021-06-19",
+              "raw_stress_start": "2021-06-18"
+            },
+            {
+              "detection_lag_days": 4,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2021-08-05",
+              "raw_stress_start": "2021-06-21"
+            },
+            {
+              "detection_lag_days": null,
+              "detection_not_observed": true,
+              "exit_lag_days": null,
+              "exit_right_censored": false,
+              "raw_stress_end": "2021-09-28",
+              "raw_stress_start": "2021-09-27"
+            },
+            {
+              "detection_lag_days": 4,
+              "detection_not_observed": false,
+              "exit_lag_days": 168,
+              "exit_right_censored": false,
+              "raw_stress_end": "2022-05-23",
+              "raw_stress_start": "2022-05-09"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 90,
+              "exit_right_censored": false,
+              "raw_stress_end": "2022-08-09",
+              "raw_stress_start": "2022-05-25"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 88,
+              "exit_right_censored": false,
+              "raw_stress_end": "2022-08-11",
+              "raw_stress_start": "2022-08-11"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2022-11-02",
+              "raw_stress_start": "2022-08-13"
+            },
+            {
+              "detection_lag_days": 4,
+              "detection_not_observed": false,
+              "exit_lag_days": 38,
+              "exit_right_censored": false,
+              "raw_stress_end": "2022-12-07",
+              "raw_stress_start": "2022-11-09"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 11,
+              "exit_right_censored": false,
+              "raw_stress_end": "2023-01-03",
+              "raw_stress_start": "2022-12-11"
+            },
+            {
+              "detection_lag_days": null,
+              "detection_not_observed": true,
+              "exit_lag_days": null,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-02-05",
+              "raw_stress_start": "2026-02-05"
+            },
+            {
+              "detection_lag_days": 4,
+              "detection_not_observed": false,
+              "exit_lag_days": 14,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-03-03",
+              "raw_stress_start": "2026-02-07"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-03-12",
+              "raw_stress_start": "2026-03-05"
+            },
+            {
+              "detection_lag_days": 4,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-05-09",
+              "raw_stress_start": "2026-03-18"
+            },
+            {
+              "detection_lag_days": null,
+              "detection_not_observed": true,
+              "exit_lag_days": null,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-05-20",
+              "raw_stress_start": "2026-05-17"
+            },
+            {
+              "detection_lag_days": null,
+              "detection_not_observed": true,
+              "exit_lag_days": null,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-05-22",
+              "raw_stress_start": "2026-05-22"
+            },
+            {
+              "detection_lag_days": null,
+              "detection_not_observed": true,
+              "exit_lag_days": null,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-05-29",
+              "raw_stress_start": "2026-05-27"
+            },
+            {
+              "detection_lag_days": 4,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-08-19",
+              "raw_stress_start": "2026-06-02"
+            }
+          ],
+          "regime_durations": [
+            {
+              "censored": false,
+              "days": 113,
+              "end_date": "2018-05-27",
+              "regime": "range",
+              "start_date": "2018-02-04"
+            },
+            {
+              "censored": false,
+              "days": 57,
+              "end_date": "2018-07-23",
+              "regime": "uptrend",
+              "start_date": "2018-05-28"
+            },
+            {
+              "censored": false,
+              "days": 5,
+              "end_date": "2018-07-28",
+              "regime": "downtrend",
+              "start_date": "2018-07-24"
+            },
+            {
+              "censored": false,
+              "days": 16,
+              "end_date": "2018-08-13",
+              "regime": "range",
+              "start_date": "2018-07-29"
+            },
+            {
+              "censored": false,
+              "days": 87,
+              "end_date": "2018-11-08",
+              "regime": "downtrend",
+              "start_date": "2018-08-14"
+            },
+            {
+              "censored": false,
+              "days": 98,
+              "end_date": "2019-02-14",
+              "regime": "stress",
+              "start_date": "2018-11-09"
+            },
+            {
+              "censored": false,
+              "days": 186,
+              "end_date": "2019-08-19",
+              "regime": "uptrend",
+              "start_date": "2019-02-15"
+            },
+            {
+              "censored": false,
+              "days": 12,
+              "end_date": "2019-08-31",
+              "regime": "range",
+              "start_date": "2019-08-20"
+            },
+            {
+              "censored": false,
+              "days": 26,
+              "end_date": "2019-09-26",
+              "regime": "downtrend",
+              "start_date": "2019-09-01"
+            },
+            {
+              "censored": false,
+              "days": 35,
+              "end_date": "2019-10-31",
+              "regime": "stress",
+              "start_date": "2019-09-27"
+            },
+            {
+              "censored": false,
+              "days": 21,
+              "end_date": "2019-11-21",
+              "regime": "downtrend",
+              "start_date": "2019-11-01"
+            },
+            {
+              "censored": false,
+              "days": 80,
+              "end_date": "2020-02-09",
+              "regime": "stress",
+              "start_date": "2019-11-22"
+            },
+            {
+              "censored": false,
+              "days": 20,
+              "end_date": "2020-02-29",
+              "regime": "uptrend",
+              "start_date": "2020-02-10"
+            },
+            {
+              "censored": false,
+              "days": 5,
+              "end_date": "2020-03-05",
+              "regime": "stress",
+              "start_date": "2020-03-01"
+            },
+            {
+              "censored": false,
+              "days": 6,
+              "end_date": "2020-03-11",
+              "regime": "uptrend",
+              "start_date": "2020-03-06"
+            },
+            {
+              "censored": false,
+              "days": 121,
+              "end_date": "2020-07-10",
+              "regime": "stress",
+              "start_date": "2020-03-12"
+            },
+            {
+              "censored": false,
+              "days": 349,
+              "end_date": "2021-06-24",
+              "regime": "uptrend",
+              "start_date": "2020-07-11"
+            },
+            {
+              "censored": false,
+              "days": 46,
+              "end_date": "2021-08-09",
+              "regime": "stress",
+              "start_date": "2021-06-25"
+            },
+            {
+              "censored": false,
+              "days": 11,
+              "end_date": "2021-08-20",
+              "regime": "range",
+              "start_date": "2021-08-10"
+            },
+            {
+              "censored": false,
+              "days": 34,
+              "end_date": "2021-09-23",
+              "regime": "uptrend",
+              "start_date": "2021-08-21"
+            },
+            {
+              "censored": false,
+              "days": 11,
+              "end_date": "2021-10-04",
+              "regime": "range",
+              "start_date": "2021-09-24"
+            },
+            {
+              "censored": false,
+              "days": 111,
+              "end_date": "2022-01-23",
+              "regime": "uptrend",
+              "start_date": "2021-10-05"
+            },
+            {
+              "censored": false,
+              "days": 91,
+              "end_date": "2022-04-24",
+              "regime": "downtrend",
+              "start_date": "2022-01-24"
+            },
+            {
+              "censored": false,
+              "days": 18,
+              "end_date": "2022-05-12",
+              "regime": "range",
+              "start_date": "2022-04-25"
+            },
+            {
+              "censored": false,
+              "days": 178,
+              "end_date": "2022-11-06",
+              "regime": "stress",
+              "start_date": "2022-05-13"
+            },
+            {
+              "censored": false,
+              "days": 6,
+              "end_date": "2022-11-12",
+              "regime": "uptrend",
+              "start_date": "2022-11-07"
+            },
+            {
+              "censored": false,
+              "days": 62,
+              "end_date": "2023-01-13",
+              "regime": "stress",
+              "start_date": "2022-11-13"
+            },
+            {
+              "censored": false,
+              "days": 18,
+              "end_date": "2023-01-31",
+              "regime": "uptrend",
+              "start_date": "2023-01-14"
+            },
+            {
+              "censored": false,
+              "days": 10,
+              "end_date": "2023-02-10",
+              "regime": "range",
+              "start_date": "2023-02-01"
+            },
+            {
+              "censored": false,
+              "days": 86,
+              "end_date": "2023-05-07",
+              "regime": "uptrend",
+              "start_date": "2023-02-11"
+            },
+            {
+              "censored": false,
+              "days": 24,
+              "end_date": "2023-05-31",
+              "regime": "range",
+              "start_date": "2023-05-08"
+            },
+            {
+              "censored": false,
+              "days": 8,
+              "end_date": "2023-06-08",
+              "regime": "uptrend",
+              "start_date": "2023-06-01"
+            },
+            {
+              "censored": false,
+              "days": 169,
+              "end_date": "2023-11-24",
+              "regime": "downtrend",
+              "start_date": "2023-06-09"
+            },
+            {
+              "censored": false,
+              "days": 17,
+              "end_date": "2023-12-11",
+              "regime": "range",
+              "start_date": "2023-11-25"
+            },
+            {
+              "censored": false,
+              "days": 208,
+              "end_date": "2024-07-06",
+              "regime": "uptrend",
+              "start_date": "2023-12-12"
+            },
+            {
+              "censored": false,
+              "days": 12,
+              "end_date": "2024-07-18",
+              "regime": "range",
+              "start_date": "2024-07-07"
+            },
+            {
+              "censored": false,
+              "days": 6,
+              "end_date": "2024-07-24",
+              "regime": "uptrend",
+              "start_date": "2024-07-19"
+            },
+            {
+              "censored": false,
+              "days": 14,
+              "end_date": "2024-08-07",
+              "regime": "range",
+              "start_date": "2024-07-25"
+            },
+            {
+              "censored": false,
+              "days": 15,
+              "end_date": "2024-08-22",
+              "regime": "downtrend",
+              "start_date": "2024-08-08"
+            },
+            {
+              "censored": false,
+              "days": 8,
+              "end_date": "2024-08-30",
+              "regime": "range",
+              "start_date": "2024-08-23"
+            },
+            {
+              "censored": false,
+              "days": 25,
+              "end_date": "2024-09-24",
+              "regime": "downtrend",
+              "start_date": "2024-08-31"
+            },
+            {
+              "censored": false,
+              "days": 11,
+              "end_date": "2024-10-05",
+              "regime": "uptrend",
+              "start_date": "2024-09-25"
+            },
+            {
+              "censored": false,
+              "days": 18,
+              "end_date": "2024-10-23",
+              "regime": "range",
+              "start_date": "2024-10-06"
+            },
+            {
+              "censored": false,
+              "days": 134,
+              "end_date": "2025-03-06",
+              "regime": "uptrend",
+              "start_date": "2024-10-24"
+            },
+            {
+              "censored": false,
+              "days": 71,
+              "end_date": "2025-05-16",
+              "regime": "downtrend",
+              "start_date": "2025-03-07"
+            },
+            {
+              "censored": false,
+              "days": 11,
+              "end_date": "2025-05-27",
+              "regime": "range",
+              "start_date": "2025-05-17"
+            },
+            {
+              "censored": false,
+              "days": 200,
+              "end_date": "2025-12-13",
+              "regime": "uptrend",
+              "start_date": "2025-05-28"
+            },
+            {
+              "censored": false,
+              "days": 7,
+              "end_date": "2025-12-20",
+              "regime": "range",
+              "start_date": "2025-12-14"
+            },
+            {
+              "censored": false,
+              "days": 23,
+              "end_date": "2026-01-12",
+              "regime": "downtrend",
+              "start_date": "2025-12-21"
+            },
+            {
+              "censored": false,
+              "days": 11,
+              "end_date": "2026-01-23",
+              "regime": "range",
+              "start_date": "2026-01-13"
+            },
+            {
+              "censored": false,
+              "days": 18,
+              "end_date": "2026-02-10",
+              "regime": "downtrend",
+              "start_date": "2026-01-24"
+            },
+            {
+              "censored": false,
+              "days": 34,
+              "end_date": "2026-03-16",
+              "regime": "stress",
+              "start_date": "2026-02-11"
+            },
+            {
+              "censored": false,
+              "days": 5,
+              "end_date": "2026-03-21",
+              "regime": "downtrend",
+              "start_date": "2026-03-17"
+            },
+            {
+              "censored": false,
+              "days": 53,
+              "end_date": "2026-05-13",
+              "regime": "stress",
+              "start_date": "2026-03-22"
+            },
+            {
+              "censored": false,
+              "days": 23,
+              "end_date": "2026-06-05",
+              "regime": "range",
+              "start_date": "2026-05-14"
+            },
+            {
+              "censored": false,
+              "days": 79,
+              "end_date": "2026-08-23",
+              "regime": "stress",
+              "start_date": "2026-06-06"
+            },
+            {
+              "censored": false,
+              "days": 86,
+              "end_date": "2026-11-17",
+              "regime": "uptrend",
+              "start_date": "2026-08-24"
+            },
+            {
+              "censored": true,
+              "days": 2,
+              "end_date": "2026-11-19",
+              "regime": "downtrend",
+              "start_date": "2026-11-18"
+            }
+          ],
+          "regime_episode_count": 58,
+          "regime_switches": 57
+        },
+        "v2": {
+          "episodes_under_10_days": 13,
+          "mean_regime_duration_days": 52.63934426229508,
+          "median_regime_duration_days": 18,
+          "raw_stress_episodes": [
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 7,
+              "exit_right_censored": false,
+              "raw_stress_end": "2019-02-08",
+              "raw_stress_start": "2018-11-05"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2019-10-27",
+              "raw_stress_start": "2019-09-23"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2020-02-05",
+              "raw_stress_start": "2019-11-18"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2020-03-01",
+              "raw_stress_start": "2020-02-26"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2020-07-06",
+              "raw_stress_start": "2020-03-08"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 16,
+              "exit_right_censored": false,
+              "raw_stress_end": "2021-05-19",
+              "raw_stress_start": "2021-05-19"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 12,
+              "exit_right_censored": false,
+              "raw_stress_end": "2021-05-23",
+              "raw_stress_start": "2021-05-21"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2021-05-30",
+              "raw_stress_start": "2021-05-28"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 52,
+              "exit_right_censored": false,
+              "raw_stress_end": "2021-06-19",
+              "raw_stress_start": "2021-06-18"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2021-08-05",
+              "raw_stress_start": "2021-06-21"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 7,
+              "exit_right_censored": false,
+              "raw_stress_end": "2021-09-28",
+              "raw_stress_start": "2021-09-27"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 168,
+              "exit_right_censored": false,
+              "raw_stress_end": "2022-05-23",
+              "raw_stress_start": "2022-05-09"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 90,
+              "exit_right_censored": false,
+              "raw_stress_end": "2022-08-09",
+              "raw_stress_start": "2022-05-25"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 88,
+              "exit_right_censored": false,
+              "raw_stress_end": "2022-08-11",
+              "raw_stress_start": "2022-08-11"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2022-11-02",
+              "raw_stress_start": "2022-08-13"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 38,
+              "exit_right_censored": false,
+              "raw_stress_end": "2022-12-07",
+              "raw_stress_start": "2022-11-09"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 11,
+              "exit_right_censored": false,
+              "raw_stress_end": "2023-01-03",
+              "raw_stress_start": "2022-12-11"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 40,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-02-05",
+              "raw_stress_start": "2026-02-05"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 14,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-03-03",
+              "raw_stress_start": "2026-02-07"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-03-12",
+              "raw_stress_start": "2026-03-05"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-05-09",
+              "raw_stress_start": "2026-03-18"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 96,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-05-20",
+              "raw_stress_start": "2026-05-17"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 94,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-05-22",
+              "raw_stress_start": "2026-05-22"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 87,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-05-29",
+              "raw_stress_start": "2026-05-27"
+            },
+            {
+              "detection_lag_days": 0,
+              "detection_not_observed": false,
+              "exit_lag_days": 5,
+              "exit_right_censored": false,
+              "raw_stress_end": "2026-08-19",
+              "raw_stress_start": "2026-06-02"
+            }
+          ],
+          "regime_durations": [
+            {
+              "censored": false,
+              "days": 113,
+              "end_date": "2018-05-27",
+              "regime": "range",
+              "start_date": "2018-02-04"
+            },
+            {
+              "censored": false,
+              "days": 57,
+              "end_date": "2018-07-23",
+              "regime": "uptrend",
+              "start_date": "2018-05-28"
+            },
+            {
+              "censored": false,
+              "days": 5,
+              "end_date": "2018-07-28",
+              "regime": "downtrend",
+              "start_date": "2018-07-24"
+            },
+            {
+              "censored": false,
+              "days": 16,
+              "end_date": "2018-08-13",
+              "regime": "range",
+              "start_date": "2018-07-29"
+            },
+            {
+              "censored": false,
+              "days": 83,
+              "end_date": "2018-11-04",
+              "regime": "downtrend",
+              "start_date": "2018-08-14"
+            },
+            {
+              "censored": false,
+              "days": 102,
+              "end_date": "2019-02-14",
+              "regime": "stress",
+              "start_date": "2018-11-05"
+            },
+            {
+              "censored": false,
+              "days": 186,
+              "end_date": "2019-08-19",
+              "regime": "uptrend",
+              "start_date": "2019-02-15"
+            },
+            {
+              "censored": false,
+              "days": 12,
+              "end_date": "2019-08-31",
+              "regime": "range",
+              "start_date": "2019-08-20"
+            },
+            {
+              "censored": false,
+              "days": 22,
+              "end_date": "2019-09-22",
+              "regime": "downtrend",
+              "start_date": "2019-09-01"
+            },
+            {
+              "censored": false,
+              "days": 39,
+              "end_date": "2019-10-31",
+              "regime": "stress",
+              "start_date": "2019-09-23"
+            },
+            {
+              "censored": false,
+              "days": 17,
+              "end_date": "2019-11-17",
+              "regime": "downtrend",
+              "start_date": "2019-11-01"
+            },
+            {
+              "censored": false,
+              "days": 84,
+              "end_date": "2020-02-09",
+              "regime": "stress",
+              "start_date": "2019-11-18"
+            },
+            {
+              "censored": false,
+              "days": 16,
+              "end_date": "2020-02-25",
+              "regime": "uptrend",
+              "start_date": "2020-02-10"
+            },
+            {
+              "censored": false,
+              "days": 9,
+              "end_date": "2020-03-05",
+              "regime": "stress",
+              "start_date": "2020-02-26"
+            },
+            {
+              "censored": false,
+              "days": 2,
+              "end_date": "2020-03-07",
+              "regime": "uptrend",
+              "start_date": "2020-03-06"
+            },
+            {
+              "censored": false,
+              "days": 125,
+              "end_date": "2020-07-10",
+              "regime": "stress",
+              "start_date": "2020-03-08"
+            },
+            {
+              "censored": false,
+              "days": 312,
+              "end_date": "2021-05-18",
+              "regime": "uptrend",
+              "start_date": "2020-07-11"
+            },
+            {
+              "censored": false,
+              "days": 16,
+              "end_date": "2021-06-03",
+              "regime": "stress",
+              "start_date": "2021-05-19"
+            },
+            {
+              "censored": false,
+              "days": 14,
+              "end_date": "2021-06-17",
+              "regime": "uptrend",
+              "start_date": "2021-06-04"
+            },
+            {
+              "censored": false,
+              "days": 53,
+              "end_date": "2021-08-09",
+              "regime": "stress",
+              "start_date": "2021-06-18"
+            },
+            {
+              "censored": false,
+              "days": 11,
+              "end_date": "2021-08-20",
+              "regime": "range",
+              "start_date": "2021-08-10"
+            },
+            {
+              "censored": false,
+              "days": 34,
+              "end_date": "2021-09-23",
+              "regime": "uptrend",
+              "start_date": "2021-08-21"
+            },
+            {
+              "censored": false,
+              "days": 3,
+              "end_date": "2021-09-26",
+              "regime": "range",
+              "start_date": "2021-09-24"
+            },
+            {
+              "censored": false,
+              "days": 8,
+              "end_date": "2021-10-04",
+              "regime": "stress",
+              "start_date": "2021-09-27"
+            },
+            {
+              "censored": false,
+              "days": 111,
+              "end_date": "2022-01-23",
+              "regime": "uptrend",
+              "start_date": "2021-10-05"
+            },
+            {
+              "censored": false,
+              "days": 91,
+              "end_date": "2022-04-24",
+              "regime": "downtrend",
+              "start_date": "2022-01-24"
+            },
+            {
+              "censored": false,
+              "days": 14,
+              "end_date": "2022-05-08",
+              "regime": "range",
+              "start_date": "2022-04-25"
+            },
+            {
+              "censored": false,
+              "days": 182,
+              "end_date": "2022-11-06",
+              "regime": "stress",
+              "start_date": "2022-05-09"
+            },
+            {
+              "censored": false,
+              "days": 2,
+              "end_date": "2022-11-08",
+              "regime": "uptrend",
+              "start_date": "2022-11-07"
+            },
+            {
+              "censored": false,
+              "days": 66,
+              "end_date": "2023-01-13",
+              "regime": "stress",
+              "start_date": "2022-11-09"
+            },
+            {
+              "censored": false,
+              "days": 18,
+              "end_date": "2023-01-31",
+              "regime": "uptrend",
+              "start_date": "2023-01-14"
+            },
+            {
+              "censored": false,
+              "days": 10,
+              "end_date": "2023-02-10",
+              "regime": "range",
+              "start_date": "2023-02-01"
+            },
+            {
+              "censored": false,
+              "days": 86,
+              "end_date": "2023-05-07",
+              "regime": "uptrend",
+              "start_date": "2023-02-11"
+            },
+            {
+              "censored": false,
+              "days": 24,
+              "end_date": "2023-05-31",
+              "regime": "range",
+              "start_date": "2023-05-08"
+            },
+            {
+              "censored": false,
+              "days": 8,
+              "end_date": "2023-06-08",
+              "regime": "uptrend",
+              "start_date": "2023-06-01"
+            },
+            {
+              "censored": false,
+              "days": 169,
+              "end_date": "2023-11-24",
+              "regime": "downtrend",
+              "start_date": "2023-06-09"
+            },
+            {
+              "censored": false,
+              "days": 17,
+              "end_date": "2023-12-11",
+              "regime": "range",
+              "start_date": "2023-11-25"
+            },
+            {
+              "censored": false,
+              "days": 208,
+              "end_date": "2024-07-06",
+              "regime": "uptrend",
+              "start_date": "2023-12-12"
+            },
+            {
+              "censored": false,
+              "days": 12,
+              "end_date": "2024-07-18",
+              "regime": "range",
+              "start_date": "2024-07-07"
+            },
+            {
+              "censored": false,
+              "days": 6,
+              "end_date": "2024-07-24",
+              "regime": "uptrend",
+              "start_date": "2024-07-19"
+            },
+            {
+              "censored": false,
+              "days": 14,
+              "end_date": "2024-08-07",
+              "regime": "range",
+              "start_date": "2024-07-25"
+            },
+            {
+              "censored": false,
+              "days": 15,
+              "end_date": "2024-08-22",
+              "regime": "downtrend",
+              "start_date": "2024-08-08"
+            },
+            {
+              "censored": false,
+              "days": 8,
+              "end_date": "2024-08-30",
+              "regime": "range",
+              "start_date": "2024-08-23"
+            },
+            {
+              "censored": false,
+              "days": 25,
+              "end_date": "2024-09-24",
+              "regime": "downtrend",
+              "start_date": "2024-08-31"
+            },
+            {
+              "censored": false,
+              "days": 11,
+              "end_date": "2024-10-05",
+              "regime": "uptrend",
+              "start_date": "2024-09-25"
+            },
+            {
+              "censored": false,
+              "days": 18,
+              "end_date": "2024-10-23",
+              "regime": "range",
+              "start_date": "2024-10-06"
+            },
+            {
+              "censored": false,
+              "days": 134,
+              "end_date": "2025-03-06",
+              "regime": "uptrend",
+              "start_date": "2024-10-24"
+            },
+            {
+              "censored": false,
+              "days": 71,
+              "end_date": "2025-05-16",
+              "regime": "downtrend",
+              "start_date": "2025-03-07"
+            },
+            {
+              "censored": false,
+              "days": 11,
+              "end_date": "2025-05-27",
+              "regime": "range",
+              "start_date": "2025-05-17"
+            },
+            {
+              "censored": false,
+              "days": 200,
+              "end_date": "2025-12-13",
+              "regime": "uptrend",
+              "start_date": "2025-05-28"
+            },
+            {
+              "censored": false,
+              "days": 7,
+              "end_date": "2025-12-20",
+              "regime": "range",
+              "start_date": "2025-12-14"
+            },
+            {
+              "censored": false,
+              "days": 23,
+              "end_date": "2026-01-12",
+              "regime": "downtrend",
+              "start_date": "2025-12-21"
+            },
+            {
+              "censored": false,
+              "days": 11,
+              "end_date": "2026-01-23",
+              "regime": "range",
+              "start_date": "2026-01-13"
+            },
+            {
+              "censored": false,
+              "days": 12,
+              "end_date": "2026-02-04",
+              "regime": "downtrend",
+              "start_date": "2026-01-24"
+            },
+            {
+              "censored": false,
+              "days": 40,
+              "end_date": "2026-03-16",
+              "regime": "stress",
+              "start_date": "2026-02-05"
+            },
+            {
+              "censored": false,
+              "days": 1,
+              "end_date": "2026-03-17",
+              "regime": "downtrend",
+              "start_date": "2026-03-17"
+            },
+            {
+              "censored": false,
+              "days": 57,
+              "end_date": "2026-05-13",
+              "regime": "stress",
+              "start_date": "2026-03-18"
+            },
+            {
+              "censored": false,
+              "days": 3,
+              "end_date": "2026-05-16",
+              "regime": "range",
+              "start_date": "2026-05-14"
+            },
+            {
+              "censored": false,
+              "days": 99,
+              "end_date": "2026-08-23",
+              "regime": "stress",
+              "start_date": "2026-05-17"
+            },
+            {
+              "censored": false,
+              "days": 86,
+              "end_date": "2026-11-17",
+              "regime": "uptrend",
+              "start_date": "2026-08-24"
+            },
+            {
+              "censored": true,
+              "days": 2,
+              "end_date": "2026-11-19",
+              "regime": "downtrend",
+              "start_date": "2026-11-18"
+            }
+          ],
+          "regime_episode_count": 61,
+          "regime_switches": 60
+        }
+      }
+    }
+  ],
+  "protocol_commit": "b8979770191ec43c029b96a403ada25c8c39ae6a",
+  "raw_stress_definition": "drawdown_365d <= -0.50",
+  "study": "R"
+}
