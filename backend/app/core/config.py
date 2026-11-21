@@ -1,6 +1,7 @@
 from pathlib import Path
+from typing import Literal
 
-from pydantic import Field, model_validator
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 ROOT_ENV_FILE = Path(__file__).resolve().parents[3] / ".env"
@@ -30,6 +31,11 @@ class Settings(BaseSettings):
     rpc_sol_url: str = "https://api.mainnet-beta.solana.com"
     rpc_bnb_url: str = "https://bsc-dataseed.binance.org/"
     rpc_btc_tip_url: str = "https://mempool.space/api/blocks/tip/height"
+    llm_provider: Literal["fake", "openai_compatible", "none"] = "none"
+    llm_base_url: str = ""
+    llm_api_key: str = ""
+    llm_model: str = ""
+    llm_daily_token_budget: int = Field(default=200_000, gt=0)
 
     model_config = SettingsConfigDict(
         env_file=ROOT_ENV_FILE,
@@ -37,6 +43,13 @@ class Settings(BaseSettings):
         extra="ignore",
         case_sensitive=False,
     )
+
+    @field_validator("llm_provider", mode="before")
+    @classmethod
+    def normalize_unconfigured_llm_placeholder(cls, value: object) -> object:
+        if isinstance(value, str) and value.lower().startswith("placeholder_"):
+            return "none"
+        return value
 
     @model_validator(mode="after")
     def validate_auth_secret_outside_development(self) -> "Settings":

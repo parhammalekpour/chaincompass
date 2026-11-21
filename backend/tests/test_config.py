@@ -27,6 +27,20 @@ def test_development_auth_settings_have_safe_defaults() -> None:
     assert config.refresh_token_days == 30
     assert config.cookie_secure is False
     assert config.cookie_domain is None
+    assert config.llm_provider == "none"
+    assert config.llm_daily_token_budget == 200_000
+
+
+def test_llm_settings_reject_unknown_provider_and_nonpositive_budget() -> None:
+    base = {
+        "database_url": "postgresql+asyncpg://test:test@localhost/test",
+        "app_env": "development",
+    }
+
+    with pytest.raises(ValidationError):
+        Settings(**base, llm_provider="unknown")
+    with pytest.raises(ValidationError):
+        Settings(**base, llm_daily_token_budget=0)
 
 
 def test_non_development_requires_smtp_configuration() -> None:
