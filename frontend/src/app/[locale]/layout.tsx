@@ -6,6 +6,7 @@ import { getMessages, getTranslations, setRequestLocale } from "next-intl/server
 import { notFound } from "next/navigation";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/components/auth/auth-provider";
+import { PublicQueryProvider } from "@/components/providers/public-query-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import { getMetadataBase } from "@/lib/metadata";
@@ -74,7 +75,7 @@ export default async function LocaleLayout({
           <ThemeProvider>
             <TooltipProvider>
               <AuthProvider>
-                {children}
+                <PublicQueryProvider>{children}</PublicQueryProvider>
                 <Toaster />
               </AuthProvider>
             </TooltipProvider>
