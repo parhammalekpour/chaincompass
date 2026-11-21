@@ -3,6 +3,7 @@ import {
   ApiError,
   apiRequest,
   NetworkError,
+  refreshSession,
   setAccessToken,
 } from "./client";
 
@@ -152,6 +153,68 @@ describe("apiRequest", () => {
         headers: { "X-CSRF-Token": "csrf-test" },
       }),
     );
+  });
+
+  it("shares a signaled bootstrap refresh with a concurrent 401 retry", async () => {
+    document.cookie = "chaincompass_csrf=csrf-test; path=/";
+    let resolveRefresh: ((response: Response) => void) | undefined;
+    let refreshCalls = 0;
+    let protectedCalls = 0;
+    const fetchMock = vi.fn((input: RequestInfo | URL) => {
+      const path = String(input);
+      if (path === "/api/v1/auth/refresh") {
+        refreshCalls += 1;
+        return new Promise<Response>((resolve) => {
+          resolveRefresh = resolve;
+        });
+      }
+      if (path === "/api/v1/protected") {
+        protectedCalls += 1;
+        if (protectedCalls === 1) {
+          return Promise.resolve(
+            jsonResponse(
+              { error: { code: "invalid_access_token", message: "hidden" } },
+              401,
+            ),
+          );
+        }
+      }
+      return Promise.resolve(jsonResponse({ ok: true }));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const bootstrap = refreshSession(new AbortController().signal);
+    const protectedRequest = apiRequest<{ ok: boolean }>("/api/v1/protected");
+    expect(protectedCalls).toBe(1);
+    expect(refreshCalls).toBe(1);
+
+    resolveRefresh?.(jsonResponse(authResponse));
+    await expect(bootstrap).resolves.toMatchObject(authResponse);
+    await expect(protectedRequest).resolves.toEqual({ ok: true });
+    expect(refreshCalls).toBe(1);
+    expect(protectedCalls).toBe(2);
+  });
+
+  it("does not cancel the shared refresh when a caller aborts its wait", async () => {
+    document.cookie = "chaincompass_csrf=csrf-test; path=/";
+    let resolveRefresh: ((response: Response) => void) | undefined;
+    const fetchMock = vi.fn(() =>
+      new Promise<Response>((resolve) => {
+        resolveRefresh = resolve;
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    const controller = new AbortController();
+    const abandonedWait = refreshSession(controller.signal);
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+
+    controller.abort();
+    await expect(abandonedWait).rejects.toMatchObject({ name: "AbortError" });
+    const nextWait = refreshSession();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    resolveRefresh?.(jsonResponse(authResponse));
+    await expect(nextWait).resolves.toMatchObject(authResponse);
   });
 
   it("reuses a newly refreshed token for a late concurrent 401", async () => {

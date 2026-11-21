@@ -112,7 +112,7 @@ async function decodeResponse<T>(response: Response): Promise<T> {
   return data as T;
 }
 
-async function performRefresh(signal?: AbortSignal): Promise<AuthResponse> {
+async function performRefresh(): Promise<AuthResponse> {
   const csrf = csrfCookie();
   if (!csrf) {
     clearAccessToken();
@@ -125,7 +125,6 @@ async function performRefresh(signal?: AbortSignal): Promise<AuthResponse> {
       method: "POST",
       credentials: "same-origin",
       headers: { "X-CSRF-Token": csrf },
-      signal,
     });
   } catch {
     clearAccessToken();
@@ -142,18 +141,50 @@ async function performRefresh(signal?: AbortSignal): Promise<AuthResponse> {
   }
 }
 
+function waitForRefresh(
+  refresh: Promise<AuthResponse>,
+  signal?: AbortSignal,
+): Promise<AuthResponse> {
+  if (!signal) return refresh;
+  if (signal.aborted) {
+    return Promise.reject(new DOMException("Aborted", "AbortError"));
+  }
+  return new Promise((resolve, reject) => {
+    const cleanup = () => signal.removeEventListener("abort", onAbort);
+    const onAbort = () => {
+      cleanup();
+      reject(new DOMException("Aborted", "AbortError"));
+    };
+    signal.addEventListener("abort", onAbort, { once: true });
+    refresh.then(
+      (value) => {
+        cleanup();
+        resolve(value);
+      },
+      (error: unknown) => {
+        cleanup();
+        reject(error);
+      },
+    );
+  });
+}
+
 async function refreshAccessToken(
   signal?: AbortSignal,
 ): Promise<AuthResponse> {
-  if (signal) return performRefresh(signal);
-  if (refreshInFlight) return refreshInFlight;
-
-  refreshInFlight = performRefresh();
-  try {
-    return await refreshInFlight;
-  } finally {
-    refreshInFlight = null;
+  if (signal?.aborted) {
+    return Promise.reject(new DOMException("Aborted", "AbortError"));
   }
+  if (!refreshInFlight) {
+    const refresh = performRefresh();
+    refreshInFlight = refresh;
+    const clearInFlight = () => {
+      if (refreshInFlight === refresh) refreshInFlight = null;
+    };
+    void refresh.then(clearInFlight, clearInFlight);
+  }
+  // Aborting a caller's wait must not interrupt a refresh that may rotate cookies.
+  return waitForRefresh(refreshInFlight, signal);
 }
 
 export async function refreshSession(

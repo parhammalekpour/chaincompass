@@ -28,14 +28,12 @@ function renderGuard(locale: "en" | "fa" = "en") {
   );
 }
 
-function abortablePendingFetch(
-  _input: RequestInfo | URL,
-  init?: RequestInit,
-): Promise<Response> {
+function delayedFailingFetch(): Promise<Response> {
   return new Promise((_, reject) => {
-    init?.signal?.addEventListener("abort", () => {
-      reject(new DOMException("Aborted", "AbortError"));
-    });
+    setTimeout(
+      () => reject(new TypeError("offline")),
+      2 * INITIAL_SESSION_REFRESH_TIMEOUT_MS,
+    );
   });
 }
 
@@ -45,6 +43,23 @@ function expiredRefreshResponse() {
       error: { code: "invalid_refresh_token", message: "Invalid refresh" },
     }),
     { status: 401, headers: { "Content-Type": "application/json" } },
+  );
+}
+
+function successfulRefreshResponse() {
+  return new Response(
+    JSON.stringify({
+      access_token: "memory-only",
+      token_type: "bearer",
+      expires_in: 900,
+      user: {
+        id: "user-1",
+        email: "signed-in@example.com",
+        locale: "en",
+        role: "user",
+      },
+    }),
+    { status: 200, headers: { "Content-Type": "application/json" } },
   );
 }
 
@@ -65,7 +80,7 @@ afterEach(() => {
 describe("AppAuthGuard refresh recovery", () => {
   it("shows a retryable error when the initial refresh times out", async () => {
     vi.useFakeTimers();
-    vi.stubGlobal("fetch", vi.fn(abortablePendingFetch));
+    vi.stubGlobal("fetch", vi.fn(delayedFailingFetch));
     renderGuard();
 
     expect(screen.getByRole("status")).toBeInTheDocument();
@@ -78,24 +93,68 @@ describe("AppAuthGuard refresh recovery", () => {
     );
     expect(screen.getByRole("button", { name: "Try again" })).toBeVisible();
     expect(replace).not.toHaveBeenCalled();
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(INITIAL_SESSION_REFRESH_TIMEOUT_MS);
+    });
   });
 
-  it("starts a new refresh attempt when Retry is selected", async () => {
+  it("shares a timed-out refresh until it settles, then retries once", async () => {
     vi.useFakeTimers();
-    const fetchMock = vi
-      .fn(abortablePendingFetch)
-      .mockImplementationOnce(abortablePendingFetch)
-      .mockImplementationOnce(abortablePendingFetch);
+    let rejectFirst: ((error: Error) => void) | undefined;
+    let refreshCalls = 0;
+    const fetchMock = vi.fn((input: RequestInfo | URL) => {
+      const path = String(input);
+      if (path === "/api/v1/auth/refresh") {
+        refreshCalls += 1;
+        if (refreshCalls === 1) {
+          return new Promise<Response>((_resolve, reject) => {
+            rejectFirst = reject;
+          });
+        }
+        return Promise.resolve(successfulRefreshResponse());
+      }
+      if (path === "/api/v1/auth/me") {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              id: "user-1",
+              email: "signed-in@example.com",
+              locale: "en",
+              role: "user",
+            }),
+            { status: 200, headers: { "Content-Type": "application/json" } },
+          ),
+        );
+      }
+      return Promise.reject(new Error("Unexpected request"));
+    });
     vi.stubGlobal("fetch", fetchMock);
     renderGuard();
 
     await act(async () => {
       await vi.advanceTimersByTimeAsync(INITIAL_SESSION_REFRESH_TIMEOUT_MS);
     });
-    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+    });
+    expect(refreshCalls).toBe(1);
 
-    expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(screen.getByRole("status")).toBeInTheDocument();
+    await act(async () => {
+      rejectFirst?.(new TypeError("offline"));
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Your session could not be restored",
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(screen.getByText("Protected content")).toBeInTheDocument();
+    expect(refreshCalls).toBe(2);
   });
 
   it("redirects to login when refresh returns 401", async () => {
@@ -111,7 +170,7 @@ describe("AppAuthGuard refresh recovery", () => {
 
   it("shows a Persian retry message", async () => {
     vi.useFakeTimers();
-    vi.stubGlobal("fetch", vi.fn(abortablePendingFetch));
+    vi.stubGlobal("fetch", vi.fn(delayedFailingFetch));
     renderGuard("fa");
 
     await act(async () => {
@@ -124,5 +183,8 @@ describe("AppAuthGuard refresh recovery", () => {
     expect(
       screen.getByRole("button", { name: "تلاش دوباره" }),
     ).toBeVisible();
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(INITIAL_SESSION_REFRESH_TIMEOUT_MS);
+    });
   });
 });

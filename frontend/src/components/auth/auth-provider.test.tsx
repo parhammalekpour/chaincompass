@@ -1,7 +1,20 @@
+import { StrictMode, useEffect } from "react";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { AuthProvider, useAuth } from "./auth-provider";
-import { setAccessToken } from "@/lib/api/client";
+import { apiRequest, setAccessToken } from "@/lib/api/client";
+
+const authResponse = {
+  access_token: "memory-only",
+  token_type: "bearer",
+  expires_in: 900,
+  user: {
+    id: "user-1",
+    email: "signed-in@example.com",
+    locale: "en",
+    role: "user",
+  },
+};
 
 function Status() {
   const { status, user } = useAuth();
@@ -16,6 +29,13 @@ function RestoreSession() {
       <button onClick={() => void restoreSession()}>restore session</button>
     </div>
   );
+}
+
+function UnauthorizedProbe() {
+  useEffect(() => {
+    void apiRequest("/api/v1/protected").catch(() => undefined);
+  }, []);
+  return null;
 }
 
 afterEach(() => {
@@ -79,6 +99,59 @@ describe("AuthProvider bootstrap", () => {
 
     expect(await screen.findByText("signed-in@example.com")).toBeInTheDocument();
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+  });
+
+  it("shares refresh across StrictMode bootstrap and a concurrent 401", async () => {
+    document.cookie = "chaincompass_csrf=csrf-test; path=/";
+    let refreshCalls = 0;
+    let protectedCalls = 0;
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const path = String(input);
+      if (path === "/api/v1/auth/refresh") {
+        refreshCalls += 1;
+        return new Response(JSON.stringify(authResponse), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      if (path === "/api/v1/auth/me") {
+        return new Response(JSON.stringify(authResponse.user), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      if (path === "/api/v1/protected") {
+        protectedCalls += 1;
+        return protectedCalls <= 2
+          ? new Response(
+              JSON.stringify({
+                error: { code: "invalid_access_token", message: "hidden" },
+              }),
+              {
+                status: 401,
+                headers: { "Content-Type": "application/json" },
+              },
+            )
+          : new Response(JSON.stringify({ ok: true }), {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            });
+      }
+      throw new Error("Unexpected request");
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    render(
+      <StrictMode>
+        <AuthProvider>
+          <UnauthorizedProbe />
+          <Status />
+        </AuthProvider>
+      </StrictMode>,
+    );
+
+    expect(await screen.findByText("signed-in@example.com")).toBeInTheDocument();
+    await waitFor(() => expect(protectedCalls).toBe(4));
+    expect(refreshCalls).toBe(1);
   });
 
   it("goes anonymous when a refresh attempt fails", async () => {
