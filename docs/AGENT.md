@@ -52,9 +52,18 @@ The final response is checked before any text is sent to the client:
 
 The output check also rejects prohibited wording. A failed check prompts one
 revision with the offending terms or numbers. If that still fails, the
-orchestrator returns a structured projection of retrieved tool data and marks
-the result `failed`. This check reduces unsupported output; it is not a promise
-that every generated statement is correct.
+orchestrator returns a short, localized plain-text summary of the verified
+figures returned by this turn's tools and marks the result `failed`. The first
+line explains that the assistant's wording could not be verified; known tools
+have deterministic formatters, and an unknown tool is represented by a generic
+retrieval line. Raw JSON is not shown. If no usable tool result exists, the
+existing safe no-data message is returned.
+
+Grounding matches a number against any value in any tool result from this turn;
+it does not bind a claim to a specific chain or metric. For example, a number
+returned for BTC could validate a numeric claim about ETH. This limitation is
+known and has not been changed. The check reduces unsupported output; it is not
+a promise that every generated statement is correct.
 
 Input classification handles restricted financial-direction requests with a
 deterministic bilingual response before provider access. The system prompt
@@ -81,10 +90,14 @@ interface must explain this data flow before it is made available.
 
 ## Why verify, then stream
 
-Provider drafts are not streamed. The server checks the completed response,
-performs its single revision when needed, persists the verified result, and
-then sends text chunks over server-sent events. This avoids displaying a
-partial response before its numeric and wording checks have completed.
+Provider drafts are not streamed. The server emits `meta` immediately, then
+emits each `tool_call` before execution and its `tool_result` immediately after
+the tool finishes. These progress events can arrive while the provider loop is
+still running. Assistant `token` events are sent only after the completed
+response has passed numeric and wording checks, or after the deterministic
+fallback has been selected; the verified result is persisted before tokens.
+This keeps unverified assistant text out of the stream while still showing
+live tool activity.
 
 Small local models may not reliably choose function calls, follow argument
 schemas, or produce concise bilingual output. The provider interface keeps
@@ -96,8 +109,12 @@ model and deployment configuration.
 The authenticated routes are documented in [API.md](API.md). Message requests
 stream `text/event-stream` events in this order: `meta`, zero or more
 `tool_call` and `tool_result` pairs, verified `token` chunks, `final`, then
-`done`. Provider or storage failures emit `error` and `done`. Tool-result
-events contain a short status summary, not the complete result payload.
+`done`. Each tool event is sent as the corresponding work happens, including
+tool executions across provider iterations; a single execution emits one pair.
+Provider or storage failures emit `error` and `done`. Tool-result events
+contain a short status summary, not the complete result payload. The response
+uses `Cache-Control: no-cache` and `X-Accel-Buffering: no` to discourage
+intermediary buffering.
 
 ## Offline evaluation
 
