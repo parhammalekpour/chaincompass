@@ -1,0 +1,17 @@
+event: meta
+data: {"user_message_id":"22000000-0000-4000-8000-000000000003","assistant_message_id":"22000000-0000-4000-8000-000000000004","language":"en"}
+
+event: tool_call
+data: {"name":"get_chain_snapshot","args":{"slug":"btc"}}
+
+event: tool_result
+data: {"name":"get_chain_snapshot","ok":true,"summary":"data_returned"}
+
+event: token
+data: {"text":"Stored value: 55."}
+
+event: final
+data: {"grounding_status":"ok","refusal":false,"tool_names":["get_chain_snapshot"]}
+
+event: done
+data: {}

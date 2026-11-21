@@ -1,5 +1,7 @@
 export const backendErrorCodes = [
   "csrf_failed",
+  "conversation_limit_reached",
+  "conversation_not_found",
   "email_not_verified",
   "forbidden",
   "http_error",
@@ -9,6 +11,9 @@ export const backendErrorCodes = [
   "invalid_email_token",
   "invalid_refresh_token",
   "invalid_reset_token",
+  "llm_not_configured",
+  "message_limit_reached",
+  "message_too_long",
   "not_found",
   "oauth_not_configured",
   "origin_not_allowed",
@@ -17,12 +22,15 @@ export const backendErrorCodes = [
   "registration_failed",
   "validation_error",
   "weak_password",
+  "token_budget_exceeded",
 ] as const;
 
 export type BackendErrorCode = (typeof backendErrorCodes)[number];
 
 export const backendErrorMessageKeys: Record<BackendErrorCode, string> = {
   csrf_failed: "authErrors.csrfFailed",
+  conversation_limit_reached: "authErrors.conversationLimitReached",
+  conversation_not_found: "authErrors.conversationNotFound",
   email_not_verified: "authErrors.emailNotVerified",
   forbidden: "authErrors.forbidden",
   http_error: "authErrors.generic",
@@ -32,6 +40,9 @@ export const backendErrorMessageKeys: Record<BackendErrorCode, string> = {
   invalid_email_token: "authErrors.invalidEmailToken",
   invalid_refresh_token: "authErrors.sessionExpired",
   invalid_reset_token: "authErrors.invalidResetToken",
+  llm_not_configured: "authErrors.llmNotConfigured",
+  message_limit_reached: "authErrors.messageLimitReached",
+  message_too_long: "authErrors.messageTooLong",
   not_found: "authErrors.generic",
   oauth_not_configured: "authErrors.googleComingSoon",
   origin_not_allowed: "authErrors.generic",
@@ -40,4 +51,5 @@ export const backendErrorMessageKeys: Record<BackendErrorCode, string> = {
   registration_failed: "authErrors.generic",
   validation_error: "authErrors.validation",
   weak_password: "authErrors.weakPassword",
+  token_budget_exceeded: "authErrors.tokenBudgetExceeded",
 };

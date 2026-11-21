@@ -174,10 +174,12 @@ export type ApiRequestOptions = {
   signal?: AbortSignal;
 };
 
-export async function apiRequest<T>(
+async function authenticatedFetch(
   path: string,
-  options: ApiRequestOptions = {},
-): Promise<T> {
+  options: ApiRequestOptions,
+  accept: string,
+  preserveAbort: boolean,
+): Promise<Response> {
   const {
     method = "GET",
     body,
@@ -188,33 +190,62 @@ export async function apiRequest<T>(
   const makeRequest = async () => {
     const requestHeaders = new Headers(headers);
     const tokenUsed = accessToken;
-    requestHeaders.set("Accept", "application/json");
+    requestHeaders.set("Accept", accept);
     if (body !== undefined) requestHeaders.set("Content-Type", "application/json");
     if (tokenUsed) requestHeaders.set("Authorization", `Bearer ${tokenUsed}`);
 
     try {
-      return {
-        response: await fetch(path, {
-          method,
-          credentials: "same-origin",
-          headers: requestHeaders,
-          body: body === undefined ? undefined : JSON.stringify(body),
-          signal,
-        }),
-        tokenUsed,
-      };
-    } catch {
+      return await fetch(path, {
+        method,
+        credentials: "same-origin",
+        headers: requestHeaders,
+        body: body === undefined ? undefined : JSON.stringify(body),
+        signal,
+      });
+    } catch (error) {
+      if (preserveAbort && signal?.aborted) throw error;
       throw new NetworkError();
     }
   };
 
-  let { response, tokenUsed } = await makeRequest();
+  let tokenUsed = accessToken;
+  let response = await makeRequest();
   if (response.status === 401 && authRetry) {
     if (accessToken === tokenUsed) await refreshAccessToken(signal);
-    ({ response, tokenUsed } = await makeRequest());
+    tokenUsed = accessToken;
+    response = await makeRequest();
     if (response.status === 401) clearAccessToken();
   }
-  return decodeResponse<T>(response);
+  return response;
+}
+
+export async function apiRequest<T>(
+  path: string,
+  options: ApiRequestOptions = {},
+): Promise<T> {
+  return decodeResponse(
+    await authenticatedFetch(path, options, "application/json", false),
+  );
+}
+
+export async function apiStreamRequest(
+  path: string,
+  options: ApiRequestOptions = {},
+): Promise<Response> {
+  const response = await authenticatedFetch(
+    path,
+    options,
+    "text/event-stream",
+    true,
+  );
+  if (!response.ok) {
+    await decodeResponse<never>(response);
+    throw new ApiError("http_error", response.status, retryAfter(response));
+  }
+  if (!response.headers.get("Content-Type")?.toLowerCase().includes("text/event-stream")) {
+    throw new ApiError("http_error", 502);
+  }
+  return response;
 }
 
 export async function fetchAuthResponse(
