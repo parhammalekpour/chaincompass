@@ -142,6 +142,27 @@ describe("ChainDetailPage", () => {
     });
   });
 
+  it("links score and scenario notes to their methodology sections", async () => {
+    renderPage();
+
+    expect(
+      await screen.findByText(
+        "Calibration for this horizon could not be assessed (too few independent windows).",
+      ),
+    ).toBeVisible();
+    await waitFor(() => {
+      expect(
+        screen.getAllByRole("link", { name: "How this is computed" }),
+      ).toHaveLength(2);
+    });
+
+    expect(
+      screen.getAllByRole("link", { name: "How this is computed" }).map((link) =>
+        link.getAttribute("href"),
+      ),
+    ).toEqual(["/methodology#health-score", "/methodology#scenarios"]);
+  });
+
   it("renders a friendly not-found state for an invalid slug", () => {
     render(
       <NextIntlClientProvider locale="en" messages={en}>

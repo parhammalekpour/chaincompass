@@ -64,6 +64,9 @@ export function ScenarioHorizonCard({
             ))}
           </div>
         )}
+        {horizon.days === 365 && (
+          <p className="text-sm text-muted">{t("calibrationNotAssessed")}</p>
+        )}
         <dl className="grid gap-2 text-sm sm:grid-cols-2">
           <div>
             <dt className="text-muted">{t("independentWindows")}</dt>

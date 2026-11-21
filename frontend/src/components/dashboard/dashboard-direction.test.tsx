@@ -1,4 +1,4 @@
-import { cleanup, render, waitFor } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import type { AnchorHTMLAttributes, ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -105,5 +105,8 @@ describe("dashboard direction and data states", () => {
       expect(container.querySelector('[role="status"]')).not.toBeInTheDocument();
       expect(container.querySelector("h1")).toHaveTextContent("Dashboard");
     });
+    expect(
+      screen.getByRole("link", { name: "How this is computed" }),
+    ).toHaveAttribute("href", "/methodology#health-score");
   });
 });

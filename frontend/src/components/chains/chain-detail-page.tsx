@@ -547,7 +547,15 @@ export function ChainDetailPage({ slug }: { slug: ChainSlug }) {
             </bdi>{" "}
             ({dashboardT("utc")})
           </p>
-          <p className="text-sm text-muted">{dashboardT("disclaimer")}</p>
+          <p className="text-sm text-muted">
+            {dashboardT("disclaimer")}{" "}
+            <Link
+              href="/methodology#health-score"
+              className="text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              {dashboardT("howComputed")}
+            </Link>
+          </p>
         </div>
       </header>
 
@@ -699,7 +707,15 @@ export function ChainDetailPage({ slug }: { slug: ChainSlug }) {
           >
             {t("scenariosTitle")}
           </h2>
-          <p className="font-medium">{t("historicalQuantilesNote")}</p>
+          <p className="font-medium">
+            {t("historicalQuantilesNote")}{" "}
+            <Link
+              href="/methodology#scenarios"
+              className="text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              {dashboardT("howComputed")}
+            </Link>
+          </p>
           <p className="text-sm text-muted">{t("quantileExplanation")}</p>
         </div>
         <SectionState

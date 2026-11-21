@@ -485,6 +485,7 @@
     "dataAsOfPrefix": "Data as of",
     "utc": "UTC",
     "disclaimer": "Analysis only. Not investment advice or a forecast.",
+    "howComputed": "How this is computed",
     "chainNames": {
       "btc": "Bitcoin",
       "eth": "Ethereum",
@@ -648,6 +649,7 @@
     "lowSample": "Low sample",
     "insufficientHistory": "Not enough history for this horizon.",
     "historicalQuantilesNote": "Historical return quantiles, not a forecast.",
+    "calibrationNotAssessed": "Calibration for this horizon could not be assessed (too few independent windows).",
     "quantileExplanation": "p10 is the 10th percentile, p50 the median, and p90 the 90th percentile of historical returns."
   },
   "chat": {

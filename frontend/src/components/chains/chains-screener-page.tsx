@@ -375,7 +375,15 @@ export function ChainsScreenerPage() {
           )}{" "}
           (<span dir="ltr">{dashboardT("utc")}</span>)
         </p>
-        <p className="max-w-3xl text-sm text-muted">{dashboardT("disclaimer")}</p>
+        <p className="max-w-3xl text-sm text-muted">
+          {dashboardT("disclaimer")}{" "}
+          <Link
+            href="/methodology#health-score"
+            className="text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            {dashboardT("howComputed")}
+          </Link>
+        </p>
       </header>
 
       <section

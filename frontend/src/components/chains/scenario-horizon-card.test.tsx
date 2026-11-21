@@ -2,6 +2,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, describe, expect, it } from "vitest";
 import en from "../../../messages/en.json";
+import fa from "../../../messages/fa.json";
 import scenariosFixture from "@/test/fixtures/btc-scenarios.json";
 import {
   scenariosResponseSchema,
@@ -11,9 +12,12 @@ import { ScenarioHorizonCard } from "./scenario-horizon-card";
 
 afterEach(cleanup);
 
-function renderCard(horizon: ScenarioHorizon) {
+function renderCard(horizon: ScenarioHorizon, locale: "en" | "fa" = "en") {
   return render(
-    <NextIntlClientProvider locale="en" messages={en}>
+    <NextIntlClientProvider
+      locale={locale}
+      messages={locale === "en" ? en : fa}
+    >
       <ScenarioHorizonCard horizon={horizon} />
     </NextIntlClientProvider>,
   );
@@ -51,4 +55,19 @@ describe("ScenarioHorizonCard", () => {
       screen.getByText("Independent windows").parentElement,
     ).toHaveTextContent("0");
   });
+
+  it.each([
+    ["en", en.chainDetail.calibrationNotAssessed],
+    ["fa", fa.chainDetail.calibrationNotAssessed],
+  ] as const)(
+    "shows the calibration caveat only on the 365-day card in %s",
+    (locale, message) => {
+      renderCard(horizons[2]!, locale);
+      expect(screen.getByText(message)).toBeVisible();
+      cleanup();
+
+      renderCard(horizons[1]!, locale);
+      expect(screen.queryByText(message)).not.toBeInTheDocument();
+    },
+  );
 });

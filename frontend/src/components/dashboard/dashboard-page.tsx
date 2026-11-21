@@ -3,6 +3,7 @@
 import { Activity, CircleAlert } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@/i18n/navigation";
 import { getChains } from "@/lib/public-api/client";
 import { publicQueryKeys } from "@/lib/public-api/query-keys";
 import { usePartialCoverageDetails } from "@/hooks/use-partial-coverage-details";
@@ -94,7 +95,15 @@ export function DashboardPage() {
           )}{" "}
           (<span dir="ltr">{t("utc")}</span>)
         </p>
-        <p className="max-w-3xl text-sm text-muted">{t("disclaimer")}</p>
+        <p className="max-w-3xl text-sm text-muted">
+          {t("disclaimer")}{" "}
+          <Link
+            href="/methodology#health-score"
+            className="text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            {t("howComputed")}
+          </Link>
+        </p>
       </header>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {chains.map((chain) => {
