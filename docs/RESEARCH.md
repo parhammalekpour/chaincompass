@@ -77,6 +77,74 @@ history. V2 is **not adopted**. The [complete Study R tables](research/R.md)
 include duration summaries and detection/exit lags for each raw-stress episode;
 the JSON reports also identify right-censored observations.
 
+## Post-hoc notes (added after results were seen)
+
+These notes describe the fixed outputs; they do not alter any label or
+pre-registered rule. Labels in the tables remain exactly as registered. The
+rule did not specify a minimum sample size, so the labels for every cell with
+fewer than 20 non-overlapping origins are not informative: BTC, ETH, SOL, and
+BNB at 365 days (`n=3`, `n=3`, `n=0`, and `n=3`, respectively), and SOL at
+90 days (`n=19`).
+
+For the pooled scenarios-v1 hit rates below, a rate above 0.80 means the
+p10-p90 band was wider than nominal; a rate below 0.80 means it was narrower.
+The rates and directions are descriptive and retain the original sample sizes.
+
+| Chain | Horizon | Independent n | P10-p90 hit rate | Direction |
+|---|---:|---:|---:|---|
+| BTC | 30 | 106 | 0.896 | Wider |
+| BTC | 90 | 31 | 0.903 | Wider |
+| BTC | 365 | 3 | 1.000 | Wider; very small sample |
+| ETH | 30 | 106 | 0.887 | Wider |
+| ETH | 90 | 31 | 0.871 | Wider |
+| ETH | 365 | 3 | 1.000 | Wider; very small sample |
+| SOL | 30 | 70 | 0.871 | Wider |
+| SOL | 90 | 19 | 1.000 | Wider; very small sample |
+| SOL | 365 | 0 | — | Not assessable |
+| BNB | 30 | 104 | 0.904 | Wider |
+| BNB | 90 | 30 | 0.900 | Wider |
+| BNB | 365 | 3 | 1.000 | Wider; very small sample |
+
+No available pooled scenarios-v1 cell has a hit rate below 0.80. Despite the
+hit rates being closer to 0.80 for B1 in some cells, that alone does not mean
+B1 is better. The paired non-overlapping mean pinball losses below come
+directly from the existing Study S JSON. Lower values are not an adoption
+criterion; `n` is the shared paired sample size.
+
+| Chain | Horizon | Paired n | V1 p10 / p50 / p90 | B1 p10 / p50 / p90 |
+|---|---:|---:|---|---|
+| BTC | 30 | 106 | 0.031385 / 0.077385 / 0.041425 | 0.031763 / 0.078601 / 0.040407 |
+| BTC | 90 | 31 | 0.058665 / 0.184231 / 0.096817 | 0.067176 / 0.191856 / 0.098438 |
+| BTC | 365 | 0 | — / — / — | — / — / — |
+| ETH | 30 | 106 | 0.041943 / 0.108706 / 0.053512 | 0.042645 / 0.110327 / 0.053140 |
+| ETH | 90 | 31 | 0.075199 / 0.244992 / 0.132353 | 0.082460 / 0.253968 / 0.146155 |
+| ETH | 365 | 0 | — / — / — | — / — / — |
+| SOL | 30 | 70 | 0.055779 / 0.165873 / 0.122734 | 0.056611 / 0.165631 / 0.110126 |
+| SOL | 90 | 19 | 0.063453 / 0.246999 / 0.433841 | 0.066535 / 0.251301 / 0.324990 |
+| SOL | 365 | 0 | — / — / — | — / — / — |
+| BNB | 30 | 104 | 0.040116 / 0.099847 / 0.084527 | 0.040289 / 0.100305 / 0.078545 |
+| BNB | 90 | 30 | 0.081095 / 0.298258 / 0.402527 | 0.079130 / 0.301920 / 0.395389 |
+| BNB | 365 | 0 | — / — / — | — / — / — |
+
+All eight Study H point estimates are positive, all eight approximate
+intervals contain zero, and eight chain/horizon tests were run. Score inputs
+include price-derived components; no association is claimed.
+
+The following Study R summaries use the stress-lag arrays in the existing
+JSON. Means and medians use only episodes with an observed lag; `n` shows how
+many of the raw-stress episodes contributed. A missing v2 SOL exit remains
+right-censored.
+
+| Chain | Raw episodes | V1 detection n / mean / median days | V2 detection n / mean / median days | V1 exit n / mean / median days | V2 exit n / mean / median days |
+|---|---:|---|---|---|---|
+| BTC | 16 | 11 / 2.18 / 4 | 16 / 0 / 0 | 11 / 9.27 / 5 | 16 / 8.44 / 5 |
+| ETH | 27 | 21 / 1.90 / 0 | 27 / 0 / 0 | 21 / 16.14 / 9 | 27 / 13.96 / 8 |
+| SOL | 20 | 11 / 2.18 / 4 | 20 / 0 / 0 | 11 / 49.45 / 5 | 18 / 59.33 / 5 |
+| BNB | 25 | 16 / 2.75 / 4 | 25 / 0 / 0 | 16 / 28.81 / 5 | 25 / 34.80 / 11 |
+
+End-to-end determinism against the database was not re-verified. The
+determinism test covers pure JSON generation only.
+
 ## What this does and does not show
 
 This report describes calibration, historical association, and regime-state
