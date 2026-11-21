@@ -221,6 +221,15 @@ Create an account or sign in, then open
 `http://localhost:3000/en/app/chains`; open the Bitcoin detail page at
 `http://localhost:3000/en/app/chains/btc`.
 
+The authenticated chat is available at `http://localhost:3000/en/app/chat`;
+the Persian route is `http://localhost:3000/fa/app/chat`. The page works
+without an AI provider and shows an explanatory configuration notice. To enable
+provider requests, configure the `LLM_PROVIDER`, `LLM_BASE_URL`, and
+`LLM_MODEL` settings in the ignored local `.env`, using the corresponding
+entries in `.env.example`. The default configuration leaves the assistant
+unconfigured. Conversation text and tool results are stored in the account and
+sent to the configured provider; review the privacy details before enabling it.
+
 ## Ingestion worker
 
 Run the worker in its own PowerShell window, separate from the API and frontend.

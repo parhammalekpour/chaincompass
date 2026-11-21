@@ -41,8 +41,8 @@ FastAPI. FastAPI serves validated application requests and reads/writes
 PostgreSQL. A separate APScheduler worker collects and normalizes data from
 swappable external providers before storing them. Account emails are handled by
 the auth email sender. The backend includes a replaceable language-model
-provider interface and an authenticated agent API; the chat UI, Telegram
-notifier, and alert-delivery implementation are not available yet.
+provider interface and an authenticated agent API with a bilingual chat UI.
+The Telegram notifier and alert-delivery implementation are not available yet.
 
 ## Implemented vs Planned
 
@@ -64,8 +64,9 @@ public methodology endpoint and uses a documented static fallback; the shared
 data-attribution footer provides full public-site and compact app variants.
 The backend agent API, provider interface, allow-listed read-only tools,
 grounding checks, bilingual guardrails, and offline evaluation harness are
-implemented. The user-facing chat UI, watchlists, and alert delivery remain
-planned. Additional public SEO and learning pages are deferred to Prompt 15.
+implemented, along with a bilingual user-facing chat UI. Watchlists and alert
+delivery remain planned. Additional public SEO and learning pages are deferred
+to Prompt 15.
 
 Public data routes are GET-only and unauthenticated. They expose chain
 snapshots, score history, reported regimes, risk flags, methodology, and
@@ -117,11 +118,22 @@ scenario values use neutral styling rather than price-return colors. The
 independent windows. Dashboard, screener, and chain-detail score notes link to
 the Health Score methodology; the scenario note links to the scenario method.
 
-Planned, not implemented: user-facing chat, Telegram notifications, alert
-delivery, watchlists, and additional public SEO and learning pages. The agent
-backend is authenticated and tool-limited; conversations are stored and sent
-to the configured provider. See [AGENT.md](AGENT.md) for its data flow,
-grounding checks, and operational limits.
+### Agent chat UI
+
+The chat client sends authenticated POST requests through the same-origin
+`/api` rewrite and parses SSE from a `ReadableStream`; `fetch` is used because
+the request includes a message body and supports the existing bearer-token
+refresh flow and `AbortController`. The active conversation UUID is kept in
+the `c` URL search parameter, not browser storage. The UI waits for the
+backend's verification to finish before displaying answer tokens. Conversation
+titles, tool summaries, and assistant text are untrusted and render only as
+plain React text; the client does not parse HTML or Markdown.
+
+Planned, not implemented: Telegram notifications, alert delivery, watchlists,
+and additional public SEO and learning pages. The agent backend is
+authenticated and tool-limited; conversations are stored and sent to the
+configured provider. See [AGENT.md](AGENT.md) for its data flow, grounding
+checks, and operational limits.
 
 ## Auth
 
@@ -205,8 +217,9 @@ before streaming any text. One revision is attempted after a failed check;
 otherwise a structured projection of retrieved data is returned with a
 failure status. Conversation messages and tool results are persisted, while
 usage rows contain provider/model and token/latency metadata only. Messages
-are sent to the configured provider; the user-facing chat UI is not available
-yet. See [AGENT.md](AGENT.md) for detailed behavior and the offline evaluator.
+are sent to the configured provider. The bilingual UI discloses this storage
+and provider flow before the composer; no live-model evaluation has been run.
+See [AGENT.md](AGENT.md) for detailed behavior and the offline evaluator.
 
 ## Data layer
 

@@ -2,7 +2,7 @@
 
 Bilingual foundation for an on-chain intelligence app for long-term crypto investors.
 
-## Status: Dashboard, chains screener, chain detail, Methodology, and Legal implemented; additional analysis features are in progress
+## Status: Dashboard, chains screener, chain detail, bilingual chat, Methodology, and Legal implemented; additional features are in progress
 
 **Disclaimer:** ChainCompass is for informational purposes only, is not financial advice, and does not provide buy or sell recommendations.
 
@@ -60,9 +60,10 @@ See [Windows setup](docs/SETUP.md) to prepare the development environment.
   no predictive claims. See [docs/RESEARCH.md](docs/RESEARCH.md).
 - Authenticated agent backend API with allow-listed public-data tools,
   response grounding checks, bilingual guardrails, and an offline evaluation
-  harness. The chat interface is not available yet; see [docs/AGENT.md](docs/AGENT.md).
-- Not implemented yet: AI chat, watchlists, user-facing alert delivery, an
-  admin interface, and Telegram notifications. Planned routes are identified as
+  harness, plus a bilingual chat interface with conversation management and
+  authenticated SSE streaming. See [docs/AGENT.md](docs/AGENT.md).
+- Not implemented yet: watchlists, user-facing alert delivery, an admin
+  interface, and Telegram notifications. Planned routes are identified as
   unavailable rather than shown as loading indefinitely.
 - Explicitly confirmed purge for the discontinued legacy Coin Metrics BNB
   series; BTC USD fees are derived from Blockchain.info fee amounts and Binance
@@ -74,15 +75,15 @@ See [Windows setup](docs/SETUP.md) to prepare the development environment.
   SOL, and BNB, limited by the measured sources in
   [docs/DATA_AUDIT.md](docs/DATA_AUDIT.md).
 - Capital-flow analysis beyond the implemented score components.
-- Chat UI, watchlists, user-facing alerts, an admin interface, and Telegram.
-- Evaluation with a live language-model provider.
+- Watchlists, user-facing alerts, an admin interface, and Telegram.
+- Evaluation with a live language-model provider; it has not been run yet.
 - Additional public SEO and learning pages (deferred to Prompt 15).
 - Admin audit logs and additional management controls.
 
-**Not verified:** Real SMTP delivery and a live Google OAuth login have not
-been exercised. The OAuth callback and password/email flows have automated
-tests, but Google provider behavior and real email delivery still need live
-verification.
+**Not verified:** Real SMTP delivery, a live Google OAuth login, and a live
+language-model evaluation have not been exercised. The OAuth callback and
+password/email flows have automated tests, but real provider behavior and
+email delivery still need live verification.
 
 ## Architecture
 
@@ -173,7 +174,7 @@ See the [Windows setup guide](docs/SETUP.md) for the full sequence and verificat
 | Phase | Scope | Status |
 |---|---|---|
 | Foundation | Repository, bilingual frontend foundation, landing page, backend health scaffold, database connectivity, and CI configuration | Done |
-| Phase 1 | Authentication and core chain analysis, watchlists, alerts, and chat agent | Dashboard, chains screener, and chain detail implemented; watchlists, alerts, and chat remain planned |
+| Phase 1 | Authentication and core chain analysis, watchlists, alerts, and chat agent | Dashboard, chains screener, chain detail, and chat implemented; watchlists and alerts remain planned |
 | Phase 2 | Level-2 protocol coverage, dedicated capital flows and risk center, comparison, plans/waitlist, and learning resources | Planned |
 
 ## Documentation
