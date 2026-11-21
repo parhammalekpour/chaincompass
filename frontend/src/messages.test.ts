@@ -33,6 +33,17 @@ describe("message catalogs", () => {
     ).toEqual([]);
   });
 
+  it("defines accessible labels and text alternatives for chain detail charts", () => {
+    expect(en.chainDetail.scoreChartAccessibleLabel).toBeTruthy();
+    expect(en.chainDetail.scoreChartTextAlternative).toBeTruthy();
+    expect(en.chainDetail.priceChartAccessibleLabel).toBeTruthy();
+    expect(en.chainDetail.priceChartTextAlternative).toBeTruthy();
+    expect(fa.chainDetail.scoreChartAccessibleLabel).toBeTruthy();
+    expect(fa.chainDetail.scoreChartTextAlternative).toBeTruthy();
+    expect(fa.chainDetail.priceChartAccessibleLabel).toBeTruthy();
+    expect(fa.chainDetail.priceChartTextAlternative).toBeTruthy();
+  });
+
   it("avoids prohibited financial wording in both locales", () => {
     const englishText = JSON.stringify(en);
     const persianText = JSON.stringify(fa);
