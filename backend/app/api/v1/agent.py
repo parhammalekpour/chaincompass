@@ -19,10 +19,12 @@ from app.agent.guardrails import (
     validate_message_length,
 )
 from app.agent.orchestrator import (
+    AgentCompleted,
     AgentNotConfiguredError,
     AgentOrchestrator,
     AgentRun,
-    ToolInvocation,
+    ToolCallStarted,
+    ToolResultReady,
 )
 from app.agent.providers.base import LLMProvider, ProviderError
 from app.agent.providers.factory import create_configured_provider
@@ -126,19 +128,18 @@ def _sse(event: str, data: Mapping[str, object]) -> str:
     return f"event: {event}\ndata: {payload}\n\n"
 
 
-def _tool_call_data(invocation: ToolInvocation) -> dict[str, object]:
-    return {"name": invocation.name, "args": invocation.arguments}
+def _tool_call_data(
+    name: str,
+    arguments: Mapping[str, object],
+) -> dict[str, object]:
+    return {"name": name, "args": arguments}
 
 
-def _tool_result_data(invocation: ToolInvocation) -> dict[str, object]:
+def _tool_result_data(name: str, ok: bool) -> dict[str, object]:
     return {
-        "name": invocation.name,
-        "ok": invocation.result.get("ok") is True,
-        "summary": (
-            "data_returned"
-            if invocation.result.get("ok") is True
-            else "data_unavailable"
-        ),
+        "name": name,
+        "ok": ok,
+        "summary": "data_returned" if ok else "data_unavailable",
     }
 
 
@@ -422,15 +423,23 @@ async def post_message(
             },
         )
         try:
-            result = await orchestrator.run(
+            result: AgentRun | None = None
+            async for event in orchestrator.run_events(
                 text=body.content,
                 history=history,
                 session=session,
                 provider=provider,
-            )
-            for invocation in result.tool_invocations:
-                yield _sse("tool_call", _tool_call_data(invocation))
-                yield _sse("tool_result", _tool_result_data(invocation))
+            ):
+                if isinstance(event, ToolCallStarted):
+                    yield _sse(
+                        "tool_call", _tool_call_data(event.name, event.arguments)
+                    )
+                elif isinstance(event, ToolResultReady):
+                    yield _sse("tool_result", _tool_result_data(event.name, event.ok))
+                elif isinstance(event, AgentCompleted):
+                    result = event.result
+            if result is None:
+                raise RuntimeError("The agent orchestration ended without a result")
             await _persist_run(
                 session=session,
                 conversation=conversation,

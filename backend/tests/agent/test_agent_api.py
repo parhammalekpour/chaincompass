@@ -6,6 +6,7 @@ from uuid import UUID
 import pytest
 from sqlalchemy import select
 
+from app.agent import orchestrator as orchestrator_module
 from app.agent.providers.base import ProviderError, ProviderResponse, ToolCall
 from app.agent.providers.fake import FakeProvider
 from app.api.v1 import agent as agent_api
@@ -342,6 +343,93 @@ async def test_agent_sse_order_persists_messages_and_usage_without_body_in_logs(
 
 
 @pytest.mark.asyncio
+async def test_agent_streams_tool_events_before_provider_retry_and_verified_tokens(
+    agent_context,
+    monkeypatch,
+) -> None:
+    second_call_started = asyncio.Event()
+    release_second_call = asyncio.Event()
+
+    class GatedFakeProvider(FakeProvider):
+        async def chat(self, messages, tools, *, timeout):
+            if len(self.requests) == 1:
+                second_call_started.set()
+                await release_second_call.wait()
+            return await super().chat(messages, tools, timeout=timeout)
+
+    async def execute_tool(name: str, arguments: object, session: object):
+        assert name == "get_chain_snapshot"
+        assert arguments == '{"slug":"btc"}'
+        return {"ok": True, "data": {"score": "42"}}
+
+    monkeypatch.setattr(orchestrator_module, "execute_tool", execute_tool)
+    provider = GatedFakeProvider(
+        [
+            ProviderResponse(
+                content=None,
+                tool_calls=(
+                    ToolCall("call-1", "get_chain_snapshot", '{"slug":"btc"}'),
+                ),
+            ),
+            ProviderResponse(content="The score is 99."),
+            ProviderResponse(content="The score is 42."),
+        ]
+    )
+    async with agent_context.session_factory() as session:
+        conversation = ChatConversation(user_id=agent_context.user_id)
+        session.add(conversation)
+        await session.commit()
+        await session.refresh(conversation)
+        user = await session.get(User, agent_context.user_id)
+        assert user is not None
+        response = await post_message(
+            conversation.id,
+            MessageCreate(content="Summarize BTC score."),
+            user,
+            session,
+            provider,
+        )
+        iterator = response.body_iterator
+
+        def event_name(chunk: object) -> str:
+            value = chunk.decode() if isinstance(chunk, bytes) else str(chunk)
+            return value.splitlines()[0].removeprefix("event: ")
+
+        assert event_name(await iterator.__anext__()) == "meta"  # type: ignore[attr-defined]
+        tool_call = await asyncio.wait_for(
+            iterator.__anext__(),  # type: ignore[attr-defined]
+            timeout=1,
+        )
+        assert event_name(tool_call) == "tool_call"
+        assert '"name":"get_chain_snapshot"' in str(tool_call)
+
+        tool_result = await asyncio.wait_for(
+            iterator.__anext__(),  # type: ignore[attr-defined]
+            timeout=1,
+        )
+        assert event_name(tool_result) == "tool_result"
+
+        next_event = asyncio.create_task(iterator.__anext__())  # type: ignore[attr-defined]
+        await asyncio.wait_for(second_call_started.wait(), timeout=1)
+        assert not next_event.done()
+        release_second_call.set()
+
+        event_names: list[str] = []
+        while True:
+            chunk = await asyncio.wait_for(next_event, timeout=1)
+            event_names.append(event_name(chunk))
+            if event_names[-1] == "done":
+                break
+            next_event = asyncio.create_task(
+                iterator.__anext__()  # type: ignore[attr-defined]
+            )
+
+    assert event_names[0] == "token"
+    assert event_names[-2:] == ["final", "done"]
+    assert len(provider.requests) == 3
+
+
+@pytest.mark.asyncio
 async def test_provider_timeout_is_an_error_sse_event(agent_context) -> None:
     class TimeoutProvider:
         async def chat(self, messages, tools, *, timeout):
@@ -367,16 +455,30 @@ async def test_provider_timeout_is_an_error_sse_event(agent_context) -> None:
 @pytest.mark.asyncio
 async def test_disconnect_cancels_provider_and_records_no_message_body(
     agent_context,
+    monkeypatch,
 ) -> None:
     started = asyncio.Event()
+    calls = 0
 
     class BlockingProvider:
         async def chat(self, messages, tools, *, timeout):
             del messages, tools, timeout
+            nonlocal calls
+            calls += 1
+            if calls == 1:
+                return ProviderResponse(
+                    content=None,
+                    tool_calls=(ToolCall("call-1", "list_chains", {}),),
+                )
             started.set()
             await asyncio.Event().wait()
             return ProviderResponse(content="not reached")
 
+    async def execute_tool(name: str, arguments: object, session: object):
+        del name, arguments, session
+        return {"ok": True, "data": {"chains": []}}
+
+    monkeypatch.setattr(orchestrator_module, "execute_tool", execute_tool)
     agent_context.app.state.agent_provider = BlockingProvider()
     async with agent_context.session_factory() as session:
         conversation = ChatConversation(user_id=agent_context.user_id)
@@ -394,22 +496,27 @@ async def test_disconnect_cancels_provider_and_records_no_message_body(
         )
         iterator = response.body_iterator
         await iterator.__anext__()  # type: ignore[attr-defined]
+        assert "tool_call" in await iterator.__anext__()  # type: ignore[attr-defined]
+        assert "tool_result" in await iterator.__anext__()  # type: ignore[attr-defined]
         pending = asyncio.create_task(iterator.__anext__())  # type: ignore[attr-defined]
         await asyncio.wait_for(started.wait(), timeout=1)
         pending.cancel()
         with pytest.raises(asyncio.CancelledError):
             await pending
+        assert pending.cancelled()
 
         usage = await session.scalar(
             select(LLMUsage).where(LLMUsage.conversation_id == conversation.id)
         )
-        message = await session.scalar(
-            select(ChatMessage).where(
-                ChatMessage.conversation_id == conversation.id,
-                ChatMessage.role == "user",
+        messages = (
+            await session.scalars(
+                select(ChatMessage).where(
+                    ChatMessage.conversation_id == conversation.id
+                )
             )
-        )
+        ).all()
     assert usage is not None
     assert usage.status == "cancelled"
-    assert message is not None
-    assert message.content == "Summarize network health data."
+    assert [(message.role, message.content) for message in messages] == [
+        ("user", "Summarize network health data.")
+    ]

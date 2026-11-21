@@ -2,7 +2,7 @@ import asyncio
 import json
 import re
 import time
-from collections.abc import Mapping, Sequence
+from collections.abc import AsyncIterator, Mapping, Sequence
 from dataclasses import dataclass
 from decimal import Decimal
 from typing import Any
@@ -148,6 +148,26 @@ class AgentRun:
     latency_ms: int
 
 
+@dataclass(frozen=True)
+class ToolCallStarted:
+    name: str
+    arguments: dict[str, object]
+
+
+@dataclass(frozen=True)
+class ToolResultReady:
+    name: str
+    ok: bool
+
+
+@dataclass(frozen=True)
+class AgentCompleted:
+    result: AgentRun
+
+
+AgentEvent = ToolCallStarted | ToolResultReady | AgentCompleted
+
+
 class AgentNotConfiguredError(Exception):
     pass
 
@@ -161,6 +181,24 @@ class AgentOrchestrator:
         session: AsyncSession,
         provider: LLMProvider | None,
     ) -> AgentRun:
+        async for event in self.run_events(
+            text=text,
+            history=history,
+            session=session,
+            provider=provider,
+        ):
+            if isinstance(event, AgentCompleted):
+                return event.result
+        raise RuntimeError("The agent orchestration ended without a result")
+
+    async def run_events(
+        self,
+        *,
+        text: str,
+        history: Sequence[Mapping[str, object]],
+        session: AsyncSession,
+        provider: LLMProvider | None,
+    ) -> AsyncIterator[AgentEvent]:
         validate_message_length(text)
         language = detect_language(text)
         started = time.perf_counter()
@@ -170,17 +208,20 @@ class AgentOrchestrator:
             check = check_output(answer, [])
             if not check.passed:
                 raise RuntimeError("The deterministic refusal failed output checks")
-            return AgentRun(
-                text=answer,
-                grounding_status="refused",
-                refusal=True,
-                language=language,
-                tool_names=(),
-                tool_invocations=(),
-                prompt_tokens=None,
-                completion_tokens=None,
-                latency_ms=_elapsed_ms(started),
+            yield AgentCompleted(
+                AgentRun(
+                    text=answer,
+                    grounding_status="refused",
+                    refusal=True,
+                    language=language,
+                    tool_names=(),
+                    tool_invocations=(),
+                    prompt_tokens=None,
+                    completion_tokens=None,
+                    latency_ms=_elapsed_ms(started),
+                )
             )
+            return
         if provider is None:
             raise AgentNotConfiguredError("llm_not_configured")
 
@@ -220,6 +261,7 @@ class AgentOrchestrator:
                     for call, safe_name, safe_arguments, execution_arguments in calls:
                         if len(invocations) >= MAX_TOOL_CALLS_PER_TURN:
                             break
+                        yield ToolCallStarted(safe_name, safe_arguments)
                         result = await execute_tool(
                             safe_name,
                             execution_arguments,
@@ -240,6 +282,10 @@ class AgentOrchestrator:
                                 "content": _delimit_tool_result(result),
                             }
                         )
+                        yield ToolResultReady(
+                            safe_name,
+                            result.get("ok") is True,
+                        )
                     if len(invocations) >= MAX_TOOL_CALLS_PER_TURN:
                         break
         except TimeoutError:
@@ -248,15 +294,18 @@ class AgentOrchestrator:
         if draft:
             output_check = check_output(draft, tool_results)
             if output_check.passed:
-                return _run_result(
-                    draft,
-                    "ok",
-                    language,
-                    invocations,
-                    prompt_tokens,
-                    completion_tokens,
-                    started,
+                yield AgentCompleted(
+                    _run_result(
+                        draft,
+                        "ok",
+                        language,
+                        invocations,
+                        prompt_tokens,
+                        completion_tokens,
+                        started,
+                    )
                 )
+                return
             retry = await self._retry_once(
                 provider,
                 messages,
@@ -269,15 +318,18 @@ class AgentOrchestrator:
                 retry_text, prompt_tokens, completion_tokens = retry
                 retry_check = check_output(retry_text, tool_results)
                 if retry_check.passed:
-                    return _run_result(
-                        retry_text,
-                        "retried",
-                        language,
-                        invocations,
-                        prompt_tokens,
-                        completion_tokens,
-                        started,
+                    yield AgentCompleted(
+                        _run_result(
+                            retry_text,
+                            "retried",
+                            language,
+                            invocations,
+                            prompt_tokens,
+                            completion_tokens,
+                            started,
+                        )
                     )
+                    return
 
         fallback = _safe_fallback(invocations, language)
         if not check_output(fallback, tool_results).passed:
@@ -286,14 +338,16 @@ class AgentOrchestrator:
                 if language == "fa"
                 else "No verified tool data is available."
             )
-        return _run_result(
-            fallback,
-            "failed",
-            language,
-            invocations,
-            prompt_tokens,
-            completion_tokens,
-            started,
+        yield AgentCompleted(
+            _run_result(
+                fallback,
+                "failed",
+                language,
+                invocations,
+                prompt_tokens,
+                completion_tokens,
+                started,
+            )
         )
 
     async def _retry_once(
