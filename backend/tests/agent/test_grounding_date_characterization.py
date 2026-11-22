@@ -1,3 +1,5 @@
+"""Post-12A5 characterization of current behavior, not desired behavior."""
+
 import pytest
 
 from app.agent.guardrails import check_output
@@ -18,22 +20,22 @@ TOOL_RESULTS = [
         ),
         pytest.param(
             "As of November 19, ETH scores 34.70.",
-            ("19",),
+            (),
             id="case-2",
         ),
         pytest.param(
             "As of 19 November 2026, ETH scores 34.70.",
-            ("19", "2026"),
+            (),
             id="case-3",
         ),
         pytest.param(
             "As of Nov 19, 2026, ETH scores 34.70.",
-            ("19", "2026"),
+            (),
             id="case-4",
         ),
         pytest.param(
             "از 19 نوامبر، امتیاز ETH برابر با 34.70 است.",
-            ("19",),
+            (),
             id="case-5",
         ),
         pytest.param(
@@ -57,7 +59,6 @@ def test_grounding_date_characterization(
     text: str,
     rejected_tokens: tuple[str, ...],
 ) -> None:
-    # characterization of current behaviour, not desired behaviour
     result = check_output(text, TOOL_RESULTS)
 
     assert tuple(number.value for number in result.ungrounded_numbers) == (
