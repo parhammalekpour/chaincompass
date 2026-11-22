@@ -52,17 +52,17 @@ The crypto and institutional feeds below were checked for `/robots.txt` and
 the candidate RSS URL. `The Block` and the institutional feeds have different
 dates and update cadence; intervals are a spread of the newest ten items.
 
-| Source | Feed URL candidate / check method | robots.txt HTTP | Feed HTTP | Type | Items | Newest age | Update spread | Fields | Summary | Reachability | Reuse / ToS | Data label |
+| Source | Homepage | Tested feed URL candidate / discovery | robots.txt HTTP | Feed HTTP | Type | Items | Newest age | Update spread | Fields | Summary | Reachability | Reuse / ToS | Data label |
 |---|---|---|---:|---|---:|---:|---|---|---|---|---|---|
-| CoinDesk | Memory candidate `/arc/outboundfeeds/rss/` | 200 | 200 | application/xml | 25 | 3.95 h | ~0.29–20.17 h | title, summary, link, date | short | reachable | UNVERIFIED | AVAILABLE |
-| Cointelegraph | Memory candidate `/rss` | 200 | 200 | XML UTF-8 | 30 | 3.46 h | ~1.0–19.66 h | title, summary, link, date | long | reachable | UNVERIFIED | AVAILABLE |
-| Decrypt | Memory candidate `/feed` | 200 | 200 | application/xml | 37 | 3.94 h | ~0.50–20 h | title, summary, link, date | short | reachable | UNVERIFIED | AVAILABLE |
-| Bitcoin Magazine | Memory candidate `/.rss/full` | 200 | 200 | text/html | 0 | — | — | none | none | reachable, not RSS | UNVERIFIED | NOT AVAILABLE FREE |
-| The Block | Memory candidate `/rss.xml` | 200 | 200 | text/xml UTF-8 | 20 | 20.67 h | ~0.08–10.90 h | title, summary, link, date | short | reachable | UNVERIFIED | AVAILABLE |
-| Federal Reserve | Memory candidate `/feeds/press_all.xml` | 404 | 200 | text/xml | 20 | 44.71 h | ~0.75–117.75 h | title, summary, link, date | short | reachable | UNVERIFIED | AVAILABLE |
-| SEC | Memory candidate `/rss/news/press.xml` | 200 | 200 | application/rss+xml UTF-8 | 25 | 47.91 h | ~3.58–146.54 h | title, summary, link, date | long | reachable | UNVERIFIED | AVAILABLE |
-| ECB | Memory candidate `/rss/press.html` | no response | error | — | 0 | — | — | — | — | no usable response | UNVERIFIED | UNVERIFIED |
-| BIS | Memory candidate `/doclist/press_releases.rss` | 200 | 404 HTML | text/html | 0 | — | — | none | none | reachable, feed missing | UNVERIFIED | NOT AVAILABLE FREE |
+| CoinDesk | `https://www.coindesk.com` | Memory candidate `https://www.coindesk.com/arc/outboundfeeds/rss/` | 200 | 200 | application/xml | 25 | 3.95 h | ~0.29–20.17 h | title, summary, link, date | short | reachable | UNVERIFIED | AVAILABLE |
+| Cointelegraph | `https://cointelegraph.com` | Memory candidate `https://cointelegraph.com/rss` | 200 | 200 | XML UTF-8 | 30 | 3.46 h | ~1.0–19.66 h | title, summary, link, date | long | reachable | UNVERIFIED | AVAILABLE |
+| Decrypt | `https://decrypt.co` | Memory candidate `https://decrypt.co/feed` | 200 | 200 | application/xml | 37 | 3.94 h | ~0.50–20 h | title, summary, link, date | short | reachable | UNVERIFIED | AVAILABLE |
+| Bitcoin Magazine | `https://bitcoinmagazine.com` | Memory candidate `https://bitcoinmagazine.com/.rss/full` | 200 | 200 | text/html | 0 | — | — | none | none | reachable, not RSS | UNVERIFIED | NOT AVAILABLE FREE |
+| The Block | `https://www.theblock.co` | Memory candidate `https://www.theblock.co/rss.xml` | 200 | 200 | text/xml UTF-8 | 20 | 20.67 h | ~0.08–10.90 h | title, summary, link, date | short | reachable | UNVERIFIED | AVAILABLE |
+| Federal Reserve | `https://www.federalreserve.gov` | Memory candidate `https://www.federalreserve.gov/feeds/press_all.xml` | 404 | 200 | text/xml | 20 | 44.71 h | ~0.75–117.75 h | title, summary, link, date | short | reachable | UNVERIFIED | AVAILABLE |
+| SEC | `https://www.sec.gov` | Memory candidate `https://www.sec.gov/rss/news/press.xml` | 200 | 200 | application/rss+xml UTF-8 | 25 | 47.91 h | ~3.58–146.54 h | title, summary, link, date | long | reachable | UNVERIFIED | AVAILABLE |
+| ECB | `https://www.ecb.europa.eu` | Memory candidate `https://www.ecb.europa.eu/rss/press.html` | no response | error | — | 0 | — | — | — | — | no usable response | UNVERIFIED | UNVERIFIED |
+| BIS | `https://www.bis.org` | Memory candidate `https://www.bis.org/doclist/press_releases.rss` | 200 | 404 HTML | text/html | 0 | — | — | none | none | reachable, feed missing | UNVERIFIED | NOT AVAILABLE FREE |
 
 The homepages and candidate feeds were used as memory candidates; the
 Bitcoin Magazine candidate returned HTML, the BIS candidate returned HTML/404,
@@ -71,6 +71,9 @@ complete lack of syndication. Candidate ToS/reuse pages were not confirmed,
 so reuse, republication, and AI-processing terms remain UNVERIFIED. The
 robots HTTP result is not a path-specific permission result. No Persian public
 crypto/news feed was confirmed.
+The feed parser checked title, summary/description, link, and date fields, but
+did not inspect content-extension elements; full-content-field presence is
+UNVERIFIED for every feed.
 
 ### News audit label count
 
@@ -79,11 +82,11 @@ status for every candidate remains UNVERIFIED.
 
 ## Part B — Source-attributed probabilities
 
-| Source | Documented / key-less check | Redisplay or ToS | Rate-decision market observed | Volume/liquidity fields | Country restrictions | Label |
-|---|---|---|---|---|---|---|
-| Polymarket Gamma API | Candidate endpoint returned HTTP 406; docs not verified | UNVERIFIED | no usable market payload returned | none returned | terms/geo restrictions not established | UNVERIFIED |
-| Kalshi public market API | HTTP 200 JSON; candidate endpoint | UNVERIFIED | no Fed/FOMC/rate match in the sampled 100 open markets | match-specific fields not returned; schema not reviewed for this audit | not established by response | UNVERIFIED |
-| CME FedWatch | HTTP 200 HTML tool page; no API endpoint checked | UNVERIFIED | web page reachable, no market data extracted | no API volume/liquidity fields verified | UNVERIFIED | UNVERIFIED |
+| Source | Tested endpoint/page | Documented / key-less check | Redisplay or ToS | Rate-decision market observed | Volume/liquidity fields | Country restrictions | Label |
+|---|---|---|---|---|---|---|---|
+| Polymarket Gamma API | `https://gamma-api.polymarket.com/events?active=true&closed=false&limit=100&order=volume&ascending=false` | Candidate endpoint returned HTTP 406; docs not verified | UNVERIFIED | no usable market payload returned | none returned | terms/geo restrictions not established | UNVERIFIED |
+| Kalshi public market API | `https://api.elections.kalshi.com/trade-api/v2/markets?limit=100&status=open` | HTTP 200 JSON; candidate endpoint | UNVERIFIED | no Fed/FOMC/rate match in the sampled 100 open markets | match-specific fields not returned; schema not reviewed for this audit | not established by response | UNVERIFIED |
+| CME FedWatch | `https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html` | HTTP 200 HTML tool page; no API endpoint checked | UNVERIFIED | web page reachable, no market data extracted | no API volume/liquidity fields verified | UNVERIFIED | UNVERIFIED |
 | Central-bank expectation surveys | not queried | UNVERIFIED | no source endpoint verified | — | — | UNVERIFIED |
 
 The Polymarket 406 did not yield a market payload. Kalshi returned an open-market
@@ -104,16 +107,16 @@ separate: BTC/ETH active addresses and transaction counts were measured in
 Community API probes, while SOL and BNB Chain holders/flows were unavailable or
 discontinued in that prior audit.
 
-| Source / check | HTTP | Freshness / history | Candidate behavior fields | Result | Label |
+| Source / tested endpoint | HTTP | Freshness / history | Candidate behavior fields | Result | Label |
 |---|---:|---|---|---|---|
-| Coin Metrics `btc` catalog | 404 | UNVERIFIED | none established | incorrect candidate route; catalog not audited | UNVERIFIED |
-| Coin Metrics `eth` catalog | 404 | UNVERIFIED | none established | incorrect candidate route; catalog not audited | UNVERIFIED |
-| Coin Metrics `sol` catalog | 404 | UNVERIFIED | none established | incorrect candidate route; catalog not audited | UNVERIFIED |
-| Coin Metrics `bnb_bsc` catalog | 404 | UNVERIFIED | none established | incorrect candidate route; catalog not audited | UNVERIFIED |
-| DefiLlama CEX endpoint | 200 | payload received | only top-level keys recorded; detailed fields not inspected | behavior indicator not established | UNVERIFIED |
-| Blockchair BTC stats | 200 | payload received | only top-level keys recorded; detailed fields not inspected | behavior indicator not established | UNVERIFIED |
-| Blockchain.info BTC transaction chart | 200 | chart payload received; values not summarized | transaction chart endpoint; freshness/history not verified | behavior indicator not established in this audit | UNVERIFIED |
-| mempool.space BTC hashrate | 200 | payload received; values not summarized | hashrate endpoint; freshness/history not verified | behavior indicator not established in this audit | UNVERIFIED |
+| Coin Metrics `btc` catalog — `https://community-api.coinmetrics.io/v4/catalog-all/assets/btc/metrics` | 404 | UNVERIFIED | none established | incorrect candidate route; catalog not audited | UNVERIFIED |
+| Coin Metrics `eth` catalog — `https://community-api.coinmetrics.io/v4/catalog-all/assets/eth/metrics` | 404 | UNVERIFIED | none established | incorrect candidate route; catalog not audited | UNVERIFIED |
+| Coin Metrics `sol` catalog — `https://community-api.coinmetrics.io/v4/catalog-all/assets/sol/metrics` | 404 | UNVERIFIED | none established | incorrect candidate route; catalog not audited | UNVERIFIED |
+| Coin Metrics `bnb_bsc` catalog — `https://community-api.coinmetrics.io/v4/catalog-all/assets/bnb_bsc/metrics` | 404 | UNVERIFIED | none established | incorrect candidate route; catalog not audited | UNVERIFIED |
+| DefiLlama CEX endpoint — `https://api.llama.fi/cexs` | 200 | payload received | only top-level keys recorded; detailed fields not inspected | behavior indicator not established | UNVERIFIED |
+| Blockchair BTC stats — `https://api.blockchair.com/bitcoin/stats` | 200 | payload received | only top-level keys recorded; detailed fields not inspected | behavior indicator not established | UNVERIFIED |
+| Blockchain.info BTC transaction chart — `https://api.blockchain.info/charts/n-transactions?timespan=30days&format=json` | 200 | chart payload received; values not summarized | transaction chart endpoint; freshness/history not verified | behavior indicator not established in this audit | UNVERIFIED |
+| mempool.space BTC hashrate — `https://mempool.space/api/v1/mining/hashrate/1w` | 200 | payload received; values not summarized | hashrate endpoint; freshness/history not verified | behavior indicator not established in this audit | UNVERIFIED |
 
 Per-chain result:
 
