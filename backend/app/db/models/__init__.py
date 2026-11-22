@@ -1,6 +1,7 @@
 """Import model classes here so Alembic can discover their metadata."""
 
 from app.db.models.agent import ChatConversation, ChatMessage, LLMUsage
+from app.db.models.alerts import AlertEvent, AlertRule, WatchlistItem
 from app.db.models.auth import EmailToken, OAuthAccount, RefreshToken, User
 from app.db.models.health import HealthScore, MarketRegime, RiskFlag
 from app.db.models.ingestion import (
@@ -21,6 +22,8 @@ __all__ = [
     "ComputedFeature",
     "DataSource",
     "EmailToken",
+    "AlertEvent",
+    "AlertRule",
     "HealthScore",
     "IngestionRun",
     "LLMUsage",
@@ -33,4 +36,5 @@ __all__ = [
     "RefreshToken",
     "SeriesCoverage",
     "User",
+    "WatchlistItem",
 ]
