@@ -3,7 +3,16 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
-import { Bot, MessageSquarePlus, Send, Square, Trash2 } from "lucide-react";
+import {
+  Bot,
+  Check,
+  CircleX,
+  LoaderCircle,
+  MessageSquarePlus,
+  Send,
+  Square,
+  Trash2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -39,7 +48,7 @@ export function isConversationId(value: string | null): value is string {
 type ToolActivity = {
   id: string;
   name: string;
-  status: "pending" | "complete";
+  status: "pending" | "complete" | "failed";
   summary: string | null;
 };
 
@@ -294,7 +303,7 @@ export function ChatPage() {
                 updated = true;
                 return {
                   ...activity,
-                  status: "complete",
+                  status: event.data.ok ? "complete" : "failed",
                   summary: event.data.summary,
                 };
               }),
@@ -724,14 +733,6 @@ export function ChatPage() {
                         : "chatPage.assistant",
                     )}
                   </p>
-                  {message.content && (
-                    <p
-                      dir="auto"
-                      className="whitespace-pre-wrap break-words leading-6"
-                    >
-                      {message.content}
-                    </p>
-                  )}
                   {message.activities.length > 0 && (
                     <div className="flex flex-wrap gap-2">
                       {message.activities.map((activity) => (
@@ -739,12 +740,29 @@ export function ChatPage() {
                           key={activity.id}
                           className="inline-flex max-w-full items-center gap-1 rounded-full border border-border bg-surface px-2.5 py-1 text-xs"
                         >
+                          {activity.status === "pending" ? (
+                            <LoaderCircle
+                              aria-hidden="true"
+                              className="size-3.5 animate-spin"
+                            />
+                          ) : activity.status === "complete" ? (
+                            <Check aria-hidden="true" className="size-3.5" />
+                          ) : (
+                            <CircleX aria-hidden="true" className="size-3.5" />
+                          )}
                           <span>
-                            {t("chatPage.toolLookup", {
+                            {t(
+                              activity.status === "pending"
+                                ? "chatPage.toolLookup"
+                                : activity.status === "complete"
+                                  ? "chatPage.toolDone"
+                                  : "chatPage.toolFailed",
+                              {
                               tool: isKnownTool(activity.name)
                                 ? t(`chatPage.tools.${activity.name}`)
                                 : t("chatPage.toolUnknown"),
-                            })}
+                              },
+                            )}
                           </span>
                           {activity.summary && (
                             <span dir="auto" className="text-muted">
@@ -754,6 +772,14 @@ export function ChatPage() {
                         </span>
                       ))}
                     </div>
+                  )}
+                  {message.content && (
+                    <p
+                      dir="auto"
+                      className="whitespace-pre-wrap break-words leading-6"
+                    >
+                      {message.content}
+                    </p>
                   )}
                   {message.groundingStatus === "retried" && (
                     <p className="rounded-lg border border-border bg-surface p-2 text-sm text-muted">

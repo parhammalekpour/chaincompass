@@ -1,4 +1,5 @@
 import {
+  act,
   cleanup,
   fireEvent,
   render,
@@ -165,7 +166,7 @@ describe("ChatPage", () => {
     fireEvent.keyDown(composer, { key: "Enter" });
 
     expect(await screen.findByText("Show the snapshot")).toBeVisible();
-    expect(await screen.findByText(/Looking up: chain snapshot/)).toBeVisible();
+    expect(await screen.findByText("Retrieved: chain snapshot")).toBeVisible();
     expect(
       await screen.findByText(
         '<img onerror="alert(1)"><a href="javascript:alert(1)">answer</a>',
@@ -173,6 +174,109 @@ describe("ChatPage", () => {
     ).toBeVisible();
     expect(screen.queryByRole("img")).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "answer" })).not.toBeInTheDocument();
+  });
+
+  it("shows live tool chips before the answer and preserves fallback newlines", async () => {
+    let releaseToolResult: (() => void) | undefined;
+    let releaseAnswer: (() => void) | undefined;
+    const toolResultGate = new Promise<void>((resolve) => {
+      releaseToolResult = resolve;
+    });
+    const answerGate = new Promise<void>((resolve) => {
+      releaseAnswer = resolve;
+    });
+    mocks.sendMessage.mockImplementation(
+      async function* () {
+        yield event("tool_call", {
+          name: "get_chain_snapshot",
+          args: { slug: "btc" },
+        });
+        await toolResultGate;
+        yield event("tool_result", {
+          name: "get_chain_snapshot",
+          ok: true,
+          summary: "data_returned",
+        });
+        await answerGate;
+        yield event("token", { text: "First line\nSecond line" });
+        yield event("final", {
+          grounding_status: "ok",
+          refusal: false,
+          tool_names: ["get_chain_snapshot"],
+        });
+        yield event("done", {});
+      },
+    );
+    const { container } = renderChat();
+    const composer = screen.getByRole("textbox", { name: "Your message" });
+    await screen.findByText("Test conversation");
+    fireEvent.change(composer, { target: { value: "Show the snapshot" } });
+    fireEvent.keyDown(composer, { key: "Enter" });
+
+    const runningChip = await screen.findByText("Looking up: chain snapshot");
+    const assistant = screen.getByText("Assistant").closest("article");
+    expect(assistant).not.toBeNull();
+    expect(runningChip).toBeVisible();
+    expect(assistant?.querySelector("svg.animate-spin")).toBeInTheDocument();
+    expect(screen.queryByText("First line\nSecond line")).not.toBeInTheDocument();
+    expect(assistant?.children[1]).toContainElement(runningChip);
+
+    await act(async () => {
+      releaseToolResult?.();
+    });
+    const completedChip = await screen.findByText("Retrieved: chain snapshot");
+    expect(completedChip).toBeVisible();
+    expect(screen.queryByText("First line\nSecond line")).not.toBeInTheDocument();
+
+    await act(async () => {
+      releaseAnswer?.();
+    });
+    await waitFor(() =>
+      expect(
+        assistant?.querySelector("p.whitespace-pre-wrap")?.textContent,
+      ).toBe("First line\nSecond line"),
+    );
+    const answer = assistant?.querySelector("p.whitespace-pre-wrap");
+    expect(answer).not.toBeNull();
+    expect(answer).toHaveClass("whitespace-pre-wrap");
+    expect(assistant?.children[1]).toContainElement(completedChip);
+    expect(assistant?.children[2]).toBe(answer);
+    expect(
+      await screen.findByText("Response complete.", {
+        selector: '[aria-live="polite"]',
+      }),
+    ).toBeVisible();
+    expect(container.querySelectorAll('[aria-live="polite"]')).toHaveLength(1);
+  });
+
+  it("marks an unsuccessful tool result as unavailable", async () => {
+    mocks.sendMessage.mockImplementation(
+      stream([
+        event("tool_call", {
+          name: "get_chain_snapshot",
+          args: { slug: "btc" },
+        }),
+        event("tool_result", {
+          name: "get_chain_snapshot",
+          ok: false,
+          summary: "data_unavailable",
+        }),
+        event("final", {
+          grounding_status: "failed",
+          refusal: false,
+          tool_names: ["get_chain_snapshot"],
+        }),
+        event("done", {}),
+      ]),
+    );
+    renderChat();
+    const composer = screen.getByRole("textbox", { name: "Your message" });
+    await screen.findByText("Test conversation");
+    fireEvent.change(composer, { target: { value: "Show the snapshot" } });
+    fireEvent.keyDown(composer, { key: "Enter" });
+
+    expect(await screen.findByText("Unavailable: chain snapshot")).toBeVisible();
+    expect(screen.getByText(/only retrieved data is shown/)).toBeVisible();
   });
 
   it.each([

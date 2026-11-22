@@ -701,6 +701,8 @@
     "assistant": "Assistant",
     "you": "You",
     "toolLookup": "Looking up: {tool}",
+    "toolDone": "Retrieved: {tool}",
+    "toolFailed": "Unavailable: {tool}",
     "toolUnknown": "public data",
     "tools": {
       "list_chains": "supported chains",

@@ -701,6 +701,8 @@
     "assistant": "دستیار",
     "you": "شما",
     "toolLookup": "بررسی: {tool}",
+    "toolDone": "دریافت شد: {tool}",
+    "toolFailed": "دریافت نشد: {tool}",
     "toolUnknown": "دادهٔ عمومی",
     "tools": {
       "list_chains": "فهرست شبکه‌ها",
