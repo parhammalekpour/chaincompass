@@ -197,3 +197,6 @@ language quality. Results are model- and day-dependent.
 - Messages 3 and 7 used the fallback after two grounding failures each; their expected fundamental-report calls had valid arguments, and logged rejected tokens were absent from persisted tool-result values.
 - Message 7's logs counted 16 rejected numbers per attempt but retained only 10 tokens per line; unlogged tokens remain unclassified.
 - This is a tiny, non-deterministic, failure-selected diagnostic, not a model evaluation; Persian quality remains UNVERIFIED and nothing was tuned.
+- 2026-11-23: Offline analysis of 12A6 messages 3/7 matched 21 retained token occurrences to pairwise arithmetic (c) and 5 to no tested relation (f); 12 tokens remain UNVERIFIED.
+- Persisted rows were deleted; deterministic local report builders at each chain's latest stored date supplied the fields, but equality to the original `as_of` is UNVERIFIED.
+- This failure-selected sample is not an evaluation; no provider calls or tuning. Proposal only: instruct exact quoting of tool values, pending pre-set gates.
