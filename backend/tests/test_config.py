@@ -17,8 +17,20 @@ def test_non_development_requires_non_placeholder_jwt_secret(secret: str) -> Non
         )
 
 
-def test_development_auth_settings_have_safe_defaults() -> None:
+def test_development_auth_settings_have_safe_defaults(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    for env_name in (
+        "LLM_PROVIDER",
+        "LLM_BASE_URL",
+        "LLM_API_KEY",
+        "LLM_MODEL",
+        "LLM_DAILY_TOKEN_BUDGET",
+    ):
+        monkeypatch.delenv(env_name, raising=False)
+
     config = Settings(
+        _env_file=None,
         database_url="postgresql+asyncpg://test:test@localhost/test",
         app_env="development",
         jwt_secret="",
