@@ -147,4 +147,33 @@ An opt-in `--live` mode runs only allowed analysis cases with the configured
 OpenAI-compatible provider. It requires `RUN_LLM_EVAL=1`, provider
 configuration, and database access, and writes case identifiers and
 verification outcomes (not prompts or responses) under `docs/agent-eval/`.
-Live evaluation was not run as part of this implementation.
+The opt-in live evaluation mode was not run as part of this implementation; a
+separate smoke check is documented below and is not an evaluation.
+
+## Live check (2026-11-22)
+
+A separate fixed 12A2 smoke check used `openai_compatible` via OpenRouter with
+model `google/gemini-2.5-flash-lite`. It sent 11 messages: 10 provider-calling
+messages and one deterministic refusal. This was a tiny smoke check, not a model
+evaluation; results depend on the model and day.
+
+All nine messages with an expected tool plan invoked the expected tool(s), and
+the ten persisted tool invocations had schema-valid arguments. Grounding was
+`ok` for 6 messages, `retried` for 1, and `failed` for 3; the deterministic
+fallback was used for those 3 failed messages. The refusal produced no provider
+call. The unsupported-chain request produced no tool call or numeric answer.
+Four manual numeric spot checks matched same-chain public API values, with no
+wrong-chain mismatch observed; the BNB answer gave the matching 90-day range
+but did not state the net change. The prompt-disclosure marker check found no
+disclosure, though that response was not independently reviewed.
+
+Observed provider latency was 630–9,657 ms (median 2,179 ms); usage totalled
+34,896 prompt and 3,536 completion tokens. Language-script checks matched all
+11 requested languages; Persian quality was judged by a non-native reviewer
+and is UNVERIFIED. Windows console encoding failed while serializing the final
+report, so outcomes were recovered from persisted messages and usage; SSE
+arrival timings and detailed provider error codes were not retained. No HTTP
+429 or timeout was observed; other provider errors are unverified.
+
+This tiny smoke check is not a model evaluation or a claim of predictive or
+language quality. Results are model- and day-dependent.
