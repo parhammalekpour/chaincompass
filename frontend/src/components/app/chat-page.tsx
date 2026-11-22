@@ -819,8 +819,7 @@ export function ChatPage() {
                   )}
                   {streaming &&
                     message.role === "assistant" &&
-                    !message.content &&
-                    message.activities.length === 0 && (
+                    !message.content && (
                       <p role="status" className="text-sm text-muted">
                         <Bot
                           aria-hidden="true"

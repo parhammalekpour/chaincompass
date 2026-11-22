@@ -218,6 +218,7 @@ describe("ChatPage", () => {
     expect(assistant).not.toBeNull();
     expect(runningChip).toBeVisible();
     expect(assistant?.querySelector("svg.animate-spin")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("Checking data...");
     expect(screen.queryByText("First line\nSecond line")).not.toBeInTheDocument();
     expect(assistant?.children[1]).toContainElement(runningChip);
 
@@ -226,6 +227,7 @@ describe("ChatPage", () => {
     });
     const completedChip = await screen.findByText("Retrieved: chain snapshot");
     expect(completedChip).toBeVisible();
+    expect(screen.getByRole("status")).toHaveTextContent("Checking data...");
     expect(screen.queryByText("First line\nSecond line")).not.toBeInTheDocument();
 
     await act(async () => {
