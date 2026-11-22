@@ -1,8 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import fundamentalReportFixture from "@/test/fixtures/fundamental-report.json";
 import {
   ContractError,
   getChains,
   getChainDetail,
+  getFundamentalReport,
   getScoreHistory,
 } from "./client";
 import type { ChainSlug } from "./contracts";
@@ -79,6 +81,44 @@ describe("public API client", () => {
       code: "chain_not_found",
       status: 404,
     });
+  });
+
+  it("maps report 404 errors without exposing the server message", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonResponse(
+          {
+            error: {
+              code: "report_not_available",
+              message: "private detail",
+            },
+          },
+          404,
+        ),
+      ),
+    );
+
+    await expect(getFundamentalReport("eth")).rejects.toMatchObject({
+      name: "ApiError",
+      code: "report_not_available",
+      status: 404,
+    });
+  });
+
+  it("loads the typed report from the same-origin chain endpoint", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      jsonResponse(fundamentalReportFixture),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const report = await getFundamentalReport("eth");
+
+    expect(report.as_of_date).toBe("2026-11-20");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/chains/eth/report",
+      expect.any(Object),
+    );
   });
 
   it("maps a network failure to network_error", async () => {

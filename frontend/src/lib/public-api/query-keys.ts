@@ -13,5 +13,7 @@ export const publicQueryKeys = {
   series: (slug: ChainSlug, metric: string, source: string) =>
     [...publicRoot, "series", slug, metric, source] as const,
   scenarios: (slug: ChainSlug) => [...publicRoot, "scenarios", slug] as const,
+  fundamentalReport: (slug: ChainSlug) =>
+    [...publicRoot, "fundamental-report", slug] as const,
   methodology: [...publicRoot, "methodology"] as const,
 };

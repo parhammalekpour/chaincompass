@@ -1,0 +1,133 @@
+{
+  "chain": "eth",
+  "as_of_date": "2026-11-20",
+  "methodology_version": "v1",
+  "generated_from": "stored_data",
+  "health": {
+    "score": "55.25",
+    "confidence": "Medium",
+    "coverage": "0.6000",
+    "score_30d_ago": "53.75",
+    "score_90d_ago": "50.00",
+    "change_30d": "1.50",
+    "change_90d": "5.25"
+  },
+  "regime": {
+    "regime": "range",
+    "vol_state": "normal",
+    "since_date": "2026-11-19",
+    "days_in_regime": 2,
+    "history_gap": false
+  },
+  "flags": [
+    {
+      "code": "low_confidence",
+      "severity": "info"
+    }
+  ],
+  "indicators": [
+    {
+      "key": "active_addresses_chg90",
+      "group": "usage",
+      "value": "0.125000000000",
+      "percentile": "55.000000000000",
+      "status": "available"
+    },
+    {
+      "key": "tx_count_chg90",
+      "group": "usage",
+      "value": "0.050000000000",
+      "percentile": "60.000000000000",
+      "status": "available"
+    },
+    {
+      "key": "tvl_usd_chg90",
+      "group": "capital",
+      "value": "0.100000000000",
+      "percentile": "52.000000000000",
+      "status": "available"
+    },
+    {
+      "key": "stablecoin_supply_usd_chg90",
+      "group": "capital",
+      "value": "0.020000000000",
+      "percentile": "51.000000000000",
+      "status": "available"
+    },
+    {
+      "key": "dex_volume_usd_chg90",
+      "group": "capital",
+      "value": "0.075000000000",
+      "percentile": null,
+      "status": "not_available"
+    },
+    {
+      "key": "hashrate_chg90",
+      "group": "security",
+      "value": null,
+      "percentile": null,
+      "status": "not_applicable"
+    },
+    {
+      "key": "fees_usd_chg90",
+      "group": "security",
+      "value": null,
+      "percentile": null,
+      "status": "not_applicable"
+    },
+    {
+      "key": "drawdown_365d",
+      "group": "market",
+      "value": "-0.200000000000",
+      "percentile": "72.500000000000",
+      "status": "available"
+    },
+    {
+      "key": "realized_vol_90d",
+      "group": "market",
+      "value": "0.450000000000",
+      "percentile": "48.000000000000",
+      "status": "available"
+    },
+    {
+      "key": "volume_ratio_30_365",
+      "group": "market",
+      "value": "1.250000000000",
+      "percentile": "55.000000000000",
+      "status": "available"
+    },
+    {
+      "key": "price_vs_sma200",
+      "group": "market",
+      "value": "0.150000000000",
+      "percentile": "68.000000000000",
+      "status": "available"
+    }
+  ],
+  "data_gaps": [
+    {
+      "key": "dex_volume_usd_chg90",
+      "status": "not_available"
+    },
+    {
+      "key": "hashrate_chg90",
+      "status": "not_applicable"
+    },
+    {
+      "key": "fees_usd_chg90",
+      "status": "not_applicable"
+    },
+    {
+      "key": "holder_distribution",
+      "status": "not_available_free"
+    },
+    {
+      "key": "exchange_flows",
+      "status": "not_available_free"
+    },
+    {
+      "key": "news_evidence",
+      "status": "not_available_free"
+    }
+  ]
+}

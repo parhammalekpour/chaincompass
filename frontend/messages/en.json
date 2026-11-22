@@ -772,6 +772,7 @@
     "network": "Could not connect to public data. Check your connection and retry.",
     "contractMismatch": "Unexpected data format. Please try again later.",
     "chainNotFound": "This chain is not available.",
+    "reportNotAvailable": "A stored fundamental report is not available for this chain and date.",
     "validation": "The requested data range is invalid.",
     "noSnapshot": "No data exists for that date.",
     "futureDate": "Future dates are not available.",

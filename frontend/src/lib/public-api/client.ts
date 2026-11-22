@@ -2,6 +2,7 @@ import type { ZodType } from "zod";
 import {
   chainDetailResponseSchema,
   chainsResponseSchema,
+  fundamentalReportResponseSchema,
   methodologyResponseSchema,
   publicApiErrorSchema,
   regimesResponseSchema,
@@ -11,6 +12,7 @@ import {
   type ChainDetailResponse,
   type ChainSlug,
   type ChainsResponse,
+  type FundamentalReportResponse,
   type MethodologyResponse,
   type RegimesResponse,
   type ScoreHistoryResponse,
@@ -152,6 +154,15 @@ export function getScenarios(slug: ChainSlug): Promise<ScenariosResponse> {
   return fetchPublicData(
     `/api/v1/chains/${encodeURIComponent(slug)}/scenarios`,
     scenariosResponseSchema,
+  );
+}
+
+export function getFundamentalReport(
+  slug: ChainSlug,
+): Promise<FundamentalReportResponse> {
+  return fetchPublicData(
+    `/api/v1/chains/${encodeURIComponent(slug)}/report`,
+    fundamentalReportResponseSchema,
   );
 }
 

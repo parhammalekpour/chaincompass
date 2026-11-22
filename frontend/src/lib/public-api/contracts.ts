@@ -254,6 +254,79 @@ export const scenariosResponseSchema = z
   })
   .strict();
 
+export const reportIndicatorStatusSchema = z.enum([
+  "available",
+  "not_available",
+  "not_applicable",
+]);
+export const reportIndicatorGroupSchema = z.enum([
+  "market",
+  "capital",
+  "usage",
+  "security",
+]);
+export const reportDataGapStatusSchema = z.enum([
+  "not_available",
+  "not_applicable",
+  "not_available_free",
+]);
+
+export const fundamentalReportResponseSchema = z
+  .object({
+    chain: chainSlugSchema,
+    as_of_date: dateSchema,
+    methodology_version: z.string(),
+    generated_from: z.literal("stored_data"),
+    health: z
+      .object({
+        score: decimalStringSchema,
+        confidence: confidenceSchema,
+        coverage: decimalStringSchema,
+        score_30d_ago: decimalStringSchema.nullable(),
+        score_90d_ago: decimalStringSchema.nullable(),
+        change_30d: decimalStringSchema.nullable(),
+        change_90d: decimalStringSchema.nullable(),
+      })
+      .passthrough(),
+    regime: z
+      .object({
+        regime: z.string().nullable(),
+        vol_state: z.string().nullable(),
+        since_date: dateSchema.nullable(),
+        days_in_regime: z.number().int().nonnegative().nullable(),
+        history_gap: z.boolean(),
+      })
+      .passthrough(),
+    flags: z.array(
+      z
+        .object({
+          code: z.string(),
+          severity: z.enum(["info", "medium", "high"]),
+        })
+        .passthrough(),
+    ),
+    indicators: z.array(
+      z
+        .object({
+          key: z.string(),
+          group: reportIndicatorGroupSchema,
+          value: decimalStringSchema.nullable(),
+          percentile: decimalStringSchema.nullable(),
+          status: reportIndicatorStatusSchema,
+        })
+        .passthrough(),
+    ),
+    data_gaps: z.array(
+      z
+        .object({
+          key: z.string(),
+          status: reportDataGapStatusSchema,
+        })
+        .passthrough(),
+    ),
+  })
+  .passthrough();
+
 const methodologyComponentSchema = z
   .object({
     feature: z.string(),
@@ -312,4 +385,10 @@ export type RegimesResponse = z.infer<typeof regimesResponseSchema>;
 export type SeriesResponse = z.infer<typeof seriesResponseSchema>;
 export type ScenariosResponse = z.infer<typeof scenariosResponseSchema>;
 export type ScenarioHorizon = z.infer<typeof scenarioHorizonSchema>;
+export type FundamentalReportResponse = z.infer<
+  typeof fundamentalReportResponseSchema
+>;
+export type ReportIndicatorStatus = z.infer<
+  typeof reportIndicatorStatusSchema
+>;
 export type MethodologyResponse = z.infer<typeof methodologyResponseSchema>;
