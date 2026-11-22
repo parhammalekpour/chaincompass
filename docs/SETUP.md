@@ -224,10 +224,32 @@ Create an account or sign in, then open
 The authenticated chat is available at `http://localhost:3000/en/app/chat`;
 the Persian route is `http://localhost:3000/fa/app/chat`. The page works
 without an AI provider and shows an explanatory configuration notice. To enable
-provider requests, configure the `LLM_PROVIDER`, `LLM_BASE_URL`, and
-`LLM_MODEL` settings in the ignored local `.env`, using the corresponding
-entries in `.env.example`. The default configuration leaves the assistant
-unconfigured. Conversation text and tool results are stored in the account and
+provider requests with OpenRouter:
+
+1. Sign in at [OpenRouter](https://openrouter.ai/). Open
+   [API Keys](https://openrouter.ai/keys) and create a key.
+2. Choose a model that supports function/tool calling from the
+   [tool-capable model list](https://openrouter.ai/models?supported_parameters=tools)
+   and copy its model ID.
+3. Edit the ignored root `.env` file (beside `.env.example`; if it does not
+   exist, copy `.env.example` to `.env`) and set:
+
+   ```dotenv
+   LLM_PROVIDER=openai_compatible
+   LLM_API_KEY=
+   LLM_BASE_URL=https://openrouter.ai/api/v1
+   LLM_MODEL=
+   ```
+
+4. Paste your key only after `LLM_API_KEY=` and the selected model ID after
+   `LLM_MODEL=`. Keep both out of source control; `.env.example` intentionally
+   leaves the key and model ID blank.
+5. Restart the backend. The existing provider sends the key as a Bearer token
+   to OpenRouter's OpenAI-compatible `/chat/completions` endpoint.
+
+The default provider remains `none`, so the assistant stays unconfigured until
+you make these local changes. OpenRouter's API key page may require a VPN from
+your network. Conversation text and tool results are stored in the account and
 sent to the configured provider; review the privacy details before enabling it.
 
 ## Ingestion worker

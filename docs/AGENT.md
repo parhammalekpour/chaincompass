@@ -15,6 +15,9 @@ Configure an OpenAI-compatible endpoint only when it is available and
 appropriate for your deployment. Provider requests have a 60-second ceiling
 and retry once after a timeout or server error. Credentials, request bodies,
 and message content are not written to application logs.
+For OpenRouter, use `https://openrouter.ai/api/v1` as the base URL and select a
+model that supports tool calling; the provider appends `/chat/completions` and
+sends the key as a Bearer token. Local setup steps are in [SETUP.md](SETUP.md).
 
 ## Allow-listed tools
 
