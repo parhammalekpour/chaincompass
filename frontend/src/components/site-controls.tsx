@@ -27,7 +27,7 @@ export function SiteControls() {
         {isDark ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}
         <span>{isDark ? t("themeToLight") : t("themeToDark")}</span>
       </Button>
-      <Button asChild variant="ghost" size="sm">
+      <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
         <Link href={pathname} locale={nextLocale}>
           {locale === "en" ? t("switchToPersian") : t("switchToEnglish")}
         </Link>
