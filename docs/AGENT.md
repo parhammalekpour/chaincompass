@@ -113,8 +113,12 @@ stream `text/event-stream` events in this order: `meta`, zero or more
 tool executions across provider iterations; a single execution emits one pair.
 Provider or storage failures emit `error` and `done`. Tool-result events
 contain a short status summary, not the complete result payload. The response
-uses `Cache-Control: no-cache` and `X-Accel-Buffering: no` to discourage
-intermediary buffering.
+uses `Cache-Control: no-cache, no-transform` and `X-Accel-Buffering: no`.
+`no-transform` prevents Next's rewrite path from compressing the event stream;
+keep Next compression enabled for ordinary responses and ensure deployment
+reverse proxies honor this directive. The installed Next proxy timeout is
+65 seconds, above the agent's 60-second orchestration budget, so a valid stream
+is not cut off early.
 
 ## Offline evaluation
 
