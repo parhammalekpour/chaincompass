@@ -91,3 +91,13 @@ Set-Location backend
 
 Each computation is recorded in `ingestion_runs` as job `features`. The feature
 engine is a library and opt-in CLI only; it is not scheduled in the worker.
+
+## Watchlist and alerts
+
+Implemented in the backend: authenticated per-user chain watchlists, validated
+regime-change, risk-flag, and score-cross rules, and in-app event storage. The
+daily evaluator runs after the score job, uses exact stored consecutive UTC
+dates, and writes newly triggered conditions with an idempotent rule/date key.
+Events contain stable type codes and structured payloads; Decimal values are
+serialized as strings. This feature reports historical conditions and is not
+financial advice. Frontend display and email/Telegram delivery are planned.

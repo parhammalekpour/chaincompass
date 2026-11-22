@@ -42,7 +42,8 @@ PostgreSQL. A separate APScheduler worker collects and normalizes data from
 swappable external providers before storing them. Account emails are handled by
 the auth email sender. The backend includes a replaceable language-model
 provider interface and an authenticated agent API with a bilingual chat UI.
-The Telegram notifier and alert-delivery implementation are not available yet.
+The authenticated watchlist, alert-rule, event-storage, and daily-evaluation
+backend is implemented. Its frontend and email/Telegram delivery are planned.
 
 ## Implemented vs Planned
 
@@ -64,9 +65,9 @@ public methodology endpoint and uses a documented static fallback; the shared
 data-attribution footer provides full public-site and compact app variants.
 The backend agent API, provider interface, allow-listed read-only tools,
 grounding checks, bilingual guardrails, and offline evaluation harness are
-implemented, along with a bilingual user-facing chat UI. Watchlists and alert
-delivery remain planned. Additional public SEO and learning pages are deferred
-to Prompt 15.
+implemented, along with a bilingual user-facing chat UI. Watchlist and alert
+backend functionality is implemented; its frontend and delivery remain
+planned. Additional public SEO and learning pages are deferred to Prompt 15.
 
 Public data routes are GET-only and unauthenticated. They expose chain
 snapshots, score history, reported regimes, risk flags, methodology, and
@@ -129,8 +130,8 @@ backend's verification to finish before displaying answer tokens. Conversation
 titles, tool summaries, and assistant text are untrusted and render only as
 plain React text; the client does not parse HTML or Markdown.
 
-Planned, not implemented: Telegram notifications, alert delivery, watchlists,
-and additional public SEO and learning pages. The agent backend is
+Planned, not implemented: alert frontend and external delivery, and additional
+public SEO and learning pages. The agent backend is
 authenticated and tool-limited; conversations are stored and sent to the
 configured provider. See [AGENT.md](AGENT.md) for its data flow, grounding
 checks, and operational limits.
@@ -224,10 +225,11 @@ See [AGENT.md](AGENT.md) for detailed behavior and the offline evaluator.
 ## Data layer
 
 The database contains `chains`, `data_sources`, `metric_definitions`,
-`observations`, `series_coverage`, `ingestion_runs`, `rpc_probes`, and
-`features`, `health_scores`, `regimes`, and `risk_flags`, in addition to the
-auth and agent tables. Agent storage includes conversations, messages, and
-metadata-only language-model usage. Observations use a composite
+`observations`, `series_coverage`, `ingestion_runs`, `rpc_probes`, `features`,
+`health_scores`, `regimes`, `risk_flags`, `watchlist_items`, `alert_rules`, and
+`alert_events`, in addition to the auth and agent tables. Agent storage
+includes conversations, messages, and metadata-only language-model usage.
+Observations use a composite
 primary key of chain, metric, source, and UTC observation date. Values are
 PostgreSQL `NUMERIC(38,12)` values, never floating point.
 
@@ -302,11 +304,18 @@ Redis. The implemented APScheduler jobs are:
 - `prune_rpc_probes`: daily at 00:45 UTC.
 - `scores`: daily at 01:00 UTC; updates features, then computes scores,
   regimes, and flags.
+- `alerts_eval`: daily at 01:15 UTC; evaluates active alert rules after scores.
 
 Jobs use one instance per
 scheduler, coalesce missed invocations, allow a one-hour misfire grace period,
 and include up to 20 seconds of jitter. `update_all` calls the existing
 `app.ingest update --all` path rather than duplicating provider logic.
+
+`alerts_eval` checks the latest complete stored score/regime date and at most
+three earlier calendar dates. It requires the exact previous date for each
+comparison and does not fill gaps. Events use a unique rule/date key so job
+retries do not add duplicates; one invalid rule does not stop evaluation of
+other rules.
 
 Before running a job, the worker takes a non-blocking PostgreSQL advisory lock
 keyed by job name. A duplicate process logs `skipped: already running` and

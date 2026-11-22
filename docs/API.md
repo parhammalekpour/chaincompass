@@ -224,3 +224,86 @@ data: {}
 Conversation messages are stored and sent to the configured provider for
 processing. See [AGENT.md](AGENT.md) for tool schemas, verification rules,
 operational limits, and evaluation instructions.
+
+## Authenticated watchlist and alerts API
+
+All routes below require a Bearer access token and scope records to the current
+user. Watchlist slugs are `btc`, `eth`, `sol`, and `bnb`. Write requests share
+an in-process per-user limit of 60 per minute; `429` responses include
+`Retry-After`.
+
+| Method | Path | Purpose |
+|---|---|---|
+| GET | `/api/v1/watchlist` | List saved chain slugs and `added_at` |
+| PUT | `/api/v1/watchlist/{slug}` | Add a chain; repeat requests are idempotent |
+| DELETE | `/api/v1/watchlist/{slug}` | Remove a chain; repeat requests are idempotent |
+| GET | `/api/v1/alerts/rules` | List the current user's rules |
+| POST | `/api/v1/alerts/rules` | Create a rule |
+| PATCH | `/api/v1/alerts/rules/{id}` | Change only `is_active` |
+| DELETE | `/api/v1/alerts/rules/{id}` | Delete an owned rule |
+| GET | `/api/v1/alerts/events` | List events, newest first; accepts `unread_only` and `limit` (1–50) |
+| GET | `/api/v1/alerts/events/unread-count` | Count unread events |
+| POST | `/api/v1/alerts/events/read` | Mark selected or all owned events as read |
+
+Rule types and parameters:
+
+```json
+{"chain":"btc","type":"regime_change","params":{}}
+{"chain":"eth","type":"risk_flag","params":{"flag":"deep_drawdown"}}
+{"chain":"sol","type":"risk_flag","params":{"flag":null}}
+{"chain":"bnb","type":"score_cross","params":{"direction":"below","threshold":40}}
+```
+
+`risk_flag` accepts an existing flag code or `null` for any newly present
+non-info flag. `score_cross` accepts `below` or `above` and an integer
+threshold from 1 through 99. Extra parameter keys are rejected. Each user may
+have at most 20 rules; duplicate chain/type/canonical-parameter combinations
+return `409 alert_rule_duplicate`.
+
+Evaluation uses exact stored consecutive UTC dates only. A condition must be
+absent on the previous date and present on the current date; rule creation
+dates are excluded. Missing score or regime rows suppress evaluation. Events
+are structured codes and payloads, not generated prose; no external delivery
+is provided. Decimal values in event payloads are strings.
+
+Mark selected events read:
+
+```json
+{"ids":["00000000-0000-0000-0000-000000000001"]}
+```
+
+Mark all events read:
+
+```json
+{"all":true}
+```
+
+An event response includes its rule reference, chain slug, type code, payload,
+UTC date, creation time, and read time:
+
+```json
+{
+  "id": "00000000-0000-0000-0000-000000000001",
+  "rule_id": "00000000-0000-0000-0000-000000000002",
+  "chain": "btc",
+  "type": "score_cross",
+  "payload": {
+    "direction": "below",
+    "threshold": 40,
+    "previous_score": "42.00",
+    "score": "39.00",
+    "confidence": "Medium",
+    "coverage": "0.7000",
+    "coverage_changed": false
+  },
+  "as_of_date": "2026-11-20",
+  "created_at": "2026-11-21T01:15:00Z",
+  "read_at": null
+}
+```
+
+IDs that do not belong to the authenticated user are ignored. Unknown or
+non-owned rule IDs return `404 alert_rule_not_found`; unknown chain slugs
+return `404 chain_not_found`. Parameter errors return
+`422 alert_rule_params_invalid`; the rule cap returns
+`409 alert_rule_limit_reached`.
