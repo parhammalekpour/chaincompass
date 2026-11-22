@@ -42,6 +42,7 @@ review and interview preparation.
 | 2026-11-23 | Prompt 12A-ci: pytest entry-point parity | Added the project root to pytest's configured import path | CI invokes the `pytest.exe` console entrypoint; `python -m pytest` alone had hidden the import-path failure. The `tests.agent.conftest` import broke CI from 13A until this fix; both invocations now pass 248 tests with 1 skip. Keep verifying the CI entrypoint with `CI=true` and no `LLM_*` process variables. |
 
 | 2026-11-23 | Prompt 12A-secrets-fix: Gitleaks API auth | Added step-scoped `GITHUB_TOKEN` to the Gitleaks action | The owner lookup hit the unauthenticated API rate limit, triggering license enforcement.<br>`GITHUB_TOKEN` is the documented usage (UNVERIFIED until CI runs green).<br>No scan result existed before this change; earlier secrets green/red conclusions were not findings results. |
+| 2026-11-23 | Prompt 12A5: prose-date grounding | Added EN/FA Gregorian prose-date recognition scoped to matching current-turn tool-result dates | Implementation followed pre-set date-match criteria.<br>Solar Hijri dates remain unsupported; message-2 causation from 12A2/12A3 remains UNVERIFIED.<br>This does not improve semantic correctness; grounding remains numeric-only. |
 
 ## Known limitations
 

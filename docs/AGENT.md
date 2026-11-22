@@ -46,9 +46,10 @@ report values.
 The final response is checked before any text is sent to the client:
 
 1. Persian and Arabic-Indic digits are normalized to Latin digits.
-2. ISO dates, list ordinals, `/100`, day-window labels `30`, `90`, `365`, and
-   `1095`, and percentile labels `p10`, `p50`, and `p90` are structural and are
-   ignored.
+2. ISO dates and matching English/Persian Gregorian prose dates, list ordinals,
+   `/100`, day-window labels `30`, `90`, `365`, and `1095`, and percentile
+   labels `p10`, `p50`, and `p90` are structural and ignored. A prose date is
+   ignored only when it matches an ISO date in this turn's tool results.
 3. Every other numeric token must match a number in this turn's tool results,
    either exactly or after half-up rounding to the number of decimal places
    shown in the answer. A percentage may also match a source value multiplied
@@ -74,6 +75,11 @@ a promise that every generated statement is correct.
 Any number present in this turn's tool results can validate an answer number,
 including numbers from `get_fundamental_report`; values are not tied to a
 specific report field or chain by the grounding check.
+
+- 2026-11-23: The 12A4 offline characterization showed month-name prose dates (for example, `November 19, 2026`) were rejected even when the date existed in tool results; the matching criteria were fixed before implementation.
+- Prose dates are now accepted only when their stated components match an ISO date in this turn's tool results: full year/month/day, month/day across any result year, or year/month. Unmatched and impossible dates remain numeric checks.
+- Solar Hijri dates remain unsupported; whether this caused the 12A2/12A3 message-2 fallback is UNVERIFIED.
+- This does not improve semantic correctness: grounding remains numeric-only.
 
 Input classification handles restricted financial-direction requests with a
 deterministic bilingual response before provider access. The system prompt
