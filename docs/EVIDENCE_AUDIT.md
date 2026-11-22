@@ -11,14 +11,24 @@ No product code, migration, dependency, test, or configuration was changed.
 Requests used `ChainCompass-audit/1.0 (research project)`, at most one GET per
 distinct URL, and a sleep of at least one second between requests to the same
 host. The audit read [DATA_AUDIT.md](DATA_AUDIT.md) first and did not repeat
-its existing data-source findings. It fetched RSS/XML feeds and documented
-read-only API endpoints only. It did not fetch article pages or store full
-article text in the repository.
+its existing data-source findings. It did not fetch article pages or store
+full article text in the repository.
 
-Third-party request count: 29 bounded HTTP requests (18 feed/robots checks,
-3 probability-source checks, 12 on-chain checks), plus 2 configured-provider
-calls for the smoke test. Provider calls are reported separately from
-third-party audit requests.
+**Verification limitation:** the feed script fetched robots.txt for the news
+hosts but did not actually evaluate `can_fetch` for the feed paths before
+requesting those feeds. The probability and on-chain scripts also did not
+fetch robots.txt for their hosts before requests. Therefore, this run did not
+meet the robots pre-check requirement, and no source can be called permitted
+for automated use based on this audit. RSS/API reachability below is only a
+record of the returned HTTP responses, not permission to automate access.
+The Coin Metrics requests used an incorrect catalog path
+(`/v4/catalog-all/assets/{asset}/metrics`); its 404 responses do not establish
+catalog availability or absence of metrics. Do not treat Part C as a completed
+Coin Metrics catalog audit.
+
+Third-party request count: 33 total calls (29 bounded feed/API GET requests:
+18 news feed/robots checks, 3 probability-source checks, and 8 on-chain checks;
+plus 4 configured-provider calls for the smoke test).
 
 ## Labels
 
@@ -42,7 +52,7 @@ The crypto and institutional feeds below were checked for `/robots.txt` and
 the candidate RSS URL. `The Block` and the institutional feeds have different
 dates and update cadence; intervals are a spread of the newest ten items.
 
-| Source | Feed URL found / check method | robots | HTTP | Type | Items | Newest age | Update spread | Fields | Summary | Reachability | Reuse / ToS | Label |
+| Source | Feed URL candidate / check method | robots.txt HTTP | Feed HTTP | Type | Items | Newest age | Update spread | Fields | Summary | Reachability | Reuse / ToS | Data label |
 |---|---|---|---:|---|---:|---:|---|---|---|---|---|---|
 | CoinDesk | Memory candidate `/arc/outboundfeeds/rss/` | 200 | 200 | application/xml | 25 | 3.95 h | ~0.29–20.17 h | title, summary, link, date | short | reachable | UNVERIFIED | AVAILABLE |
 | Cointelegraph | Memory candidate `/rss` | 200 | 200 | XML UTF-8 | 30 | 3.46 h | ~1.0–19.66 h | title, summary, link, date | long | reachable | UNVERIFIED | AVAILABLE |
@@ -58,20 +68,22 @@ The homepages and candidate feeds were used as memory candidates; the
 Bitcoin Magazine candidate returned HTML, the BIS candidate returned HTML/404,
 and ECB produced no usable response. This is not evidence of a source's
 complete lack of syndication. Candidate ToS/reuse pages were not confirmed,
-so reuse, republication, and AI-processing terms remain UNVERIFIED. No Persian
-public crypto/news feed was confirmed.
+so reuse, republication, and AI-processing terms remain UNVERIFIED. The
+robots HTTP result is not a path-specific permission result. No Persian public
+crypto/news feed was confirmed.
 
 ### News audit label count
 
-AVAILABLE 5; NOT AVAILABLE FREE 2; UNVERIFIED 1; DISALLOWED 0.
+AVAILABLE 6; NOT AVAILABLE FREE 2; UNVERIFIED 1; DISALLOWED 0. Permission
+status for every candidate remains UNVERIFIED.
 
 ## Part B — Source-attributed probabilities
 
 | Source | Documented / key-less check | Redisplay or ToS | Rate-decision market observed | Volume/liquidity fields | Country restrictions | Label |
 |---|---|---|---|---|---|---|
-| Polymarket Gamma API | Public endpoint returned HTTP 406; documentation status UNVERIFIED | UNVERIFIED | no usable market payload returned | none returned | terms/geo restrictions not established | NOT AVAILABLE FREE |
-| Kalshi public market API | HTTP 200 JSON, no key on returned public endpoint | UNVERIFIED | no Fed/FOMC/rate match in 100 open markets returned | volume/open-interest fields can exist in returned schema | no country restriction stated in response | UNVERIFIED |
-| CME FedWatch | HTTP 200 HTML tool page; no free documented key-less API established | UNVERIFIED | web tool HTML was reachable | no API volume/liquidity fields verified | UNVERIFIED | NOT AVAILABLE FREE |
+| Polymarket Gamma API | Candidate endpoint returned HTTP 406; docs not verified | UNVERIFIED | no usable market payload returned | none returned | terms/geo restrictions not established | UNVERIFIED |
+| Kalshi public market API | HTTP 200 JSON; candidate endpoint | UNVERIFIED | no Fed/FOMC/rate match in the sampled 100 open markets | match-specific fields not returned; schema not reviewed for this audit | not established by response | UNVERIFIED |
+| CME FedWatch | HTTP 200 HTML tool page; no API endpoint checked | UNVERIFIED | web page reachable, no market data extracted | no API volume/liquidity fields verified | UNVERIFIED | UNVERIFIED |
 | Central-bank expectation surveys | not queried | UNVERIFIED | no source endpoint verified | — | — | UNVERIFIED |
 
 The Polymarket 406 did not yield a market payload. Kalshi returned an open-market
@@ -80,63 +92,67 @@ and the redisplay terms were not verified.
 
 ### Probability audit label count
 
-AVAILABLE 0; NOT AVAILABLE FREE 2; UNVERIFIED 2.
+AVAILABLE 0; NOT AVAILABLE FREE 0; UNVERIFIED 4.
 
 ## Part C — On-chain behavior data
 
-The Coin Metrics catalog URLs for `btc`, `eth`, `sol`, and `bnb_bsc` returned
-HTTP 404, so no actual metric IDs or sample data requests could be confirmed
-from those routes. Existing [DATA_AUDIT.md](DATA_AUDIT.md) evidence remains
+The attempted Coin Metrics catalog URLs for `btc`, `eth`, `sol`, and `bnb_bsc`
+used an incorrect route and returned HTTP 404. No actual metric IDs or sample
+data requests were confirmed; these responses are not evidence of metric
+absence. Existing [DATA_AUDIT.md](DATA_AUDIT.md) evidence remains
 separate: BTC/ETH active addresses and transaction counts were measured in
 Community API probes, while SOL and BNB Chain holders/flows were unavailable or
 discontinued in that prior audit.
 
 | Source / check | HTTP | Freshness / history | Candidate behavior fields | Result | Label |
 |---|---:|---|---|---|---|
-| Coin Metrics `btc` catalog | 404 | UNVERIFIED | no candidate metric list returned | catalog route did not resolve | UNVERIFIED |
-| Coin Metrics `eth` catalog | 404 | UNVERIFIED | no candidate metric list returned | catalog route did not resolve | UNVERIFIED |
-| Coin Metrics `sol` catalog | 404 | UNVERIFIED | no candidate metric list returned | catalog route did not resolve | UNVERIFIED |
-| Coin Metrics `bnb_bsc` catalog | 404 | UNVERIFIED | no candidate metric list returned | catalog route did not resolve | UNVERIFIED |
-| DefiLlama CEX endpoint | 200 | payload received | top-level CEX and CoinGecko-volume aggregates; detailed balance history not inspected | not established as a holder-distribution source | UNVERIFIED |
-| Blockchair BTC stats | 200 | payload received | context/data keys; balance-distribution or exchange-flow fields not established | general BTC stats only | UNVERIFIED |
-| Blockchain.info BTC transaction chart | 200 | 30-day chart requested | transaction-count time series | descriptive chain activity, not holder identity or exchange flow | UNVERIFIED |
-| mempool.space BTC hashrate | 200 | one-week hash-rate request | network difficulty/hash-rate fields | descriptive network security/activity, not holder movement | AVAILABLE — as hashrate only |
+| Coin Metrics `btc` catalog | 404 | UNVERIFIED | none established | incorrect candidate route; catalog not audited | UNVERIFIED |
+| Coin Metrics `eth` catalog | 404 | UNVERIFIED | none established | incorrect candidate route; catalog not audited | UNVERIFIED |
+| Coin Metrics `sol` catalog | 404 | UNVERIFIED | none established | incorrect candidate route; catalog not audited | UNVERIFIED |
+| Coin Metrics `bnb_bsc` catalog | 404 | UNVERIFIED | none established | incorrect candidate route; catalog not audited | UNVERIFIED |
+| DefiLlama CEX endpoint | 200 | payload received | only top-level keys recorded; detailed fields not inspected | behavior indicator not established | UNVERIFIED |
+| Blockchair BTC stats | 200 | payload received | only top-level keys recorded; detailed fields not inspected | behavior indicator not established | UNVERIFIED |
+| Blockchain.info BTC transaction chart | 200 | chart payload received; values not summarized | transaction chart endpoint; freshness/history not verified | behavior indicator not established in this audit | UNVERIFIED |
+| mempool.space BTC hashrate | 200 | payload received; values not summarized | hashrate endpoint; freshness/history not verified | behavior indicator not established in this audit | UNVERIFIED |
 
 Per-chain result:
 
 | Chain | Descriptive indicators | Evidence status |
 |---|---|---|
-| BTC | BTC hashrate, transaction-count chart, and existing Coin Metrics address/activity data | Hashrate and prior measured BTC address/activity evidence exist; 11C holder/exchange-flow catalog was UNVERIFIED |
-| ETH | Existing Data Audit address/activity evidence; no 11C holder-distribution or exchange-flow source confirmed | NOT AVAILABLE FREE for 11C holder/exchange-flow indicators |
-| SOL | No confirmed holder-distribution, exchange-inflow/outflow, or large-holder metric | NOT AVAILABLE FREE |
-| BNB Chain | No confirmed BNB Chain holder-distribution, exchange-inflow/outflow, or large-holder metric | NOT AVAILABLE FREE / legacy BNB data DISCONTINUED |
+| BTC | Prior audit has address/activity and network series; no 11C holder-distribution, large-holder, or exchange-flow metric was verified | UNVERIFIED |
+| ETH | Prior audit has address/activity data; no 11C holder-distribution, large-holder, or exchange-flow metric was verified | UNVERIFIED |
+| SOL | No 11C holder-distribution, exchange-inflow/outflow, or large-holder metric verified | UNVERIFIED |
+| BNB Chain | No 11C holder-distribution, exchange-inflow/outflow, or large-holder metric verified; prior legacy BNB series do not establish BNB Chain coverage | UNVERIFIED |
 
 ### On-chain audit label count
 
-AVAILABLE 1 (hashrate only); NOT AVAILABLE FREE 0; UNVERIFIED 7; DISCONTINUED 1.
+AVAILABLE 0; NOT AVAILABLE FREE 0; UNVERIFIED 8; DISCONTINUED 0.
+Existing `DATA_AUDIT.md` findings are prior evidence, not fresh 11C measurements.
 
 ## Part D — LLM extraction smoke
 
-This was a 12-item smoke test, not an evaluation. Two batches of six real feed
-items were sent. Strict JSON was requested but the existing app did not send a
+This was a 12-item smoke test, not an evaluation. The same two batches of six
+real feed items were sent twice, using the unchanged prompt, for four provider
+calls total. Strict JSON was requested but the existing app did not send a
 provider `response_format` or JSON structured-output mode.
 
 | Measure | Result |
 |---|---|
-| JSON validity | 2/2 batch responses valid JSON (100%) |
-| Enum validity | 12/12 records valid (100%) |
-| Invented attributed probabilities | 0 |
-| Latency | 9,857 ms and 865 ms |
+| JSON validity | 4/4 batch responses valid JSON (100%) |
+| Enum validity | 24/24 records valid (100%) |
+| Attributed probabilities | 0 non-null probability objects in the retained repeat responses; no attribution to verify there. First-run outputs were not retained, so manual review does not cover that run. |
+| Latency | First run: 9,857 ms and 865 ms; repeat: 2,447 ms and 1,103 ms |
 | Structured-output mode | NOT APP-ENABLED; prompt-only JSON |
 | Non-English/Persian | NOT TESTED; no Persian feed was found |
 
-The provider was configured as `openai_compatible`, host `openrouter.ai`,
+The smoke script reported the provider configured as `openai_compatible`, host `openrouter.ai`,
 model `google/gemini-2.5-flash-lite`, and key state `set`. No key value was
 printed or stored.
 
 ## Recommended shortlist for 11D
 
-At most six items, ranked only for feasibility:
+No source is approved for collection from this audit. The following six were
+reachable candidates for a later permission-and-terms review only:
 
 1. CoinDesk RSS — reachable, 3.95-hour newest item, short summaries.
 2. Cointelegraph RSS — reachable, 3.46-hour newest item, longer summaries.
@@ -145,23 +161,28 @@ At most six items, ranked only for feasibility:
 5. Federal Reserve press RSS — reachable, 44.71-hour newest item.
 6. SEC press RSS — reachable, 47.91-hour newest item.
 
-No probability or on-chain source is a clear 11D build recommendation in this
-run. Polymarket and CME were blocked or not API-established; Kalshi lacked a
-verified rate match and redisplay terms; Coin Metrics routes remained 404.
-Existing BTC hashrate and transaction series may be useful as documented
-descriptive chain indicators, subject to a separate terms/dependency review.
+No feed, probability, or on-chain source is cleared for an 11D build by this
+run because robots path permissions and reuse terms were not verified.
+Recommended shortlist for implementation: **none**. The six reachable feeds
+above are only candidates for a properly permission-checked follow-up. Kalshi
+lacked a verified rate match; the Coin Metrics catalog was not audited through
+a valid path. Existing DATA_AUDIT.md BTC history may be considered separately
+after an explicit terms review.
 
 ## NOT BUILDING (and why)
 
-- News extraction from Bitcoin Magazine and BIS: no usable RSS response was
-  observed.
+- Automated news-feed ingestion: robots path permissions and reuse terms were
+  not verified.
+- Bitcoin Magazine and BIS feed ingestion: no usable RSS response was
+  observed at the tested candidate URLs.
 - ECB feed ingestion: response could not be established.
-- Live price or macro probability extraction: no key-less, documented,
-  redisplay-cleared source produced a verified rate-decision market.
-- Kalshi probability display: open-market output lacked a verified
+- Live macro probability display: no source was confirmed with both a
+  verified rate market and redisplay terms.
+- Kalshi probability display: sampled open-market output lacked a verified
   rate-decision match and redistribution terms remain unconfirmed.
-- Holder-distribution and exchange-flow ingestion: no matching confirmed
-  free, key-less, current source was measured for the four chains.
+- Holder-distribution and exchange-flow ingestion: Coin Metrics catalog paths
+  were incorrect and no other endpoint was inspected deeply enough to confirm
+  a current metric.
 - Public Dune or Flipside ingestion: account-gated sources are excluded.
 - Full-article scraping or republication: the audit used feed metadata only,
   and reuse terms remain unverified.
@@ -171,6 +192,8 @@ descriptive chain indicators, subject to a separate terms/dependency review.
 
 This is a technical and terms-reuse feasibility report, not legal advice.
 robots.txt and terms pages can change; results are observations for this
-machine, date, and network path. No claim is made that unavailable or missing
-pages are absent from all regions or forever. No market number or model result
-is described as definitive.
+machine, date, and network path. This run did not correctly enforce its
+robots pre-check requirement; do not use it as clearance for automated
+collection. No claim is made that unavailable or missing pages are absent from
+all regions or forever. No market number or model result is described as
+definitive.
