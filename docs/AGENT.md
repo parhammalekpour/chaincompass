@@ -192,3 +192,8 @@ language quality. Results are model- and day-dependent.
 - 2026-11-23: Offline characterization recorded current verifier decisions for eight synthetic cases; ISO dates passed, while month-name prose dates were rejected when their numeric tokens were not independently grounded.
 - 12A3 records rejected token `19`, but not message 2's tool-result dates or model answer; whether it was a date component remains UNVERIFIED.
 - No provider calls or network access were made, and nothing was tuned.
+- 2026-11-23: Re-sent only 12A2 messages 2 (EN), 3 (EN), and 7 (FA), once each and in order; eight provider requests total, with no 429s.
+- Message 2 passed grounding with no fallback; both expected BTC/SOL snapshot calls had valid arguments.
+- Messages 3 and 7 used the fallback after two grounding failures each; their expected fundamental-report calls had valid arguments, and logged rejected tokens were absent from persisted tool-result values.
+- Message 7's logs counted 16 rejected numbers per attempt but retained only 10 tokens per line; unlogged tokens remain unclassified.
+- This is a tiny, non-deterministic, failure-selected diagnostic, not a model evaluation; Persian quality remains UNVERIFIED and nothing was tuned.
