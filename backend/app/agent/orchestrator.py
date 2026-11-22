@@ -1,5 +1,6 @@
 import asyncio
 import json
+import logging
 import time
 from collections.abc import AsyncIterator, Mapping, Sequence
 from dataclasses import dataclass
@@ -19,6 +20,8 @@ from app.agent.guardrails import (
 from app.agent.providers.base import LLMProvider, ProviderError, ProviderResponse
 from app.agent.tools import TOOL_DEFINITIONS, execute_tool
 from app.analytics.score_config import COMPONENTS, RISK_FLAGS
+
+logger = logging.getLogger(__name__)
 
 MAX_TOOL_ITERATIONS = 4
 MAX_TOOL_CALLS_PER_TURN = 4
@@ -220,6 +223,7 @@ class AgentOrchestrator:
                     )
                 )
                 return
+            _log_verification_failure(output_check, invocations, attempt_index=1)
             retry = await self._retry_once(
                 provider,
                 messages,
@@ -244,9 +248,25 @@ class AgentOrchestrator:
                         )
                     )
                     return
+                _log_verification_failure(
+                    retry_check,
+                    invocations,
+                    attempt_index=2,
+                )
+                fallback_attempt_index = 3
+            else:
+                fallback_attempt_index = 2
+        else:
+            fallback_attempt_index = 1
 
         fallback = _safe_fallback(invocations, language)
-        if not check_output(fallback, tool_results).passed:
+        fallback_check = check_output(fallback, tool_results)
+        if not fallback_check.passed:
+            _log_verification_failure(
+                fallback_check,
+                invocations,
+                attempt_index=fallback_attempt_index,
+            )
             fallback = (
                 "داده‌ی ابزارِ تأییدشده در دسترس نیست."
                 if language == "fa"
@@ -376,6 +396,34 @@ def _provider_tool_message(
             "tool_calls": provider_calls,
         },
         calls,
+    )
+
+
+def _log_verification_failure(
+    check: OutputCheck,
+    invocations: Sequence[ToolInvocation],
+    *,
+    attempt_index: int,
+) -> None:
+    reasons: list[str] = []
+    if check.banned_words:
+        reasons.append("banned_words")
+    if check.ungrounded_numbers:
+        reasons.append("ungrounded_numbers")
+    logger.info(
+        "%s",
+        json.dumps(
+            {
+                "attempt_index": attempt_index,
+                "reason_code": "_and_".join(reasons),
+                "tool_names": [invocation.name for invocation in invocations],
+                "rejected_number_count": len(check.ungrounded_numbers),
+                "rejected_number_tokens": [
+                    number.value for number in check.ungrounded_numbers[:10]
+                ],
+            },
+            separators=(",", ":"),
+        ),
     )
 
 

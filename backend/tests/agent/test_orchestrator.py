@@ -1,4 +1,6 @@
 import asyncio
+import json
+import logging
 from typing import cast
 
 import pytest
@@ -124,6 +126,65 @@ async def test_orchestrator_uses_verified_data_fallback_after_failed_retry(
     assert "55.25" in result.text
     assert "99" not in result.text
     assert "target" not in result.text.lower()
+
+
+@pytest.mark.asyncio
+async def test_verification_failures_log_only_reason_and_rejected_numbers(
+    monkeypatch,
+    caplog,
+) -> None:
+    question = "private-question-marker"
+    first_answer = "private-first-answer-marker 99"
+    retry_answer = "private-retry-answer-marker 88"
+    tool_text = "private-tool-result-marker"
+
+    async def execute(_: str, __: object, ___: object) -> dict[str, object]:
+        return {
+            "ok": True,
+            "data": {"score": "55.25", "note": tool_text},
+        }
+
+    monkeypatch.setattr(orchestrator_module, "execute_tool", execute)
+    provider = FakeProvider(
+        [
+            _tool_call(),
+            ProviderResponse(content=first_answer),
+            ProviderResponse(content=retry_answer),
+        ]
+    )
+    caplog.set_level(logging.INFO, logger=orchestrator_module.__name__)
+
+    result = await AgentOrchestrator().run(
+        text=question,
+        history=[],
+        session=_session(),
+        provider=provider,
+    )
+
+    assert result.grounding_status == "failed"
+    records = [
+        record.getMessage()
+        for record in caplog.records
+        if record.name == orchestrator_module.__name__
+    ]
+    assert [json.loads(message) for message in records] == [
+        {
+            "attempt_index": 1,
+            "reason_code": "ungrounded_numbers",
+            "tool_names": ["get_chain_snapshot"],
+            "rejected_number_count": 1,
+            "rejected_number_tokens": ["99"],
+        },
+        {
+            "attempt_index": 2,
+            "reason_code": "ungrounded_numbers",
+            "tool_names": ["get_chain_snapshot"],
+            "rejected_number_count": 1,
+            "rejected_number_tokens": ["88"],
+        },
+    ]
+    for private_text in (question, first_answer, retry_answer, tool_text):
+        assert private_text not in caplog.text
 
 
 @pytest.mark.asyncio
