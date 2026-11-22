@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 MAX_TOOL_ITERATIONS = 4
 MAX_TOOL_CALLS_PER_TURN = 4
 MAX_TOOL_ARGUMENT_LENGTH = 5000
+MAX_REJECTED_NUMBERS_LOGGED = 40
 TOTAL_BUDGET_SECONDS = 60.0
 _REPORT_FLAG_CODES = {spec.flag for spec in RISK_FLAGS}
 _REPORT_GAP_KEYS = {
@@ -419,7 +420,8 @@ def _log_verification_failure(
                 "tool_names": [invocation.name for invocation in invocations],
                 "rejected_number_count": len(check.ungrounded_numbers),
                 "rejected_number_tokens": [
-                    number.value for number in check.ungrounded_numbers[:10]
+                    number.value
+                    for number in check.ungrounded_numbers[:MAX_REJECTED_NUMBERS_LOGGED]
                 ],
             },
             separators=(",", ":"),

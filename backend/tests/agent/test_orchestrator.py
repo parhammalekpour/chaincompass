@@ -134,8 +134,12 @@ async def test_verification_failures_log_only_reason_and_rejected_numbers(
     caplog,
 ) -> None:
     question = "private-question-marker"
-    first_answer = "private-first-answer-marker 99"
-    retry_answer = "private-retry-answer-marker 88"
+    first_answer = "private-first-answer-marker " + " ".join(
+        str(number) for number in range(1000, 1016)
+    )
+    retry_answer = "private-retry-answer-marker " + " ".join(
+        str(number) for number in range(2000, 2050)
+    )
     tool_text = "private-tool-result-marker"
 
     async def execute(_: str, __: object, ___: object) -> dict[str, object]:
@@ -172,15 +176,15 @@ async def test_verification_failures_log_only_reason_and_rejected_numbers(
             "attempt_index": 1,
             "reason_code": "ungrounded_numbers",
             "tool_names": ["get_chain_snapshot"],
-            "rejected_number_count": 1,
-            "rejected_number_tokens": ["99"],
+            "rejected_number_count": 16,
+            "rejected_number_tokens": [str(number) for number in range(1000, 1016)],
         },
         {
             "attempt_index": 2,
             "reason_code": "ungrounded_numbers",
             "tool_names": ["get_chain_snapshot"],
-            "rejected_number_count": 1,
-            "rejected_number_tokens": ["88"],
+            "rejected_number_count": 50,
+            "rejected_number_tokens": [str(number) for number in range(2000, 2040)],
         },
     ]
     for private_text in (question, first_answer, retry_answer, tool_text):
