@@ -639,6 +639,7 @@
     "emptyScenarios": "آمار بازده تاریخی در دسترس نیست.",
     "notFoundTitle": "شبکه پیدا نشد",
     "notFoundDescription": "داده‌ای برای این شبکه در دسترس نیست.",
+    "reportLink": "گزارش بنیادی",
     "regimeLabel": "روند",
     "methodologyVersion": "نسخهٔ روش‌شناسی: {version}",
     "componentPercentile": "رتبهٔ صدکی",
@@ -738,6 +739,74 @@
       "کدام داده‌ها برای BNB Chain موجود نیستند؟"
     ]
   },
+  "fundamentalReport": {
+    "title": "گزارش بنیادی",
+    "forChain": "گزارش بنیادی {chainName}",
+    "asOf": "تاریخ داده",
+    "methodologyVersion": "نسخهٔ روش‌شناسی",
+    "generatedFromStoredData": "بر پایهٔ داده‌های ذخیره‌شده ساخته شده است",
+    "historicalNote": "این گزارش فقط داده‌های تاریخی و توصیفی را نشان می‌دهد.",
+    "backToChain": "بازگشت به {chainName}",
+    "explainWithAssistant": "توضیح با دستیار",
+    "health": "سلامت شبکه",
+    "score": "امتیاز سلامت",
+    "confidence": "اطمینان",
+    "coverage": "پوشش",
+    "changesTitle": "تغییرهای امتیاز ذخیره‌شده",
+    "change30d": "تغییر 30 روزه",
+    "change90d": "تغییر 90 روزه",
+    "score30d": "امتیاز ذخیره‌شده دقیقاً در 30 روز پیش",
+    "score90d": "امتیاز ذخیره‌شده دقیقاً در 90 روز پیش",
+    "insufficientHistory": "سابقهٔ ذخیره‌شدهٔ کافی موجود نیست.",
+    "regime": "رژیم",
+    "volatility": "وضعیت نوسان",
+    "sinceDate": "از تاریخ",
+    "daysInRegime": "روز در رژیم",
+    "notAvailable": "در دسترس نیست",
+    "historyGap": "در سابقهٔ رژیم فاصله وجود دارد. تاریخ آغاز و مدت، فقط به آخرین بازهٔ پیوسته اشاره دارند.",
+    "flags": "پرچم‌های فعال",
+    "noActiveFlags": "پرچم فعالی ثبت نشده است.",
+    "severity": "شدت",
+    "severityLabels": {
+      "info": "اطلاعاتی",
+      "medium": "متوسط",
+      "high": "بالا"
+    },
+    "indicators": "شاخص‌ها",
+    "indicatorTableCaption": "مؤلفه‌های ذخیره‌شدهٔ امتیاز سلامت",
+    "indicator": "مؤلفه",
+    "value": "مقدار ذخیره‌شده",
+    "percentile": "رتبهٔ صدکی",
+    "status": "وضعیت",
+    "groupNames": {
+      "market": "بازار",
+      "capital": "سرمایه",
+      "usage": "کاربرد",
+      "security": "امنیت"
+    },
+    "statusLabels": {
+      "available": "در دسترس",
+      "not_available": "در دسترس نیست",
+      "not_applicable": "نامرتبط"
+    },
+    "rawValueNote": "مقدار شاخص‌ها به‌صورت رشتهٔ ده‌دهی ذخیره‌شده و بدون تغییر واحد نمایش داده می‌شود.",
+    "noIndicators": "مؤلفه‌ای برای نمایش موجود نیست.",
+    "dataGaps": "آنچه نمی‌دانیم",
+    "dataGapTableCaption": "گسست‌های داده و دسترس‌پذیری",
+    "dataItem": "داده",
+    "availability": "دسترس‌پذیری",
+    "gapStatuses": {
+      "not_available": "در دسترس نیست",
+      "not_applicable": "نامرتبط",
+      "not_available_free": "از منابع رایگان و تأییدشده در دسترس نیست"
+    },
+    "gapNames": {
+      "holder_distribution": "توزیع دارندگان",
+      "exchange_flows": "جریان‌های صرافی",
+      "news_evidence": "شواهد خبری"
+    },
+    "noDataGaps": "گسست دادهٔ دیگری ثبت نشده است."
+  },
   "watchlist": {
     "title": "فهرست پیگیری",
     "description": "شبکه‌هایی را که دنبال می‌کنید همیشه در دسترس داشته باشید."
@@ -836,6 +905,10 @@
     "chainDetail": {
       "title": "{chainName} - ChainCompass",
       "description": "شاخص‌های آن‌چین و زمینهٔ تاریخی شبکهٔ {chainName}."
+    },
+    "fundamentalReport": {
+      "title": "گزارش بنیادی {chainName} - ChainCompass",
+      "description": "خلاصه‌ای تاریخی و محاسبه‌شده از داده‌های ذخیره‌شدهٔ شبکهٔ {chainName}."
     },
     "chat": {
       "title": "تحلیلگر داده‌های آن‌چین",

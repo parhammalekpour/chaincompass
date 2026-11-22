@@ -161,6 +161,9 @@ describe("ChainDetailPage", () => {
         link.getAttribute("href"),
       ),
     ).toEqual(["/methodology#health-score", "/methodology#scenarios"]);
+    expect(
+      screen.getByRole("link", { name: "Fundamental report" }),
+    ).toHaveAttribute("href", "/app/chains/btc/report");
   });
 
   it("renders a friendly not-found state for an invalid slug", () => {

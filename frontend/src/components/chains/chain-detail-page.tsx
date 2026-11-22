@@ -557,6 +557,9 @@ export function ChainDetailPage({ slug }: { slug: ChainSlug }) {
             </Link>
           </p>
         </div>
+        <Button asChild variant="outline">
+          <Link href={`/app/chains/${slug}/report`}>{t("reportLink")}</Link>
+        </Button>
       </header>
 
       <section

@@ -639,6 +639,7 @@
     "emptyScenarios": "No historical scenarios are available.",
     "notFoundTitle": "Chain not found",
     "notFoundDescription": "That chain is not available in the public data.",
+    "reportLink": "Fundamental report",
     "regimeLabel": "Regime",
     "methodologyVersion": "Methodology {version}",
     "componentPercentile": "Percentile",
@@ -738,6 +739,74 @@
       "Which data is missing for BNB Chain?"
     ]
   },
+  "fundamentalReport": {
+    "title": "Fundamental report",
+    "forChain": "Fundamental report for {chainName}",
+    "asOf": "Data as of",
+    "methodologyVersion": "Methodology version",
+    "generatedFromStoredData": "Generated from stored data",
+    "historicalNote": "Descriptive and historical data only; not a forecast.",
+    "backToChain": "Back to {chainName}",
+    "explainWithAssistant": "Explain with assistant",
+    "health": "Health",
+    "score": "Health score",
+    "confidence": "Confidence",
+    "coverage": "Coverage",
+    "changesTitle": "Stored score changes",
+    "change30d": "30-day change",
+    "change90d": "90-day change",
+    "score30d": "Stored score exactly 30 days earlier",
+    "score90d": "Stored score exactly 90 days earlier",
+    "insufficientHistory": "Not enough stored history",
+    "regime": "Regime",
+    "volatility": "Volatility state",
+    "sinceDate": "Since",
+    "daysInRegime": "Days in regime",
+    "notAvailable": "Not available",
+    "historyGap": "Regime history contains a gap. The start date and duration refer to the latest consecutive run.",
+    "flags": "Active flags",
+    "noActiveFlags": "No active flags",
+    "severity": "Severity",
+    "severityLabels": {
+      "info": "Informational",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "indicators": "Indicators",
+    "indicatorTableCaption": "Stored Health Score components",
+    "indicator": "Component",
+    "value": "Stored value",
+    "percentile": "Percentile",
+    "status": "Status",
+    "groupNames": {
+      "market": "Market",
+      "capital": "Capital",
+      "usage": "Usage",
+      "security": "Security"
+    },
+    "statusLabels": {
+      "available": "Available",
+      "not_available": "Not available",
+      "not_applicable": "Not applicable"
+    },
+    "rawValueNote": "Indicator values are shown as raw stored Decimal strings; units are not normalized here.",
+    "noIndicators": "No indicator components are available.",
+    "dataGaps": "What we do not know",
+    "dataGapTableCaption": "Data gaps and availability",
+    "dataItem": "Data item",
+    "availability": "Availability",
+    "gapStatuses": {
+      "not_available": "Not available",
+      "not_applicable": "Not applicable",
+      "not_available_free": "Not available from free verified sources"
+    },
+    "gapNames": {
+      "holder_distribution": "Holder distribution",
+      "exchange_flows": "Exchange flows",
+      "news_evidence": "News evidence"
+    },
+    "noDataGaps": "No additional data gaps are recorded."
+  },
   "watchlist": {
     "title": "Watchlist",
     "description": "Keep the networks you follow close at hand."
@@ -836,6 +905,10 @@
     "chainDetail": {
       "title": "{chainName} - ChainCompass",
       "description": "On-chain indicators and historical context for {chainName}."
+    },
+    "fundamentalReport": {
+      "title": "Fundamental report for {chainName} - ChainCompass",
+      "description": "Deterministic historical summary of stored network data for {chainName}."
     },
     "chat": {
       "title": "On-chain data analyst",
