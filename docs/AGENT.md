@@ -187,6 +187,9 @@ language quality. Results are model- and day-dependent.
 
 - 2026-11-23: Three of the ten provider-calling messages in 12A2 ended in a grounding fallback.
 - In the follow-up, the BTC/SOL comparison invoked both expected snapshot tools; rejected token `19` was absent from both public snapshots (absent or derived), so no verifier-formatting gap was demonstrated.
+- 2026-11-23: Offline null baseline: message 3 was below the preset 25% threshold (INFORMATIVE); message 7 and the pooled sample were above it (UNINFORMATIVE; cause UNKNOWN).
+- The baseline used 26 retained tokens and locally rebuilt BTC/SOL reports; 12 omitted tokens and equality with the original `as_of` dates remain UNVERIFIED.
+- Tiny, failure-selected sample; not a model evaluation; nothing tuned or changed.
 - The provider returned HTTP 429 twice; after one retry, the run stopped at four of six allowed provider requests, before the other two prompts or a final answer could be observed.
 - This was a tiny, non-deterministic diagnostic sample, not an evaluation; nothing was tuned.
 - 2026-11-23: Offline characterization recorded current verifier decisions for eight synthetic cases; ISO dates passed, while month-name prose dates were rejected when their numeric tokens were not independently grounded.
