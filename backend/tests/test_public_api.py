@@ -390,6 +390,85 @@ async def test_point_in_time_snapshots_and_unknown_chain_errors(
     assert unknown.json()["error"]["code"] == "chain_not_found"
 
 
+async def test_fundamental_report_is_available_for_each_chain_with_cache_headers(
+    public_client: AsyncClient,
+    public_session_factory: async_sessionmaker[AsyncSession],
+    seeded_public_data: date,
+) -> None:
+    async with public_session_factory() as session:
+        session.add_all(
+            [
+                _score("sol", seeded_public_data, "58.25", "0.6000"),
+                _score("bnb", seeded_public_data, "57.00", "0.6000"),
+            ]
+        )
+        await session.commit()
+
+    for slug in ("btc", "eth", "sol", "bnb"):
+        response = await public_client.get(f"/api/v1/chains/{slug}/report")
+        assert response.status_code == 200
+        assert response.headers["Cache-Control"] == (
+            "public, max-age=300, stale-while-revalidate=600"
+        )
+        report = response.json()
+        assert report["chain"] == slug
+        assert report["as_of_date"] == seeded_public_data.isoformat()
+        assert report["methodology_version"] == "v1"
+        assert report["generated_from"] == "stored_data"
+        assert len(report["indicators"]) == 11
+        assert all(
+            re.fullmatch(r"[A-Za-z0-9_./+-]+", value)
+            for value in _string_values(report)
+        )
+        assert {entry["key"]: entry["status"] for entry in report["data_gaps"]}[
+            "news_evidence"
+        ] == "not_available_free"
+
+    btc = (await public_client.get("/api/v1/chains/btc/report")).json()
+    assert all(
+        indicator["status"] == "not_applicable"
+        for indicator in btc["indicators"]
+        if indicator["group"] == "capital"
+    )
+
+
+async def test_fundamental_report_date_validation_and_no_data_errors(
+    public_client: AsyncClient,
+    seeded_public_data: date,
+) -> None:
+    historical = await public_client.get(
+        "/api/v1/chains/btc/report",
+        params={"as_of": "2020-03-13"},
+    )
+    assert historical.status_code == 200
+    assert historical.json()["as_of_date"] == "2020-03-13"
+
+    missing = await public_client.get(
+        "/api/v1/chains/btc/report",
+        params={"as_of": "2020-03-14"},
+    )
+    assert missing.status_code == 404
+    assert missing.json()["error"]["code"] == "report_not_available"
+
+    unknown = await public_client.get("/api/v1/chains/unknown/report")
+    assert unknown.status_code == 404
+    assert unknown.json()["error"]["code"] == "chain_not_found"
+
+    invalid = await public_client.get(
+        "/api/v1/chains/btc/report",
+        params={"as_of": "not-a-date"},
+    )
+    assert invalid.status_code == 422
+    assert invalid.json()["error"]["code"] == "validation_error"
+
+    future = await public_client.get(
+        "/api/v1/chains/btc/report",
+        params={"as_of": (datetime.now(UTC).date() + timedelta(days=1)).isoformat()},
+    )
+    assert future.status_code == 422
+    assert future.json()["error"]["code"] == "future_as_of_date"
+
+
 async def test_scenarios_are_point_in_time_and_decimal_serialized(
     public_client: AsyncClient,
     public_session_factory: async_sessionmaker[AsyncSession],
@@ -477,6 +556,20 @@ async def test_scenarios_are_point_in_time_and_decimal_serialized(
     assert historical_body["horizons"][0]["n_independent"] == 5
     assert historical_body["horizons"][2]["available"] is False
     assert historical_body["horizons"][2]["reason"] == "insufficient_history"
+
+
+def _string_values(value: object) -> list[str]:
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, dict):
+        return [
+            item
+            for key, nested in value.items()
+            for item in [*_string_values(key), *_string_values(nested)]
+        ]
+    if isinstance(value, list):
+        return [item for nested in value for item in _string_values(nested)]
+    return []
 
 
 async def test_scenario_snapshot_validation_and_methodology(

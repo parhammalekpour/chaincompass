@@ -94,6 +94,7 @@ from app.schemas.public_api import (
     SourceMethodology,
     VolatilityOverlayMethodology,
 )
+from app.services.fundamental_report import load_fundamental_report
 from app.services.rate_limit import check_rate_limit, client_ip
 
 DEFAULT_RANGE_DAYS = 365
@@ -605,6 +606,30 @@ async def get_chain(
             score.as_of_date,
         )
     return ChainDetailResponse(**payload)
+
+
+@router.get(
+    "/chains/{slug}/report",
+    response_model=dict[str, Any],
+    responses=PUBLIC_ERRORS,
+    summary="Get a stored deterministic chain report",
+)
+async def get_fundamental_report(
+    slug: str,
+    as_of: date | None = Query(default=None),
+    session: AsyncSession = Depends(get_session),
+) -> dict[str, Any]:
+    chain, _, _ = _require_chain(slug)
+    if as_of is not None and as_of > datetime.now(UTC).date():
+        raise APIError(422, "future_as_of_date", "as_of cannot be in the future")
+    report = await load_fundamental_report(session, chain, as_of)
+    if report.get("ok") is False:
+        raise APIError(
+            404,
+            "report_not_available",
+            "No stored report is available for the requested date",
+        )
+    return report
 
 
 @router.get(
