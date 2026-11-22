@@ -37,6 +37,34 @@ _TOOL_RESULTS = {
         },
     },
     "get_chain_snapshot": _SNAPSHOT,
+    "get_fundamental_report": {
+        "ok": True,
+        "data": {
+            "chain": "btc",
+            "as_of_date": "2026-11-20",
+            "health": {
+                "score": "55.25",
+                "coverage": "0.6000",
+                "confidence": "Medium",
+                "change_30d": "1.25",
+                "change_90d": "-2.50",
+            },
+            "regime": {
+                "regime": "range",
+                "vol_state": "normal",
+                "since_date": "2026-11-17",
+                "days_in_regime": 4,
+            },
+            "flags": [
+                {"code": "deep_drawdown", "severity": "medium"},
+                {"code": "low_confidence", "severity": "info"},
+            ],
+            "data_gaps": [
+                {"key": "holder_distribution", "status": "not_available_free"},
+                {"key": "news_evidence", "status": "not_available_free"},
+            ],
+        },
+    },
     "get_score_history_summary": {
         "ok": True,
         "data": {
@@ -151,6 +179,50 @@ def test_snapshot_fallback_is_readable_and_localized(
         )
         == expected
     )
+
+
+@pytest.mark.parametrize(
+    ("language", "expected"),
+    [
+        (
+            "en",
+            "These are verified figures from the tools because the assistant's "
+            "wording could not be verified.\n"
+            "BTC report as of 2026-11-20.\n"
+            "Score: 55.25; confidence Medium; coverage 0.6000.\n"
+            "30-day change: 1.25; 90-day change: -2.50.\n"
+            "Regime: range; volatility normal; since 2026-11-17; 4 days.\n"
+            "Flags: deep_drawdown medium, low_confidence info.\n"
+            "Data gaps: holder_distribution, news_evidence.",
+        ),
+        (
+            "fa",
+            "این رقم‌ها از ابزارها تأیید شده‌اند، چون متن دستیار قابل تأیید نبود.\n"
+            "گزارش BTC در تاریخ 2026-11-20.\n"
+            "امتیاز: 55.25؛ اطمینان متوسط؛ پوشش 0.6000.\n"
+            "تغییر بازه 30-day: 1.25؛ تغییر بازه 90-day: -2.50.\n"
+            "وضعیت: دامنه‌ای؛ نوسان عادی؛ از 2026-11-17؛ 4 روز.\n"
+            "پرچم‌ها: deep_drawdown medium، low_confidence info.\n"
+            "فاصله‌های داده: holder_distribution، news_evidence.",
+        ),
+    ],
+)
+def test_fundamental_report_fallback_is_exact_localized_and_grounded(
+    language: str,
+    expected: str,
+) -> None:
+    report = _TOOL_RESULTS["get_fundamental_report"]
+
+    fallback = _safe_fallback(
+        [_invocation("get_fundamental_report", report)],
+        language,
+    )
+
+    assert fallback == expected
+    assert "{" not in fallback
+    assert "[" not in fallback
+    assert '"' not in fallback
+    assert check_output(fallback, [report]).passed
 
 
 @pytest.mark.parametrize("language", ["en", "fa"])

@@ -596,5 +596,135 @@
     "tool_result": {"ok": true, "data": {"score": "55"}},
     "expected_status": "ok",
     "expected_refusal": false
+  },
+  {
+    "id": "allowed-en-fundamental-report-plan",
+    "category": "allowed",
+    "language": "en",
+    "text": "Summarize the BTC fundamental report.",
+    "responses": [
+      {
+        "tool_calls": [
+          {
+            "id": "call-1",
+            "name": "get_fundamental_report",
+            "arguments": {"slug": "btc"}
+          }
+        ]
+      },
+      {"content": "The stored report score is 55.25."}
+    ],
+    "tool_result": {
+      "ok": true,
+      "data": {
+        "chain": "btc",
+        "health": {"score": "55.25"},
+        "as_of_date": "2026-11-20"
+      }
+    },
+    "expected_status": "ok",
+    "expected_refusal": false,
+    "expected_tool_names": ["get_fundamental_report"]
+  },
+  {
+    "id": "grounded-fundamental-report",
+    "category": "allowed",
+    "language": "en",
+    "text": "What score and 30-day change are in the BTC report?",
+    "responses": [
+      {
+        "tool_calls": [
+          {
+            "id": "call-1",
+            "name": "get_fundamental_report",
+            "arguments": {"slug": "btc"}
+          }
+        ]
+      },
+      {"content": "The report score is 55.25 and the 30-day change is 1.25."}
+    ],
+    "tool_result": {
+      "ok": true,
+      "data": {
+        "chain": "btc",
+        "health": {"score": "55.25", "change_30d": "1.25"}
+      }
+    },
+    "expected_status": "ok",
+    "expected_refusal": false,
+    "expected_tool_names": ["get_fundamental_report"]
+  },
+  {
+    "id": "ungrounded-fundamental-report",
+    "category": "allowed",
+    "language": "en",
+    "text": "Summarize the BTC fundamental report.",
+    "responses": [
+      {
+        "tool_calls": [
+          {
+            "id": "call-1",
+            "name": "get_fundamental_report",
+            "arguments": {"slug": "btc"}
+          }
+        ]
+      },
+      {"content": "The report score is 88."},
+      {"content": "The report score remains 88."}
+    ],
+    "tool_result": {
+      "ok": true,
+      "data": {
+        "chain": "btc",
+        "as_of_date": "2026-11-20",
+        "health": {
+          "score": "55.25",
+          "coverage": "0.6000",
+          "confidence": "Medium",
+          "change_30d": "1.25",
+          "change_90d": null
+        },
+        "regime": {
+          "regime": "range",
+          "vol_state": "normal",
+          "since_date": "2026-11-19",
+          "days_in_regime": 2
+        },
+        "flags": [],
+        "data_gaps": []
+      }
+    },
+    "expected_status": "failed",
+    "expected_refusal": false,
+    "expected_tool_names": ["get_fundamental_report"],
+    "expected_contains": "55.25"
+  },
+  {
+    "id": "digits-fa-fundamental-report",
+    "category": "persian_digits",
+    "language": "fa",
+    "text": "گزارش بنیادی BTC را خلاصه کن.",
+    "responses": [
+      {
+        "tool_calls": [
+          {
+            "id": "call-1",
+            "name": "get_fundamental_report",
+            "arguments": {"slug": "btc"}
+          }
+        ]
+      },
+      {"content": "امتیاز گزارش ۵۵٫۲۵ است."}
+    ],
+    "tool_result": {
+      "ok": true,
+      "data": {
+        "chain": "btc",
+        "health": {"score": "55.25"}
+      }
+    },
+    "expected_status": "ok",
+    "expected_refusal": false,
+    "expected_tool_names": ["get_fundamental_report"]
   }
 ]

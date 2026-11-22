@@ -34,4 +34,4 @@ def test_offline_eval_cli_passes_committed_cases() -> None:
     )
 
     assert completed.returncode == 0, completed.stdout + completed.stderr
-    assert "Total: 35/35 passed." in completed.stdout
+    assert "Total: 39/39 passed." in completed.stdout

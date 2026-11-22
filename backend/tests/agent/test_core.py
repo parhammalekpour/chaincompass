@@ -217,6 +217,7 @@ async def test_openai_provider_does_not_log_key_or_message_body(caplog) -> None:
     ("name", "arguments"),
     [
         ("get_chain_snapshot", {"slug": "doge"}),
+        ("get_fundamental_report", {"slug": "doge"}),
         ("get_score_history_summary", {"slug": "btc", "days": 3651}),
         ("get_regime_history", {"slug": "btc", "limit": True}),
         ("unknown", {}),
@@ -231,6 +232,46 @@ async def test_tool_bad_arguments_return_tool_errors(
     assert result["as_of"] is None
     assert result["analysis_only"] is True
     assert result["error"]["code"] in {"invalid_arguments", "unknown_tool"}  # type: ignore[index]
+
+
+@pytest.mark.asyncio
+async def test_fundamental_report_tool_uses_loader_and_builds_summary(
+    monkeypatch,
+) -> None:
+    report = {
+        "chain": "btc",
+        "as_of_date": "2026-11-20",
+        "health": {
+            "score": "55.25",
+            "change_30d": "1.25",
+            "change_90d": "-2.50",
+        },
+        "regime": {"regime": "range"},
+        "flags": [{"code": "deep_drawdown", "severity": "medium"}],
+        "data_gaps": [{}, {}, {}],
+    }
+    received: list[tuple[object, str]] = []
+
+    async def load(session: object, slug: str) -> dict[str, object]:
+        received.append((session, slug))
+        return report
+
+    monkeypatch.setattr(tools, "load_fundamental_report", load)
+    session = object()
+    result = await tools.execute_tool(
+        "get_fundamental_report",
+        {"slug": "btc"},
+        cast(AsyncSession, session),
+    )
+
+    assert received == [(session, "btc")]
+    assert result["ok"] is True
+    assert result["as_of"] == "2026-11-20"
+    assert result["summary"] == (
+        "chain=btc as_of=2026-11-20 score=55.25 change_30d=1.25 "
+        "change_90d=-2.50 regime=range flags=1 data_gaps=3"
+    )
+    assert result["data"] is report
 
 
 @pytest.mark.asyncio
@@ -284,3 +325,9 @@ def test_tool_schemas_are_closed_and_limit_chains_to_supported_slugs() -> None:
         "sol",
         "bnb",
     ]
+    report_schema = next(
+        entry["function"]
+        for entry in tools.TOOL_DEFINITIONS
+        if entry["function"]["name"] == "get_fundamental_report"  # type: ignore[index]
+    )
+    assert report_schema["parameters"]["additionalProperties"] is False  # type: ignore[index]

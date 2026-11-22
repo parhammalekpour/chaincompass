@@ -18,14 +18,23 @@ from app.agent.guardrails import (
 )
 from app.agent.providers.base import LLMProvider, ProviderError, ProviderResponse
 from app.agent.tools import TOOL_DEFINITIONS, execute_tool
+from app.analytics.score_config import COMPONENTS, RISK_FLAGS
 
 MAX_TOOL_ITERATIONS = 4
 MAX_TOOL_CALLS_PER_TURN = 4
 MAX_TOOL_ARGUMENT_LENGTH = 5000
 TOTAL_BUDGET_SECONDS = 60.0
+_REPORT_FLAG_CODES = {spec.flag for spec in RISK_FLAGS}
+_REPORT_GAP_KEYS = {
+    *(spec.feature for spec in COMPONENTS),
+    "holder_distribution",
+    "exchange_flows",
+    "news_evidence",
+}
 _SAFE_TOOL_NAMES = {
     "list_chains",
     "get_chain_snapshot",
+    "get_fundamental_report",
     "get_score_history_summary",
     "get_regime_history",
     "get_scenarios",
@@ -431,6 +440,8 @@ def _format_tool_data(
         if line:
             return [line]
         return []
+    if name == "get_fundamental_report":
+        return _fundamental_report_lines(data, language)
     if name == "get_score_history_summary":
         return _score_history_lines(data, language)
     if name == "get_regime_history":
@@ -440,6 +451,109 @@ def _format_tool_data(
     if name == "get_methodology_summary":
         return _methodology_lines(data, language)
     return []
+
+
+def _fundamental_report_lines(
+    data: Mapping[str, object],
+    language: str,
+) -> list[str]:
+    chain = _chain_label(data.get("chain"))
+    as_of = _date_text(data.get("as_of_date"))
+    health = data.get("health")
+    regime = data.get("regime")
+    if not isinstance(health, Mapping) or not isinstance(regime, Mapping):
+        return []
+
+    lines: list[str] = []
+    if as_of:
+        lines.append(
+            f"گزارش {chain} در تاریخ {as_of}."
+            if language == "fa"
+            else f"{chain} report as of {as_of}."
+        )
+
+    score = _number_text(health.get("score"))
+    coverage = _number_text(health.get("coverage"))
+    confidence = _confidence(health.get("confidence"), language)
+    if score:
+        details = [f"امتیاز: {score}" if language == "fa" else f"Score: {score}"]
+        if confidence:
+            details.append(
+                f"اطمینان {confidence}"
+                if language == "fa"
+                else f"confidence {confidence}"
+            )
+        if coverage:
+            details.append(
+                f"پوشش {coverage}" if language == "fa" else f"coverage {coverage}"
+            )
+        lines.append(("؛ " if language == "fa" else "; ").join(details) + ".")
+
+    change_30d = _number_text(health.get("change_30d"))
+    change_90d = _number_text(health.get("change_90d"))
+    if change_30d or change_90d:
+        value_30d = change_30d or ("ناموجود" if language == "fa" else "unavailable")
+        value_90d = change_90d or ("ناموجود" if language == "fa" else "unavailable")
+        lines.append(
+            f"تغییر بازه 30-day: {value_30d}؛ تغییر بازه 90-day: {value_90d}."
+            if language == "fa"
+            else f"30-day change: {value_30d}; 90-day change: {value_90d}."
+        )
+
+    regime_name = _regime_label(regime.get("regime"), language)
+    vol_state = _regime_label(regime.get("vol_state"), language)
+    since = _date_text(regime.get("since_date"))
+    days = _number_text(regime.get("days_in_regime"))
+    if regime_name:
+        details = [
+            f"وضعیت: {regime_name}" if language == "fa" else f"Regime: {regime_name}"
+        ]
+        if vol_state:
+            details.append(
+                f"نوسان {vol_state}" if language == "fa" else f"volatility {vol_state}"
+            )
+        if since:
+            details.append(f"از {since}" if language == "fa" else f"since {since}")
+        if days:
+            details.append(f"{days} روز" if language == "fa" else f"{days} days")
+        lines.append(("؛ " if language == "fa" else "; ").join(details) + ".")
+
+    flags = data.get("flags")
+    if isinstance(flags, list):
+        values = [
+            f"{flag['code']} {flag['severity']}"
+            for flag in flags
+            if isinstance(flag, Mapping)
+            and isinstance(flag.get("code"), str)
+            and isinstance(flag.get("severity"), str)
+            and flag.get("code") in _REPORT_FLAG_CODES
+            and flag.get("severity") in {"info", "medium", "high"}
+        ]
+        if values:
+            joined = "، ".join(values)
+            lines.append(
+                f"پرچم‌ها: {joined}."
+                if language == "fa"
+                else f"Flags: {', '.join(values)}."
+            )
+
+    gaps = data.get("data_gaps")
+    if isinstance(gaps, list):
+        keys = [
+            gap["key"]
+            for gap in gaps
+            if isinstance(gap, Mapping)
+            and isinstance(gap.get("key"), str)
+            and gap.get("key") in _REPORT_GAP_KEYS
+        ]
+        if keys:
+            joined = "، ".join(keys)
+            lines.append(
+                f"فاصله‌های داده: {joined}."
+                if language == "fa"
+                else f"Data gaps: {', '.join(keys)}."
+            )
+    return lines
 
 
 def _score_line(

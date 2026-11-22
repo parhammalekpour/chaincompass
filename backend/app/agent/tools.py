@@ -29,6 +29,7 @@ from app.api.v1.public import (
 )
 from app.core.errors import APIError
 from app.schemas.public_api import AnalysisResponse
+from app.services.fundamental_report import load_fundamental_report
 
 CHAIN_SLUGS = ("btc", "eth", "sol", "bnb")
 
@@ -57,6 +58,20 @@ TOOL_DEFINITIONS: tuple[dict[str, object], ...] = (
         "function": {
             "name": "get_chain_snapshot",
             "description": "Get a chain's latest score, regime, flags, and coverage.",
+            "strict": True,
+            "parameters": {
+                "type": "object",
+                "properties": {"slug": _slug_schema()},
+                "additionalProperties": False,
+                "required": ["slug"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_fundamental_report",
+            "description": "Get a deterministic report built from stored chain data.",
             "strict": True,
             "parameters": {
                 "type": "object",
@@ -209,6 +224,7 @@ def _parse_arguments(
         "list_chains": (),
         "get_methodology_summary": (),
         "get_chain_snapshot": ("slug",),
+        "get_fundamental_report": ("slug",),
         "get_score_history_summary": ("slug", "days"),
         "get_regime_history": ("slug", "limit"),
         "get_scenarios": ("slug",),
@@ -219,6 +235,7 @@ def _parse_arguments(
         "list_chains": set(),
         "get_methodology_summary": set(),
         "get_chain_snapshot": {"slug"},
+        "get_fundamental_report": {"slug"},
         "get_score_history_summary": {"slug", "days"},
         "get_regime_history": {"slug", "limit"},
         "get_scenarios": {"slug"},
@@ -272,6 +289,11 @@ async def execute_tool(
             response = await public_get_methodology()
         elif name == "get_chain_snapshot":
             response = await public_get_chain(str(args["slug"]), None, session)
+        elif name == "get_fundamental_report":
+            report = await load_fundamental_report(session, str(args["slug"]))
+            if report.get("ok") is False:
+                return _error_result("report_not_available")
+            return _fundamental_report_result(report)
         elif name == "get_score_history_summary":
             response = await _score_history_summary(
                 session,
@@ -296,6 +318,38 @@ async def execute_tool(
     except APIError as exc:
         return _error_result(exc.code)
     return _response_result(response)
+
+
+def _fundamental_report_result(report: dict[str, object]) -> dict[str, object]:
+    chain = report.get("chain")
+    as_of = report.get("as_of_date")
+    health = report.get("health")
+    regime = report.get("regime")
+    flags = report.get("flags")
+    data_gaps = report.get("data_gaps")
+    if not isinstance(health, Mapping) or not isinstance(regime, Mapping):
+        raise RuntimeError("The fundamental report has an invalid shape")
+
+    def field_text(value: object) -> str:
+        return value if isinstance(value, str) else "unavailable"
+
+    summary = (
+        f"chain={field_text(chain)} as_of={field_text(as_of)} "
+        f"score={field_text(health.get('score'))} "
+        f"change_30d={field_text(health.get('change_30d'))} "
+        f"change_90d={field_text(health.get('change_90d'))} "
+        f"regime={field_text(regime.get('regime'))} "
+        f"flags={len(flags) if isinstance(flags, list) else 0} "
+        f"data_gaps={len(data_gaps) if isinstance(data_gaps, list) else 0}"
+    )
+    return {
+        "ok": True,
+        "as_of": as_of if isinstance(as_of, str) else None,
+        "generated_at": datetime.now(UTC).isoformat(),
+        "analysis_only": True,
+        "summary": summary,
+        "data": report,
+    }
 
 
 async def _score_history_summary(
