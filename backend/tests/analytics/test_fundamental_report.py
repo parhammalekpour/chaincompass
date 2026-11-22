@@ -38,11 +38,27 @@ def _snapshot(
         flags=(("deep_drawdown", "medium"), ("low_confidence", "info")),
         feature_values={
             "active_addresses_chg90": Decimal("0.125000000000"),
+            "tx_count_chg90": Decimal("0.050000000000"),
+            "tvl_usd_chg90": Decimal("0.100000000000"),
+            "stablecoin_supply_usd_chg90": Decimal("0.020000000000"),
+            "dex_volume_usd_chg90": Decimal("0.075000000000"),
+            "fees_usd_chg90": Decimal("0.030000000000"),
             "drawdown_365d": Decimal("-0.200000000000"),
+            "realized_vol_90d": Decimal("0.450000000000"),
+            "volume_ratio_30_365": Decimal("1.250000000000"),
+            "price_vs_sma200": Decimal("0.150000000000"),
         },
         component_percentiles={
             "active_addresses_chg90": Decimal("55.000000000000"),
+            "tx_count_chg90": Decimal("55.000000000000"),
+            "tvl_usd_chg90": Decimal("55.000000000000"),
+            "stablecoin_supply_usd_chg90": Decimal("55.000000000000"),
+            "dex_volume_usd_chg90": Decimal("55.000000000000"),
+            "fees_usd_chg90": Decimal("55.000000000000"),
             "drawdown_365d": Decimal("72.500000000000"),
+            "realized_vol_90d": Decimal("55.000000000000"),
+            "volume_ratio_30_365": Decimal("55.000000000000"),
+            "price_vs_sma200": Decimal("55.000000000000"),
         },
     )
 
@@ -69,6 +85,11 @@ def test_full_report_is_decimal_string_only_and_deterministic() -> None:
     assert health["score"] == "61.00"
     assert health["change_30d"] == "1.75"
     assert health["change_90d"] == "11.00"
+    assert all(
+        indicator["status"] == "available"
+        for indicator in first["indicators"]
+        if indicator["group"] != "security"
+    )
     regime = first["regime"]
     assert regime["since_date"] == (AS_OF - timedelta(days=2)).isoformat()
     assert regime["days_in_regime"] == 3
@@ -88,6 +109,8 @@ def test_btc_components_mark_capital_indicators_not_applicable() -> None:
     assert all(item["status"] == "not_applicable" for item in capital)
     fees = next(item for item in indicators if item["key"] == "fees_usd_chg90")
     assert fees["group"] == "security"
+    assert fees["status"] == "available"
+    assert fees["value"] == "0.030000000000"
 
 
 def test_missing_exact_30_day_score_has_no_change_or_substitute() -> None:
@@ -107,6 +130,20 @@ def test_missing_exact_30_day_score_has_no_change_or_substitute() -> None:
 def test_regime_history_gap_starts_a_new_gap_free_run() -> None:
     rows = (
         RegimePoint(AS_OF - timedelta(days=3), "range", "normal"),
+        RegimePoint(AS_OF - timedelta(days=1), "range", "normal"),
+        RegimePoint(AS_OF, "range", "normal"),
+    )
+    report = build_fundamental_report(_snapshot(regime_rows=rows))
+
+    assert report["regime"]["since_date"] == (AS_OF - timedelta(days=1)).isoformat()
+    assert report["regime"]["days_in_regime"] == 2
+    assert report["regime"]["history_gap"] is True
+
+
+def test_regime_history_gap_before_latest_regime_transition_is_reported() -> None:
+    rows = (
+        RegimePoint(AS_OF - timedelta(days=4), "stress", "high"),
+        RegimePoint(AS_OF - timedelta(days=2), "stress", "high"),
         RegimePoint(AS_OF - timedelta(days=1), "range", "normal"),
         RegimePoint(AS_OF, "range", "normal"),
     )

@@ -72,18 +72,21 @@ def _regime_summary(
             "vol_state": None,
             "since_date": None,
             "days_in_regime": None,
-            "history_gap": True,
+            "history_gap": bool(points),
         }
 
+    ordered_dates = sorted(by_date, reverse=True)
+    history_gap = any(
+        (newer - older).days > 1
+        for newer, older in zip(ordered_dates, ordered_dates[1:], strict=False)
+    )
     start = as_of
     count = 1
     cursor = as_of
-    history_gap = False
     while True:
         previous_date = cursor - timedelta(days=1)
         previous = by_date.get(previous_date)
         if previous is None:
-            history_gap = any(point.as_of_date < cursor for point in points)
             break
         if previous.regime != current.regime:
             break
