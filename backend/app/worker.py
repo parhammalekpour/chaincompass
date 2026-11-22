@@ -67,6 +67,7 @@ JOB_SPECS = (
     JobSpec("rpc_probe", 0, 0, interval_minutes=15),
     JobSpec("prune_rpc_probes", 0, 45),
     JobSpec("scores", 1, 0),
+    JobSpec("alerts_eval", 1, 15),
 )
 
 
@@ -123,6 +124,17 @@ async def scores_job() -> JobOutcome:
             f"feature_rows={feature_summary.rows_upserted} "
             f"score/regime/flag_rows={chain_counts or '-'}"
         ),
+    )
+
+
+async def alerts_eval_job() -> JobOutcome:
+    from app.alerts.evaluation import evaluate_active_rules
+
+    events_created, evaluated, failed = await evaluate_active_rules()
+    return JobOutcome(
+        status="partial" if failed else "ok",
+        rows_upserted=events_created,
+        details=f"evaluated={evaluated} rule_failures={failed}",
     )
 
 
@@ -232,6 +244,7 @@ JOB_HANDLERS: dict[str, JobHandler] = {
     "rpc_probe": rpc_probe_job,
     "prune_rpc_probes": prune_rpc_probes_job,
     "scores": scores_job,
+    "alerts_eval": alerts_eval_job,
 }
 
 

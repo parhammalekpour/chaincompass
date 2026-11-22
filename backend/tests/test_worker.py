@@ -336,6 +336,7 @@ def test_worker_job_registry_and_schedules() -> None:
         ("rpc_probe", 0, 0),
         ("prune_rpc_probes", 0, 45),
         ("scores", 1, 0),
+        ("alerts_eval", 1, 15),
     ]
     assert format_job_list().splitlines() == [
         "coingecko_snapshot: daily at 00:05 UTC",
@@ -343,6 +344,7 @@ def test_worker_job_registry_and_schedules() -> None:
         "rpc_probe: every 15 minutes",
         "prune_rpc_probes: daily at 00:45 UTC",
         "scores: daily at 01:00 UTC",
+        "alerts_eval: daily at 01:15 UTC",
     ]
     scheduler = build_scheduler()
     jobs = {job.id: job for job in scheduler.get_jobs()}
@@ -352,6 +354,7 @@ def test_worker_job_registry_and_schedules() -> None:
         "rpc_probe",
         "prune_rpc_probes",
         "scores",
+        "alerts_eval",
     }
     assert all(job.max_instances == 1 and job.coalesce for job in jobs.values())
     assert all(job.misfire_grace_time == 3600 for job in jobs.values())
