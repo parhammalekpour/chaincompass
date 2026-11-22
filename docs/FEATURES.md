@@ -101,3 +101,13 @@ dates, and writes newly triggered conditions with an idempotent rule/date key.
 Events contain stable type codes and structured payloads; Decimal values are
 serialized as strings. This feature reports historical conditions and is not
 financial advice. Frontend display and email/Telegram delivery are planned.
+
+## Fundamental report
+
+Backend implemented: a deterministic, read-only report assembled from stored
+score, regime, risk-flag, component, and coverage data. Exact-date gaps remain
+explicit, and unsupported or unavailable components are not substituted.
+The public report API and the agent's read-only `get_fundamental_report` tool
+are implemented; the report UI is planned. News evidence, holder distribution,
+exchange flows, and source-attributed probabilities are not built. The 11C
+audit did not verify source permissions for automated use.

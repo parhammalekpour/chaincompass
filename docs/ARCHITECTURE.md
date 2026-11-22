@@ -71,7 +71,8 @@ planned. Additional public SEO and learning pages are deferred to Prompt 15.
 
 Public data routes are GET-only and unauthenticated. They expose chain
 snapshots, score history, reported regimes, risk flags, methodology, and
-allow-listed raw series and historical-return scenarios. Decimal values
+allow-listed raw series, historical-return scenarios, and the deterministic
+stored-data fundamental report. Decimal values
 serialize as strings; unavailable and context-only series carry explicit
 status/role metadata. Public responses are cached for five minutes and use an
 in-process per-IP rate limiter. No CORS settings were added for this API;

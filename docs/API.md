@@ -11,6 +11,7 @@ details.
 |---|---|---|---|
 | GET | `/api/v1/chains` | — | `ChainsResponse` |
 | GET | `/api/v1/chains/{slug}` | `as_of` (optional ISO date) | `ChainDetailResponse` |
+| GET | `/api/v1/chains/{slug}/report` | `as_of` (optional ISO date) | Fundamental report object |
 | GET | `/api/v1/chains/{slug}/score-history` | `from`, `to` (optional ISO dates) | `ScoreHistoryResponse` |
 | GET | `/api/v1/chains/{slug}/regimes` | `from`, `to` (optional ISO dates) | `RegimesResponse` |
 | GET | `/api/v1/chains/{slug}/series` | `metric` (required), `source` (conditional), `from`, `to` | `SeriesResponse` |
@@ -36,6 +37,67 @@ date. A date without a score row returns `404 no_snapshot_for_date`; a future
 date returns `422`. Price observations in a snapshot are constrained to that
 date or earlier. When `as_of` is supplied, `data_coverage` reports observations
 available through that date; without it, coverage metadata is current.
+
+## Fundamental report
+
+`GET /chains/{slug}/report` reads the latest stored score date, or selects an
+exact stored score date with `as_of`. A missing date returns
+`404 report_not_available`; an unknown chain returns `404 chain_not_found`;
+invalid dates and future dates return `422`. The route uses the public API's
+standard cache header and per-IP rate limit.
+
+Scores at 30 and 90 days earlier are read only at those exact dates. Missing
+rows remain `null`, and changes remain `null` when either required score is
+missing. Regime duration counts consecutive stored dates ending at the report
+date. Indicators use the existing Health Score component registry; unsupported
+chain components are `not_applicable`, while missing stored score components
+are `not_available`. Decimal values are strings. The response has no generated
+timestamp or prose fields.
+
+Shortened response:
+
+```json
+{
+  "chain": "btc",
+  "as_of_date": "2026-11-20",
+  "methodology_version": "v1",
+  "generated_from": "stored_data",
+  "health": {
+    "score": "53.75",
+    "confidence": "Medium",
+    "coverage": "0.6000",
+    "score_30d_ago": null,
+    "score_90d_ago": "50.00",
+    "change_30d": null,
+    "change_90d": "3.75"
+  },
+  "regime": {
+    "regime": "uptrend",
+    "vol_state": "normal",
+    "since_date": "2026-11-18",
+    "days_in_regime": 3,
+    "history_gap": false
+  },
+  "flags": [{"code": "deep_drawdown", "severity": "medium"}],
+  "indicators": [
+    {
+      "key": "drawdown_365d",
+      "group": "market",
+      "value": "-0.200000000000",
+      "percentile": "55.000000000000",
+      "status": "available"
+    }
+  ],
+  "data_gaps": [
+    {"key": "holder_distribution", "status": "not_available_free"},
+    {"key": "exchange_flows", "status": "not_available_free"},
+    {"key": "news_evidence", "status": "not_available_free"}
+  ]
+}
+```
+
+The fixed data-gap entries mean no source is currently cleared for those
+indicators; they are not computed or inferred.
 
 Example, shortened:
 

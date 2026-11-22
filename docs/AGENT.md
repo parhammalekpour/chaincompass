@@ -28,6 +28,7 @@ includes freshness metadata and `analysis_only: true`.
 |---|---|
 | `list_chains` | None |
 | `get_chain_snapshot` | `slug`: `btc`, `eth`, `sol`, or `bnb` |
+| `get_fundamental_report` | `slug`: supported chain |
 | `get_score_history_summary` | `slug`: supported chain; `days`: integer from 1 to 3650 |
 | `get_regime_history` | `slug`: supported chain; `limit`: integer from 1 to 20 |
 | `get_scenarios` | `slug`: supported chain |
@@ -36,6 +37,9 @@ includes freshness metadata and `analysis_only: true`.
 Unknown names, malformed arguments, extra fields, and out-of-range values
 produce safe tool errors. Tool results are delimited and treated as untrusted
 data; neither tool output nor user text can extend the function allowlist.
+The report tool returns stored scores, regimes, flags, and indicator gaps. Its
+compact summary is assembled by application code; the model does not create
+report values.
 
 ## Grounding and response checks
 
@@ -67,6 +71,9 @@ it does not bind a claim to a specific chain or metric. For example, a number
 returned for BTC could validate a numeric claim about ETH. This limitation is
 known and has not been changed. The check reduces unsupported output; it is not
 a promise that every generated statement is correct.
+Any number present in this turn's tool results can validate an answer number,
+including numbers from `get_fundamental_report`; values are not tied to a
+specific report field or chain by the grounding check.
 
 Input classification handles restricted financial-direction requests with a
 deterministic bilingual response before provider access. The system prompt
