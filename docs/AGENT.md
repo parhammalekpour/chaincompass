@@ -183,3 +183,6 @@ language quality. Results are model- and day-dependent.
 - In the follow-up, the BTC/SOL comparison invoked both expected snapshot tools; rejected token `19` was absent from both public snapshots (absent or derived), so no verifier-formatting gap was demonstrated.
 - The provider returned HTTP 429 twice; after one retry, the run stopped at four of six allowed provider requests, before the other two prompts or a final answer could be observed.
 - This was a tiny, non-deterministic diagnostic sample, not an evaluation; nothing was tuned.
+- 2026-11-23: Offline characterization recorded current verifier decisions for eight synthetic cases; ISO dates passed, while month-name prose dates were rejected when their numeric tokens were not independently grounded.
+- 12A3 records rejected token `19`, but not message 2's tool-result dates or model answer; whether it was a date component remains UNVERIFIED.
+- No provider calls or network access were made, and nothing was tuned.
