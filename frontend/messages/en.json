@@ -58,6 +58,7 @@
       "sources": "Data and sources",
       "healthScore": "Network Health Score v1",
       "regimes": "Regimes and risk flags",
+      "fundamentalReport": "Fundamental report",
       "scenarios": "Historical scenarios",
       "research": "Research findings",
       "assistant": "The assistant",
@@ -155,6 +156,10 @@
           "hashrate_decline": "hashrate_chg90 <= -0.15 (BTC)",
           "low_confidence": "coverage < 0.50"
         }
+      },
+      "fundamentalReport": {
+        "title": "Fundamental report",
+        "body": "The fundamental report is computed deterministically from stored score, regime, risk-flag, coverage, and component records. A language model does not produce its numbers. The assistant can explain only figures returned by the same data service. News, holder distribution, exchange flows, and market-implied probabilities are not built; no free verified source has been cleared for use."
       },
       "scenarios": {
         "title": "Historical scenarios",

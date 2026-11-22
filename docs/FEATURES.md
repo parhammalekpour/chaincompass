@@ -108,6 +108,8 @@ Backend implemented: a deterministic, read-only report assembled from stored
 score, regime, risk-flag, component, and coverage data. Exact-date gaps remain
 explicit, and unsupported or unavailable components are not substituted.
 The public report API and the agent's read-only `get_fundamental_report` tool
-are implemented; the report UI is planned. News evidence, holder distribution,
-exchange flows, and source-attributed probabilities are not built. The 11C
-audit did not verify source permissions for automated use.
+are implemented. The authenticated EN/FA report UI is implemented, including
+explicit history gaps, component statuses, and the fixed data-gap entries.
+News evidence, holder distribution, exchange flows, and market-implied
+probabilities are not built; no free verified source has been cleared for use.
+The 11C audit did not verify source permissions for automated use.

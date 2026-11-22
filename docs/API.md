@@ -49,10 +49,24 @@ standard cache header and per-IP rate limit.
 Scores at 30 and 90 days earlier are read only at those exact dates. Missing
 rows remain `null`, and changes remain `null` when either required score is
 missing. Regime duration counts consecutive stored dates ending at the report
-date. Indicators use the existing Health Score component registry; unsupported
-chain components are `not_applicable`, while missing stored score components
-are `not_available`. Decimal values are strings. The response has no generated
+date. `since_date` is the first date of the latest consecutive run with the
+current regime ending on the report date; `days_in_regime` counts only that
+run. `history_gap` is true when any adjacent stored regime rows through the
+report date are separated by more than one calendar day. A gap earlier in the
+history does not change the latest run's start date or duration. If no regime
+row exists exactly on the report date, the regime fields are null and
+`history_gap` is true when earlier stored regime rows exist.
+
+Indicators use the existing Health Score component registry; unsupported chain
+components are `not_applicable`, while missing stored score components are
+`not_available`. Decimal values are strings. The response has no generated
 timestamp or prose fields.
+
+Errors: `404 report_not_available` means no score row exists for the selected
+date; `404 chain_not_found` means the slug is unknown. Invalid dates return
+`422 validation_error`, and future dates return `422 future_as_of_date`.
+Successful responses use the standard public cache header; the endpoint shares
+the public per-IP rate limit.
 
 Shortened response:
 
@@ -225,7 +239,7 @@ Errors use the same envelope:
 Relevant codes include `chain_not_found`, `no_snapshot_for_date`,
 `series_not_available`, `source_required`, `validation_error`,
 `future_as_of_date`, `invalid_date_range`, `range_too_large`, `too_many_points`,
-and `rate_limited`.
+`report_not_available`, and `rate_limited`.
 Date parsing and range validation return 422; unknown chains, missing snapshots,
 and unavailable series return 404.
 

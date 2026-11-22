@@ -104,6 +104,10 @@ describe("public methodology and legal pages", () => {
       expect(container.textContent).toContain(
         (locale === "en" ? en : fa).methodologyPage.sections.assistant.body,
       );
+      expect(container.textContent).toContain(
+        (locale === "en" ? en : fa).methodologyPage.sections.fundamentalReport
+          .body,
+      );
     },
   );
 

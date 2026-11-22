@@ -45,11 +45,18 @@ const TOC_KEYS = [
   "sources",
   "healthScore",
   "regimes",
+  "fundamentalReport",
   "scenarios",
   "research",
   "assistant",
   "limitations",
 ] as const;
+
+function methodologySectionId(key: (typeof TOC_KEYS)[number]): string {
+  if (key === "healthScore") return "health-score";
+  if (key === "fundamentalReport") return "fundamental-report";
+  return key;
+}
 
 function latin(value: number | string) {
   return typeof value === "number"
@@ -97,7 +104,10 @@ export function MethodologyPage() {
         <ul className="mt-3 grid gap-2 sm:grid-cols-2">
           {TOC_KEYS.map((key) => (
             <li key={key}>
-              <a className="text-primary underline-offset-4 hover:underline" href={`#${key === "healthScore" ? "health-score" : key}`}>
+              <a
+                className="text-primary underline-offset-4 hover:underline"
+                href={`#${methodologySectionId(key)}`}
+              >
                 {t(`toc.${key}`)}
               </a>
             </li>
@@ -272,6 +282,18 @@ export function MethodologyPage() {
             </tr>
           ))}
         </ContentTable>
+      </section>
+
+      <section
+        id="fundamental-report"
+        className="scroll-mt-24 space-y-3"
+      >
+        <h2 className="text-2xl font-semibold">
+          {t("sections.fundamentalReport.title")}
+        </h2>
+        <p className="leading-7 text-muted">
+          {t("sections.fundamentalReport.body")}
+        </p>
       </section>
 
       <section id="scenarios" className="scroll-mt-24 space-y-4">
