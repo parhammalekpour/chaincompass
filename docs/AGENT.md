@@ -172,8 +172,9 @@ Observed provider latency was 630–9,657 ms (median 2,179 ms); usage totalled
 11 requested languages; Persian quality was judged by a non-native reviewer
 and is UNVERIFIED. Windows console encoding failed while serializing the final
 report, so outcomes were recovered from persisted messages and usage; SSE
-arrival timings and detailed provider error codes were not retained. No HTTP
-429 or timeout was observed; other provider errors are unverified.
+arrival timings and detailed provider error codes were not retained. All final
+responses were HTTP 200, but attempt-level 429/timeouts and other provider
+errors are unverified.
 
 This tiny smoke check is not a model evaluation or a claim of predictive or
 language quality. Results are model- and day-dependent.
