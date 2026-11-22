@@ -178,3 +178,8 @@ errors are unverified.
 
 This tiny smoke check is not a model evaluation or a claim of predictive or
 language quality. Results are model- and day-dependent.
+
+- 2026-11-23: Three of the ten provider-calling messages in 12A2 ended in a grounding fallback.
+- In the follow-up, the BTC/SOL comparison invoked both expected snapshot tools; rejected token `19` was absent from both public snapshots (absent or derived), so no verifier-formatting gap was demonstrated.
+- The provider returned HTTP 429 twice; after one retry, the run stopped at four of six allowed provider requests, before the other two prompts or a final answer could be observed.
+- This was a tiny, non-deterministic diagnostic sample, not an evaluation; nothing was tuned.
