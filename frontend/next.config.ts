@@ -51,6 +51,9 @@ const nextConfig: NextConfig = {
       },
     },
   },
+  experimental: {
+    proxyTimeout: 65_000,
+  },
 };
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");

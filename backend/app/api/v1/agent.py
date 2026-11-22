@@ -409,7 +409,7 @@ async def post_message(
 
     started_at = datetime.now(UTC)
     response_headers = {
-        "Cache-Control": "no-cache",
+        "Cache-Control": "no-cache, no-transform",
         "X-Accel-Buffering": "no",
     }
 
