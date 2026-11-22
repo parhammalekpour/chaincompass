@@ -16,16 +16,9 @@ import type { AgentSseEvent } from "@/lib/agent/contracts";
 import { ChatPage, isConversationId } from "./chat-page";
 
 const mocks = vi.hoisted(() => {
-  const searchParams = {
-    get: (name: string) =>
-      name === "c" ? mocks.search : null,
-    toString: () => (mocks.search ? `c=${mocks.search}` : ""),
-  };
-  const router = { replace: vi.fn() };
-  const mocks = {
-    search: "",
-    searchParams,
-    router,
+  const state = {
+    query: "",
+    router: { replace: vi.fn() },
     listConversations: vi.fn(),
     createConversation: vi.fn(),
     getConversation: vi.fn(),
@@ -33,7 +26,12 @@ const mocks = vi.hoisted(() => {
     sendMessage: vi.fn(),
     pathname: "/app/chat",
   };
-  return mocks;
+  const searchParams = {
+    get: (name: string) => new URLSearchParams(state.query).get(name),
+    has: (name: string) => new URLSearchParams(state.query).has(name),
+    toString: () => state.query,
+  };
+  return Object.assign(state, { searchParams });
 });
 
 vi.mock("next/navigation", () => ({
@@ -73,16 +71,20 @@ const conversation = {
   updated_at: "2026-11-20T12:00:00Z",
 };
 
-function renderChat(locale: "en" | "fa" = "en", search = `c=${conversationId}`) {
-  mocks.search = new URLSearchParams(search).get("c") ?? "";
-  return render(
+function chatTree(locale: "en" | "fa" = "en") {
+  return (
     <NextIntlClientProvider
       locale={locale}
       messages={locale === "fa" ? fa : en}
     >
       <ChatPage />
-    </NextIntlClientProvider>,
+    </NextIntlClientProvider>
   );
+}
+
+function renderChat(locale: "en" | "fa" = "en", search = `c=${conversationId}`) {
+  mocks.query = search;
+  return render(chatTree(locale));
 }
 
 function event(type: AgentSseEvent["type"], data: unknown): AgentSseEvent {
@@ -104,7 +106,7 @@ function setupApi() {
 }
 
 beforeEach(() => {
-  mocks.search = "";
+  mocks.query = "";
   mocks.router.replace.mockReset();
   mocks.listConversations.mockReset();
   mocks.createConversation.mockReset();
@@ -388,6 +390,96 @@ describe("ChatPage", () => {
 
     expect(composer).toHaveValue(starter);
     expect(mocks.sendMessage).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    [
+      "en",
+      `ask=report&chain=eth`,
+      en.chatPage.reportQuestion.replace(
+        "{chainName}",
+        en.dashboard.chainNames.eth,
+      ),
+    ],
+    [
+      "fa",
+      `ask=report&chain=eth`,
+      fa.chatPage.reportQuestion.replace(
+        "{chainName}",
+        fa.dashboard.chainNames.eth,
+      ),
+    ],
+  ] as const)(
+    "prefills the fixed %s question, focuses it, and does not send or create",
+    async (locale, search, question) => {
+      renderChat(locale, search);
+      const composer = screen.getByRole("textbox", {
+        name: locale === "fa" ? "پیام شما" : "Your message",
+      });
+
+      await waitFor(() => expect(composer).toHaveValue(question));
+      expect(composer).toHaveFocus();
+      expect(mocks.router.replace).toHaveBeenCalledWith("/app/chat", {
+        scroll: false,
+      });
+      expect(mocks.sendMessage).not.toHaveBeenCalled();
+      expect(mocks.createConversation).not.toHaveBeenCalled();
+      expect(mocks.getConversation).not.toHaveBeenCalled();
+    },
+  );
+
+  it("ignores an unknown chain in the report prefill", async () => {
+    renderChat("en", "ask=report&chain=unknown");
+    const composer = screen.getByRole("textbox", { name: "Your message" });
+    await screen.findByText("Start with public data");
+
+    expect(composer).toHaveValue("");
+    expect(mocks.router.replace).not.toHaveBeenCalled();
+    expect(mocks.sendMessage).not.toHaveBeenCalled();
+    expect(mocks.createConversation).not.toHaveBeenCalled();
+  });
+
+  it("ignores an unknown ask and unrelated URL text", async () => {
+    renderChat("en", "ask=summary&chain=eth&text=URL%20text");
+    const composer = screen.getByRole("textbox", { name: "Your message" });
+    await screen.findByText("Start with public data");
+
+    expect(composer).toHaveValue("");
+    expect(mocks.router.replace).not.toHaveBeenCalled();
+    expect(mocks.sendMessage).not.toHaveBeenCalled();
+    expect(mocks.createConversation).not.toHaveBeenCalled();
+  });
+
+  it("does not override an existing conversation view", async () => {
+    renderChat(
+      "en",
+      `c=${conversationId}&ask=report&chain=eth`,
+    );
+    const composer = screen.getByRole("textbox", { name: "Your message" });
+
+    await screen.findByText("Test conversation");
+    expect(composer).toHaveValue("");
+    expect(mocks.getConversation).toHaveBeenCalledWith(conversationId);
+    expect(mocks.router.replace).not.toHaveBeenCalled();
+    expect(mocks.sendMessage).not.toHaveBeenCalled();
+    expect(mocks.createConversation).not.toHaveBeenCalled();
+  });
+
+  it("preserves existing user text and ignores extra URL text", async () => {
+    const view = renderChat("en", "");
+    const composer = screen.getByRole("textbox", { name: "Your message" });
+    fireEvent.change(composer, { target: { value: "My existing draft" } });
+
+    mocks.query = "ask=report&chain=eth&text=URL%20text";
+    view.rerender(chatTree("en"));
+
+    expect(composer).toHaveValue("My existing draft");
+    expect(mocks.router.replace).toHaveBeenCalledWith(
+      "/app/chat?text=URL+text",
+      { scroll: false },
+    );
+    expect(mocks.sendMessage).not.toHaveBeenCalled();
+    expect(mocks.createConversation).not.toHaveBeenCalled();
   });
 
   it("returns to the conversation list when the selected conversation is missing", async () => {

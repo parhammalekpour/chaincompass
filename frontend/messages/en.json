@@ -693,6 +693,7 @@
     "loadingMessages": "Loading messages",
     "composerLabel": "Your message",
     "composerPlaceholder": "Ask about public chain data...",
+    "reportQuestion": "Explain the fundamental report for {chainName}: what do the stored figures show, and what data is missing?",
     "characterCount": "{count} / 2,000",
     "send": "Send",
     "stop": "Stop",

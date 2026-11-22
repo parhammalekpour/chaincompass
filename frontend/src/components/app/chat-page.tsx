@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { chainNameKeys } from "@/components/app/chain-labels";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import {
   ApiError,
@@ -36,6 +37,7 @@ import type {
   GroundingStatus,
 } from "@/lib/agent/contracts";
 import { formatNumber } from "@/lib/format";
+import { chainSlugSchema } from "@/lib/public-api/contracts";
 import { getPublicApiErrorMessage } from "@/lib/public-api/error-codes";
 
 const UUID_PATTERN =
@@ -94,13 +96,29 @@ function isAbort(error: unknown, signal: AbortSignal): boolean {
 export function ChatPage() {
   const locale = useLocale() === "fa" ? "fa" : "en";
   const t = useTranslations();
+  const dashboardT = useTranslations("dashboard");
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const rawConversationId = searchParams.get("c");
+  const hasConversationParam = searchParams.has("c");
+  const reportAsk = searchParams.get("ask");
+  const reportChain = searchParams.get("chain");
+  const searchQuery = searchParams.toString();
   const activeId = isConversationId(rawConversationId)
     ? rawConversationId
     : null;
+  const [initialConversationParam] = useState(() => searchParams.has("c"));
+  const reportChainSlug = chainSlugSchema.safeParse(reportChain);
+  const initialReportQuestion =
+    reportAsk === "report" &&
+    !initialConversationParam &&
+    !hasConversationParam &&
+    reportChainSlug.success
+      ? t("chatPage.reportQuestion", {
+          chainName: dashboardT(chainNameKeys[reportChainSlug.data]),
+        })
+      : "";
 
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [listLoading, setListLoading] = useState(true);
@@ -110,7 +128,7 @@ export function ChatPage() {
   const [loadedConversationId, setLoadedConversationId] = useState<
     string | null
   >(null);
-  const [draft, setDraft] = useState("");
+  const [draft, setDraft] = useState(() => initialReportQuestion);
   const [streaming, setStreaming] = useState(false);
   const [retryText, setRetryText] = useState<string | null>(null);
   const [requestError, setRequestError] = useState<RequestError | null>(null);
@@ -121,6 +139,9 @@ export function ChatPage() {
   const streamRef = useRef<StreamState | null>(null);
   const sendLockRef = useRef(false);
   const invalidParamHandledRef = useRef(false);
+  const reportPrefillHandledRef = useRef(false);
+  const initialReportQuestionRef = useRef(initialReportQuestion);
+  const composerRef = useRef<HTMLTextAreaElement>(null);
   const retryIdsRef = useRef<{ userId: string; assistantId: string } | null>(
     null,
   );
@@ -180,6 +201,39 @@ export function ChatPage() {
     invalidParamHandledRef.current = true;
     updateConversationParam(null);
   }, [rawConversationId, updateConversationParam]);
+
+  useEffect(() => {
+    if (reportAsk !== "report" || reportPrefillHandledRef.current) {
+      return;
+    }
+    if (initialConversationParam || hasConversationParam) {
+      reportPrefillHandledRef.current = true;
+      return;
+    }
+    if (!chainSlugSchema.safeParse(reportChain).success) return;
+
+    reportPrefillHandledRef.current = true;
+    const params = new URLSearchParams(searchQuery);
+    params.delete("ask");
+    params.delete("chain");
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, {
+      scroll: false,
+    });
+
+    if (draft === initialReportQuestionRef.current && draft) {
+      composerRef.current?.focus();
+    }
+  }, [
+    draft,
+    hasConversationParam,
+    initialConversationParam,
+    pathname,
+    reportAsk,
+    reportChain,
+    router,
+    searchQuery,
+  ]);
 
   useEffect(() => {
     const activeStream = streamRef.current;
@@ -937,6 +991,7 @@ export function ChatPage() {
               </label>
               <textarea
                 id="chat-composer"
+                ref={composerRef}
                 dir="auto"
                 value={draft}
                 disabled={streaming}

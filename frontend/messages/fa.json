@@ -693,6 +693,7 @@
     "loadingMessages": "در حال بارگیری پیام‌ها",
     "composerLabel": "پیام شما",
     "composerPlaceholder": "دربارهٔ داده‌های عمومی شبکه بپرسید...",
+    "reportQuestion": "گزارش بنیادی {chainName} را توضیح بده: داده‌های ذخیره‌شده چه چیزی نشان می‌دهند و چه داده‌هایی در دسترس نیستند؟",
     "characterCount": "{count} / 2,000",
     "send": "ارسال",
     "stop": "توقف",
