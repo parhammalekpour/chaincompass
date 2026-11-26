@@ -1,11 +1,11 @@
 # Historical research reports
 
-## Planned machine-learning study
+## Machine-learning study
 
 The [pre-registered historical volatility-risk protocol](ML_PROTOCOL.md)
 records the proposed study and its fixed evaluation rules.
 
-ML study: Planned, not Implemented; no model has been trained and no result exists.
+Study 1 implemented and run on 2026-11-26; Part 2 planned; no live model on the site. Study 1 verdict: **NEGATIVE** — see [ML_RESULTS.md](ML_RESULTS.md).
 
 Future work: Evidence-tuple grounding (chain, metric, value, unit, date) for the agent.
 
