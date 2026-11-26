@@ -28,6 +28,7 @@ from app.ml.dataset import (  # noqa: E402
     make_folds,
     q80_window_ends,
 )
+from app.ml.label_audit import reference_labels  # noqa: E402
 
 
 def _garch_inputs(length: int, seed: int) -> ChainInputs:
@@ -240,3 +241,24 @@ def test_label_cutoff_requires_mature_forward_window() -> None:
     labels = build_labels(frame, cutoff)
     assert np.all(labels.labels[-10:] == -1)
     assert np.all(np.isnan(labels.rv30_fwd[-10:]))
+
+
+def test_independent_reference_matches_production_labels_and_volatility() -> None:
+    inputs = _garch_inputs(2250, 5050)
+    cutoff = inputs.dates[-1]
+    dataset = build_dataset({"btc": inputs}, cutoff)
+    reference = reference_labels(inputs.dates, inputs.closes, cutoff)
+
+    assert dataset.rows
+    for row in dataset.rows:
+        expected = reference[row.obs_date]
+        assert row.y == expected.y
+        for observed, computed in (
+            (row.rv30, expected.rv30),
+            (row.rv30_fwd, expected.rv30_fwd),
+            (row.q80, expected.q80),
+        ):
+            assert abs(observed - computed) <= 1e-9 * max(
+                abs(observed),
+                abs(computed),
+            )
