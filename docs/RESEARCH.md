@@ -1,5 +1,14 @@
 # Historical research reports
 
+## Planned machine-learning study
+
+The [pre-registered historical volatility-risk protocol](ML_PROTOCOL.md)
+records the proposed study and its fixed evaluation rules.
+
+ML study: Planned, not Implemented; no model has been trained and no result exists.
+
+Future work: Evidence-tuple grounding (chain, metric, value, unit, date) for the agent.
+
 These are read-only, historical checks of the currently shipped scenario,
 Health Score, and regime methods. The protocol was committed first at
 [`b897977`](https://github.com/parhammalekpour/chaincompass/commit/b8979770191ec43c029b96a403ada25c8c39ae6a).
