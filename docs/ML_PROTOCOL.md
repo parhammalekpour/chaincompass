@@ -386,3 +386,58 @@ remains an empirical, UNVERIFIED outcome.
    `Q80`, and `RV30_fwd` in a fixed order, each float formatted with
    `format(x, ".12e")`. Prepend the cutoff date. Do not hash model output.
 7. Until all leakage checks (a)-(e) are green, no model is fit on true labels.
+
+## Amendment A2 (dated 2026-11-26, written before any result)
+
+This amendment supersedes the original section 10 informativeness rule, Tier A
+criterion (iii) in section 9, and the Part 2 chain-count rule in section 16.
+It is based only on label counts; no model performance has been seen.
+
+1. **Motivation and observed counts:** The 11G-2 `build-dataset` output gives
+   the following eligible row and positive-label counts:
+
+   | Chain | Eligible rows | Positive labels |
+   |---|---:|---:|
+   | BTC | 2,624 | 164 |
+   | ETH | 2,624 | 173 |
+   | SOL | 1,534 | 42 |
+   | BNB | 2,543 | 164 |
+   | Pooled | 9,325 | 543 |
+
+   Summed over the union of all test blocks, the counts are:
+
+   | Chain | Test rows | Test positives |
+   |---|---:|---:|
+   | BTC | 1,894 | 38 |
+   | ETH | 1,894 | 58 |
+   | SOL | 1,534 | 42 |
+   | BNB | 1,894 | 0 |
+   | Pooled | 7,216 | 138 |
+
+   All 164 BNB positive labels are dated 2020-02-11 through 2021-05-30,
+   before the first test block starts on 2021-08-14; they fall in the
+   training-only initial period. Thus BNB has no positives in the test union.
+2. **Amended informativeness rule:** Evaluate informativeness on the union of
+   all test blocks, not separately per fold; per-fold counts are descriptive.
+   (i) If the pooled test union has fewer than 100 positive labels, the whole
+   result is **NOT INFORMATIVE**. (ii) A chain with fewer than 20 positive
+   labels over that union is labelled **chain not informative**. Its results
+   are still reported descriptively, including Brier score, and its rows
+   remain in pooled evaluation; it is excluded from Tier A criterion (iii),
+   the per-chain macro-average, and the Part 2 chain count. (iii) If fewer
+   than 2 chains are informative, the whole result is **NOT INFORMATIVE**.
+3. **Tier A criterion (iii):** Replace “Brier score is lower in at least 3 of
+   4 chains” with “Brier score is lower in at least
+   `ceil(0.75 * n_inf)` of the `n_inf` informative chains.” With 4 informative
+   chains this requires 3; with 3 it requires all 3.
+4. **Part 2:** A chain counts toward “at least 2 of 4 chains succeed” only if
+   it is informative on Part 2's own identical P/PF test rows. Apply the same
+   100 pooled-positive and 20 per-chain-positive rules to those rows; fewer
+   than 2 informative chains makes the whole Part 2 result **NOT INFORMATIVE**.
+5. Labels, features, folds, models, hyperparameters, metrics, bootstrap
+   settings, and all other thresholds are unchanged.
+6. **Limitation (hypothesis, unverified):** The measured positive rate is
+   543/9,325 (5.82%) overall and 138/7,216 (1.91%) over the test union, far
+   below the nominal 20%. The expanding Q80 is anchored by the very high
+   volatility of 2017-2021; whether that explains the lower rates is a
+   hypothesis and remains unverified.
