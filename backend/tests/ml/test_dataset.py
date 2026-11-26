@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib
 import importlib.util
+import json
 import os
 from datetime import date, timedelta
 from typing import Any
@@ -29,6 +30,9 @@ from app.ml.dataset import (  # noqa: E402
     q80_window_ends,
 )
 from app.ml.label_audit import reference_labels  # noqa: E402
+from app.ml.leakage import run_leakage_checks  # noqa: E402
+from app.ml.study import evaluate_study1, render_results_markdown  # noqa: E402
+from app.ml.vol_state import build_vol_state_lookup  # noqa: E402
 
 
 def _garch_inputs(length: int, seed: int) -> ChainInputs:
@@ -262,3 +266,48 @@ def test_independent_reference_matches_production_labels_and_volatility() -> Non
                 abs(observed),
                 abs(computed),
             )
+
+
+def test_synthetic_study_runner_completes_with_leaky_canary() -> None:
+    inputs = {
+        "btc": _garch_inputs(2250, 12345),
+        "eth": _garch_inputs(1620, 67890),
+    }
+    dataset = build_dataset(inputs, date(2018, 2, 28))
+    folds = make_folds(dataset.rows)
+    leakage = run_leakage_checks(
+        dataset,
+        folds,
+        permutation_seeds=tuple(range(12345, 12351)),
+    )
+    lookup = build_vol_state_lookup(dataset.rows, {})
+
+    results = evaluate_study1(
+        dataset,
+        folds,
+        lookup,
+        code_commit_hash="synthetic-test",
+        amendment_hashes={
+            "a1_commit_hash": "a1",
+            "a2_commit_hash": "a2",
+            "a3_commit_hash": "a3",
+        },
+        leakage_results=leakage,
+    )
+    markdown = render_results_markdown(results)
+    encoded = json.dumps(results, allow_nan=False)
+
+    assert leakage.canary_auc >= 0.99
+    assert results["dataset"]["test_rows"] > 0
+    assert results["metrics"]["pooled"]["M1"]["rows"] > 0
+    assert (
+        "Experimental historical volatility-risk study; not a forecast and not advice."
+        in markdown
+    )
+    assert '"dataset_hash"' in encoded
+    assert results["verdict"]["label"] in {
+        "NOT INFORMATIVE",
+        "NEGATIVE",
+        "TIER A MET",
+        "TIER B MET",
+    }
