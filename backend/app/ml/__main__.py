@@ -2,8 +2,11 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import json
+import subprocess
 from collections import defaultdict
-from datetime import timedelta
+from datetime import UTC, datetime, timedelta
+from pathlib import Path
 
 from app.db.session import SessionFactory, engine
 from app.ml.dataset import (
@@ -22,6 +25,17 @@ from app.ml.leakage import (
     passed_permutation_check,
     run_leakage_checks,
 )
+from app.ml.study import evaluate_study1, render_results_markdown
+from app.ml.vol_state import load_vol_state_lookup
+
+EXPECTED_DATASET_HASH = (
+    "dc409eef38e6f425cc919bd9c52ad53cf5885bee42ce5a016f32eec64a7c8cbe"
+)
+AMENDMENT_HASHES = {
+    "a1_commit_hash": "fc5cb5cba62c6b7e2eef7ff1bcec1ea0c8267a8f",
+    "a2_commit_hash": "dbce7faaa8c97c5d258d6f89f30369d648f634a5",
+    "a3_commit_hash": "675909da38fc6a60b322cc432348a6cf50d76655",
+}
 
 
 async def _load_dataset() -> Dataset:
@@ -200,12 +214,101 @@ async def _run_label_audit() -> int:
     return 0 if total_mismatches == 0 else 1
 
 
+async def _run_study1() -> int:
+    repository_root = Path(__file__).resolve().parents[3]
+    status_result = subprocess.run(
+        ["git", "status", "--porcelain", "--untracked-files=normal"],
+        cwd=repository_root,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    commit_result = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=repository_root,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    worktree_status = status_result.stdout.strip()
+    code_commit_hash = commit_result.stdout.strip()
+
+    async with SessionFactory() as session:
+        chain_inputs = await load_chain_inputs(session)
+        dataset = build_dataset(chain_inputs, DATA_CUTOFF)
+        folds = make_folds(dataset.rows)
+        vol_states = await load_vol_state_lookup(session, dataset.rows)
+    await engine.dispose()
+
+    print(f"code_commit_hash={code_commit_hash}")
+    print(f"worktree_status={'dirty' if worktree_status else 'clean'}")
+    if worktree_status:
+        print(f"worktree_changes={worktree_status}")
+    print(f"dataset_hash={dataset.sha256}")
+    print(f"expected_dataset_hash={EXPECTED_DATASET_HASH}")
+    print(f"protocol_commit_hash={PROTOCOL_COMMIT}")
+    print(f"a1_commit_hash={AMENDMENT_HASHES['a1_commit_hash']}")
+    print(f"a2_commit_hash={AMENDMENT_HASHES['a2_commit_hash']}")
+    print(f"a3_commit_hash={AMENDMENT_HASHES['a3_commit_hash']}")
+    print(f"vol_state_distinct_values={','.join(vol_states.distinct_values)}")
+    print(f"vol_state_missing_eligible_rows={vol_states.missing_eligible_rows}")
+    if worktree_status or dataset.sha256 != EXPECTED_DATASET_HASH:
+        print("study1=STOP (dirty worktree or dataset hash mismatch)")
+        return 1
+
+    results_path = repository_root / "docs" / "research" / "ml_study1_results.json"
+    markdown_path = repository_root / "docs" / "ML_RESULTS.md"
+    if results_path.exists() or markdown_path.exists():
+        print("study1=STOP (result file already exists; refusing to overwrite)")
+        return 1
+
+    leakage_results = run_leakage_checks(dataset, folds)
+    permutation_pass = passed_permutation_check(leakage_results)
+    canary_pass = passed_canary_check(leakage_results)
+    print(
+        "study1_leakage_permutation_auc="
+        f"{leakage_results.permutation_mean:.6f} "
+        f"result={'PASS' if permutation_pass else 'FAIL'}"
+    )
+    print(
+        f"study1_leaky_canary_auc={leakage_results.canary_auc:.6f} "
+        f"result={'PASS' if canary_pass else 'FAIL'}"
+    )
+    if not permutation_pass or not canary_pass:
+        print("study1=STOP (leakage checks failed)")
+        return 1
+
+    results = evaluate_study1(
+        dataset,
+        folds,
+        vol_states,
+        code_commit_hash=code_commit_hash,
+        amendment_hashes=AMENDMENT_HASHES,
+        leakage_results=leakage_results,
+    )
+    results["metadata"]["generated_at_utc"] = datetime.now(UTC).isoformat()
+    json_output = json.dumps(
+        results,
+        ensure_ascii=False,
+        indent=2,
+        allow_nan=False,
+    )
+    markdown_output = render_results_markdown(results)
+
+    results_path.parent.mkdir(parents=True, exist_ok=True)
+    results_path.write_text(json_output + "\n", encoding="utf-8")
+    markdown_path.write_text(markdown_output, encoding="utf-8")
+    print(markdown_output)
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(prog="python -m app.ml")
     subparsers = parser.add_subparsers(dest="command", required=True)
     subparsers.add_parser("build-dataset")
     subparsers.add_parser("leakage-check")
     subparsers.add_parser("label-audit")
+    subparsers.add_parser("study1")
     args = parser.parse_args()
     if args.command == "build-dataset":
         return asyncio.run(_run_build_dataset())
@@ -213,6 +316,8 @@ def main() -> int:
         return asyncio.run(_run_leakage_check())
     if args.command == "label-audit":
         return asyncio.run(_run_label_audit())
+    if args.command == "study1":
+        return asyncio.run(_run_study1())
     raise ValueError(f"unknown command: {args.command}")
 
 
