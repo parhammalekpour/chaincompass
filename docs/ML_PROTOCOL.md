@@ -441,3 +441,79 @@ It is based only on label counts; no model performance has been seen.
    below the nominal 20%. The expanding Q80 is anchored by the very high
    volatility of 2017-2021; whether that explains the lower rates is a
    hypothesis and remains unverified.
+
+## Amendment A3 (dated 2026-11-26, written before any result)
+
+This amendment clarifies implementation of Study 1. Labels, features, folds,
+models, hyperparameters, metrics, success criteria, and thresholds are
+unchanged, except for the explicit smoothing rule in item 5.
+
+1. **Evaluation set:** Concatenate predictions from all 22 folds. Compute all
+   metrics on the union of test blocks, using the same eligible rows for every
+   model and comparator.
+2. **Training per fold:** Use all training rows pooled over chains, applying
+   the A1 purge rule. Fit `StandardScaler` on the training fold only and apply
+   it to the 16 features for M1, M2, and M3. Clip probabilities to
+   `[1e-6, 1-1e-6]` before log loss and logit. Use no class weights.
+3. **Metrics:** Report Brier score, log loss, AUC (`sklearn.metrics.roc_auc_score`),
+   a reliability table with 10 equal-count bins, ECE, and calibration slope
+   and intercept. Sort probabilities with a stable `argsort`, split their
+   indices using `numpy.array_split`, and compute
+   `ECE = sum_b (n_b/n) * |mean(p_b) - mean(y_b)|`. Report AUC as `n/a` if
+   the evaluated set has one class. Fit calibration slope and intercept using
+   unpenalized `LogisticRegression(penalty=None, max_iter=1000)` of `y` on
+   `logit(p)`; report them as undefined if `p` is constant or the fit fails.
+   Report pooled metrics; each chain (BTC, ETH, SOL, BNB, with BNB descriptive
+   only); the macro-average over informative chains only; both chronological
+   halves; and each calendar year as supplementary descriptive output.
+4. **Chronological halves:** Let `midpoint = first_test_start +
+   floor((last_test_end_exclusive - first_test_start)/2)` days. The first half
+   contains test origins `t < midpoint`; the second contains origins `t >=
+   midpoint`.
+5. **Smoothing (the only substantive clarification):** B0, B1, and B2 use
+   the Laplace-smoothed training frequency `(k+1)/(n+2)` per cell, so
+   probabilities are never 0 or 1. An empty cell falls back to the smoothed
+   overall training rate. If a training fold contains a single class, M1, M2,
+   and M3 output the smoothed overall training rate for every test row in that
+   fold and do not attempt a fit. Report the number of such folds per model.
+6. **Baselines:** B1's cell is the indicator
+   `[RV30(t) > Q80(t)]`. B2's cell is the stored `vol_state` for `(chain, date
+   t)` from the `regimes` table, read SELECT-only; a missing stored value for
+   an eligible row is category `missing`, and its count is reported. For B3,
+   fit OLS on the pooled training fold:
+   `ln(RV30_fwd) ~ [1, ln(RV7), ln(RV30), ln(RV90)]`. Set
+   `sigma = sqrt(sum(residual^2)/(n-4))` and
+   `P = 1 - Phi((ln Q80(t) - prediction)/sigma)`, with `Phi` computed using
+   `math.erf`.
+7. **Bootstrap:** Order unique test-origin calendar dates chronologically
+   (`n_dates`). For each `L` in `{30, 60}`, draw `ceil(n_dates/L)` overlapping,
+   non-circular block starts uniformly from `0..n_dates-L`, concatenate the
+   blocks, and truncate to `n_dates`. Use the same resampled dates for every
+   chain and model. A resampled pooled Brier score is the sum over resampled
+   dates of squared errors for all rows on each date divided by the number of
+   rows on those dates. A paired difference is `Brier(model) -
+   Brier(comparator)` on the same resample (ratio of sums). Use 2,000
+   resamples and recreate `numpy.default_rng(12345)` for each block length.
+   Report the two-sided percentile interval with total `alpha = 0.05/3`
+   (quantiles `alpha/2` and `1-alpha/2`), the Bonferroni reading of section 8.
+8. **Informativeness:** Apply A2 first: at least 100 pooled test positives,
+   at least 2 informative chains, and a chain is informative at 20 or more
+   test positives. If unmet, the verdict is **NOT INFORMATIVE**; still report
+   all numbers.
+9. **Verdict:** Evaluate Tier A for every model (M1, M2, M3) against each
+   comparator (B1, B2, B3; B2 is kept because Appendix A found `vol_state`
+   CAUSAL). Require all of: (i) pooled paired-Brier interval upper bound below
+   zero for both block lengths; (ii) pooled relative Brier improvement
+   `(Brier_comparator - Brier_model)/Brier_comparator >= 0.02`; (iii) lower
+   Brier in at least `ceil(0.75*n_inf)` informative chains; and (iv) lower
+   pooled Brier in both halves. A model meets Tier A only if it passes all
+   four criteria against all comparators. Tier B is M1 only: Tier A plus
+   pooled calibration slope in `[0.8, 1.2]` and ECE at most `0.05`. Verdicts
+   are **NOT INFORMATIVE**, **NEGATIVE**, **TIER A MET**, or **TIER B MET**.
+   M2 and M3 cannot trigger a live card. B0 is context only, not a verdict
+   comparator.
+10. **Run once:** Execute the study command once on final, committed, clean
+    code. Result files record the code commit hash, dataset hash, protocol
+    commit hash, and A1/A2/A3 commit hashes if known. Any later run requires
+    a dated amendment with its reason written first; preserve the original
+    result unchanged.
