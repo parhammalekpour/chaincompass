@@ -349,3 +349,40 @@ registered dataset construction is implemented. Each chain has more than
 1,500 approximate eligible rows, so the inventory does not make the fixed
 walk-forward design impossible. Final informativeness under section 10
 remains an empirical, UNVERIFIED outcome.
+
+## Amendment A1 (dated 2026-11-26, written before any result)
+
+1. **Data cutoff:** `DATA_CUTOFF = 2026-11-19`, the last complete UTC close in
+   the local database at protocol time. Ignore observations dated after the
+   cutoff. An origin `t` is eligible only when `t+30 <= DATA_CUTOFF`.
+2. **Eligibility:** All models and comparators use identical rows. At origin
+   `t`, every feature, `RV7`, `RV30`, `Q80`, and `RV30_fwd` must be
+   computable with no missing close inside any required window. Each expanding
+   feature percentile rank needs at least 365 values; `Q80` needs at least 365
+   `RV30` values. Required logs must be defined (`RV7`, `RV30`, and `RV90`
+   positive; volume mean positive). Otherwise the row is ineligible. The 16
+   model features are `RV30`, `RV90`, `RV30/RV90`, `ret_30d`, `ret_90d`,
+   `drawdown_365d`, `price_vs_sma200`, and `volume_ratio_30_365`, plus the
+   expanding percentile rank of each of those eight. `RV7` and log values are
+   inputs to B3 only.
+3. **Fold schedule:** `first_eligible_date` is the earliest eligible origin
+   across all chains. `test_start_k = first_eligible_date + 730 days + 90*k
+   days`, for `k = 0, 1, 2, ...`. Test block `k` contains pooled origins
+   `test_start_k <= t < test_start_k + 90 days`; include a final partial
+   block shorter than 90 days. Training rows for fold `k` are all eligible
+   origins from all chains with `t <= test_start_k - 31 days`. A chain with
+   no eligible rows in a block is absent from that block.
+4. **Leakage-check tolerances:** These are pre-set sanity thresholds, not
+   performance claims. For (c), run 20 permutations of `y` using seeds
+   `12345..12364`, each shuffling `y` over all eligible rows; use fixed M1,
+   the same folds, and pooled test AUC per permutation. PASS when the mean of
+   the 20 AUCs is in `[0.45, 0.55]`. For (d), add the single canary feature
+   `ln(RV30_fwd/Q80)`; PASS when pooled test AUC is at least `0.99`. Failure
+   of (c) or (d) means STOP and investigate a genuine bug; do not tune.
+5. **Purge test (e):** For every fold, every training row must satisfy
+   `t + 30 days < test_start`.
+6. **Dataset hash:** SHA-256 over rows sorted by `(chain, date)`. Serialize
+   each row as `"chain|date|y|"` plus all model features, `RV7`, `RV30`,
+   `Q80`, and `RV30_fwd` in a fixed order, each float formatted with
+   `format(x, ".12e")`. Prepend the cutoff date. Do not hash model output.
+7. Until all leakage checks (a)-(e) are green, no model is fit on true labels.
